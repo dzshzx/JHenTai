@@ -21,10 +21,16 @@ Use the Flutter toolchain version that matches the checked-in dependency lock:
 
 - Flutter `3.24.5`
 - Dart `3.5.4`
-- Android SDK platform/build-tools `34`
+- Android SDK platform `35` for compilation; target SDK remains `34`
 - Java `17`
 
 This project currently resolves with the locked `path 1.9.0` dependency. Newer Flutter SDKs may pin a newer `flutter_test` dependency set and fail `flutter pub get`; verify dependency resolution before changing the Flutter version.
+
+## Dependency Maintenance
+
+- Keep git dependencies on immutable refs when the checked-in lock depends on the Flutter `3.24.5` / Dart `3.5.4` toolchain. Floating branches can move to a newer SDK constraint and make `flutter pub get`, `flutter pub upgrade`, and `flutter pub outdated` fail even though the lockfile previously resolved.
+- When a git dependency is intentionally kept at the lockfile revision, copy `resolved-ref` from `pubspec.lock` into the dependency's `ref` in `pubspec.yaml`.
+- After running `flutter pub upgrade`, run `flutter build apk --debug -t lib/src/main.dart`. The app entrypoint is `lib/src/main.dart`, not the Flutter default `lib/main.dart`.
 
 ---
 

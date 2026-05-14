@@ -46,7 +46,7 @@ dependencies:
   flutter_slidable:
     git:
       url: https://github.com/letsar/flutter_slidable.git
-      ref: master
+      ref: 3280106581fc8d54eae45f4a446f92cae36d7837
   flutter_widget_from_html: 0.15.2
   url_launcher: 6.3.1
   # add onLongPress
