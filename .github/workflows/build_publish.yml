@@ -61,7 +61,7 @@ jobs:
       arch: ${{ steps.get_version.outputs.arch}}
     runs-on: ${{ matrix.os }}
     env:
-      FLUTTER_VERSION: 3.24.4
+      FLUTTER_VERSION: 3.41.9
     steps:
       # Checkout branch
       - name: Checkout
@@ -81,7 +81,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: 'master'
+          channel: 'stable'
           cache: true
       # Output Flutter Version
       - name: Output Flutter Version
@@ -93,7 +93,7 @@ jobs:
         with:
           key: ${{ matrix.cache_pod_key }}
           path: ${{ matrix.cache_pod_path }}
-          restore-keys: ${{ matrix.cache_key }}-${{ hashFiles(matrix.cache_pod_restore_keys_hash_file)}}
+          restore-keys: ${{ matrix.cache_pod_key }}-${{ hashFiles(matrix.cache_pod_restore_keys_hash_file)}}
       # Setup JDK
       - name: Setup JDK 17 (Android)
         if: matrix.target == 'Android'
@@ -104,7 +104,7 @@ jobs:
           cache: gradle
       # Xcodebuild
       - name: Build Xcode
-        if: matrix.os == 'macos-latest'
+        if: matrix.target == 'iOS'
         run: xcodebuild -resolvePackageDependencies -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release
       # Flutter Pub Get
       - name: Flutter Pub Get
@@ -129,7 +129,7 @@ jobs:
           mv app-x86_64-release.apk JHenTai-${{ steps.get_version.outputs.version }}-x64.apk
       # Build iOS .ipa
       - name: Build iOS
-        if: matrix.target == 'ios'
+        if: matrix.target == 'iOS'
         run: |
           flutter precache --ios
           cd ios
@@ -154,7 +154,7 @@ jobs:
       - name: Build Windows
         if: matrix.target == 'Windows'
         run: |
-          flutter build windows -t lib/src/main.dart --release
+          flutter build windows --release -t lib/src/main.dart
           $DestDir = "build\windows\JHenTai_${{ steps.get_version.outputs.version }}"
           $SrcDir = "build\windows\x64\runner\Release"
           New-Item -Path $DestDir -ItemType Directory
@@ -310,4 +310,3 @@ jobs:
           git add altsource/AltSource.json
           git commit -m "Update AltSource.json for version ${{ needs.Build.outputs.version }}"
           git push origin HEAD:master
-

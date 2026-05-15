@@ -30,6 +30,7 @@
 .pub-cache/
 .pub/
 /build/
+/android/build/
 pubspec.lock
 
 # Web related
