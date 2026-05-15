@@ -17,8 +17,10 @@ class GroupedList<G, E> extends StatefulWidget {
   final G Function(E element) elementGroup;
   final String Function(G group) groupUniqueKey;
   final String Function(E element) elementUniqueKey;
-  final Widget Function(BuildContext context, G group, bool isOpen) groupBuilder;
-  final Widget Function(BuildContext context, G group, E element, bool isOpen) elementBuilder;
+  final Widget Function(BuildContext context, G group, bool isOpen)
+  groupBuilder;
+  final Widget Function(BuildContext context, G group, E element, bool isOpen)
+  elementBuilder;
 
   final int maxGalleryNum4Animation;
 
@@ -101,45 +103,7 @@ class _GroupedListState<G, E> extends State<GroupedList<G, E>> {
 
   @override
   Widget build(BuildContext context) {
-    // return _buildInListView();
-
     return _buildInCustomScrollView(context);
-  }
-
-  EHWheelSpeedController _buildInListView() {
-    return EHWheelSpeedController(
-      controller: scrollController,
-      child: ListView.builder(
-        controller: scrollController,
-        cacheExtent: 200,
-        itemCount: _groups.length + widget.elements.length,
-        itemBuilder: (context, index) {
-          int i = 0;
-          int groupIndex = 0;
-          while (true) {
-            G group = _groups.keys.elementAt(groupIndex);
-
-            if (i == index) {
-              return _buildGroup(group, context);
-            }
-
-            List<E> elements = _group2Elements[group] ?? [];
-
-            if (i + 1 + elements.length > index) {
-              return _buildElement(
-                context,
-                elements[index - i - 1],
-                group,
-                elements.length <= maxGalleryNum4Animation,
-              );
-            }
-
-            i += 1 + elements.length;
-            groupIndex++;
-          }
-        },
-      ),
-    );
   }
 
   EHWheelSpeedController _buildInCustomScrollView(BuildContext context) {
@@ -156,13 +120,17 @@ class _GroupedListState<G, E> extends State<GroupedList<G, E>> {
   List<Widget> _buildSlivers(BuildContext context) {
     List<Widget> slivers = [];
 
-    Map<G, List<E>> group2Elements = widget.elements.groupListsBy<G>((e) => widget.elementGroup(e));
+    Map<G, List<E>> group2Elements = widget.elements.groupListsBy<G>(
+      (e) => widget.elementGroup(e),
+    );
 
     for (G group in _groups.keys) {
       slivers.add(_buildGroupSliver(context, group));
 
       if (group2Elements.containsKey(group)) {
-        slivers.add(_buildElementsSliver(context, group2Elements[group]!, group));
+        slivers.add(
+          _buildElementsSliver(context, group2Elements[group]!, group),
+        );
       }
     }
 
@@ -170,26 +138,26 @@ class _GroupedListState<G, E> extends State<GroupedList<G, E>> {
   }
 
   Widget _buildGroupSliver(BuildContext context, G group) {
-    return SliverToBoxAdapter(
-      child: _buildGroup(group, context),
-    );
+    return SliverToBoxAdapter(child: _buildGroup(group, context));
   }
 
   Widget _buildElementsSliver(BuildContext context, List<E> elements, G group) {
     return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          return GetBuilder<GroupedListLogic>(
-            id: 'group::${widget.groupUniqueKey(group)}',
-            global: false,
-            init: logic,
-            builder: (_) {
-              return _buildElement(context, elements[index], group, elements.length <= maxGalleryNum4Animation);
-            },
-          );
-        },
-        childCount: elements.length,
-      ),
+      delegate: SliverChildBuilderDelegate((context, index) {
+        return GetBuilder<GroupedListLogic>(
+          id: 'group::${widget.groupUniqueKey(group)}',
+          global: false,
+          init: logic,
+          builder: (_) {
+            return _buildElement(
+              context,
+              elements[index],
+              group,
+              elements.length <= maxGalleryNum4Animation,
+            );
+          },
+        );
+      }, childCount: elements.length),
     );
   }
 
@@ -205,7 +173,12 @@ class _GroupedListState<G, E> extends State<GroupedList<G, E>> {
     );
   }
 
-  Widget _buildElement(BuildContext context, E element, G group, bool enableAnimation) {
+  Widget _buildElement(
+    BuildContext context,
+    E element,
+    G group,
+    bool enableAnimation,
+  ) {
     return GetBuilder<GroupedListLogic>(
       id: 'group::${widget.groupUniqueKey(group)}',
       global: false,
@@ -219,13 +192,19 @@ class _GroupedListState<G, E> extends State<GroupedList<G, E>> {
             bool isOpen = _groups[group] ?? false;
             return FadeSlideWidget(
               key: ValueKey(widget.elementUniqueKey(element)),
-              show: isOpen && !_deletingElements.containsKey(widget.elementUniqueKey(element)),
+              show:
+                  isOpen &&
+                  !_deletingElements.containsKey(
+                    widget.elementUniqueKey(element),
+                  ),
               enableOpacityTransition: enableAnimation,
               enableSlideTransition: enableAnimation,
               child: widget.elementBuilder(context, group, element, isOpen),
               afterAnimation: (bool show, bool isInit) {
                 if (!show && !isInit) {
-                  _deletingElements.remove(widget.elementUniqueKey(element))?.complete();
+                  _deletingElements
+                      .remove(widget.elementUniqueKey(element))
+                      ?.complete();
                 }
               },
             );
@@ -256,11 +235,13 @@ class _GroupedListState<G, E> extends State<GroupedList<G, E>> {
   }
 
   void _initGroupsAndElements(GroupedList<G, E> widget) {
-    this._groups.clear();
-    this._group2Elements.clear();
+    _groups.clear();
+    _group2Elements.clear();
 
-    this._groups.addAll(widget.groups);
-    this._group2Elements = widget.elements.groupListsBy<G>((e) => widget.elementGroup(e));
+    _groups.addAll(widget.groups);
+    _group2Elements = widget.elements.groupListsBy<G>(
+      (e) => widget.elementGroup(e),
+    );
   }
 }
 

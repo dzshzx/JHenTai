@@ -49,14 +49,21 @@ class EHRequest with JHLifeCircleBeanErrorCatch implements JHLifeCircleBean {
   static const String domainFrontingExtraKey = 'JHDF';
 
   @override
-  List<JHLifeCircleBean> get initDependencies => super.initDependencies..addAll([networkSetting, ehSetting]);
+  List<JHLifeCircleBean> get initDependencies =>
+      super.initDependencies..addAll([networkSetting, ehSetting]);
 
   @override
   Future<void> doInitBean() async {
-    _dio = Dio(BaseOptions(
-      connectTimeout: Duration(milliseconds: networkSetting.connectTimeout.value),
-      receiveTimeout: Duration(milliseconds: networkSetting.receiveTimeout.value),
-    ));
+    _dio = Dio(
+      BaseOptions(
+        connectTimeout: Duration(
+          milliseconds: networkSetting.connectTimeout.value,
+        ),
+        receiveTimeout: Duration(
+          milliseconds: networkSetting.receiveTimeout.value,
+        ),
+      ),
+    );
 
     systemProxyAddress = await getSystemProxyAddress();
     await _initProxy();
@@ -88,9 +95,10 @@ class EHRequest with JHLifeCircleBeanErrorCatch implements JHLifeCircleBean {
 
   Future<void> _initProxy() async {
     SocksProxy.initProxy(
-      onCreate: (client) => client.badCertificateCallback = (_, String host, __) {
-        return networkSetting.allIPs.contains(host);
-      },
+      onCreate: (client) =>
+          client.badCertificateCallback = (_, String host, __) {
+            return networkSetting.allIPs.contains(host);
+          },
       findProxy: await findProxySettingFunc(() => systemProxyAddress),
     );
   }
@@ -114,43 +122,51 @@ class EHRequest with JHLifeCircleBeanErrorCatch implements JHLifeCircleBean {
 
   void _initDomainFronting() {
     /// domain fronting interceptor
-    _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
-        if (networkSetting.enableDomainFronting.isFalse) {
-          handler.next(options);
-          return;
-        }
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
+          if (networkSetting.enableDomainFronting.isFalse) {
+            handler.next(options);
+            return;
+          }
 
-        String rawPath = options.path;
-        String host = options.uri.host;
-        if (!_ehIpProvider.supports(host)) {
-          handler.next(options);
-          return;
-        }
+          String rawPath = options.path;
+          String host = options.uri.host;
+          if (!_ehIpProvider.supports(host)) {
+            handler.next(options);
+            return;
+          }
 
-        String ip = _ehIpProvider.nextIP(host);
-        handler.next(options.copyWith(
-          path: rawPath.replaceFirst(host, ip),
-          headers: {...options.headers, 'host': host},
-          extra: options.extra..[domainFrontingExtraKey] = {'host': host, 'ip': ip},
-        ));
-      },
-      onError: (DioException e, ErrorInterceptorHandler handler) {
-        if (!e.requestOptions.extra.containsKey(domainFrontingExtraKey)) {
+          String ip = _ehIpProvider.nextIP(host);
+          handler.next(
+            options.copyWith(
+              path: rawPath.replaceFirst(host, ip),
+              headers: {...options.headers, 'host': host},
+              extra: options.extra
+                ..[domainFrontingExtraKey] = {'host': host, 'ip': ip},
+            ),
+          );
+        },
+        onError: (DioException e, ErrorInterceptorHandler handler) {
+          if (!e.requestOptions.extra.containsKey(domainFrontingExtraKey)) {
+            handler.next(e);
+            return;
+          }
+
+          if (e.type == DioExceptionType.connectionTimeout ||
+              e.type == DioExceptionType.badResponse ||
+              e.type == DioExceptionType.connectionError) {
+            String host =
+                e.requestOptions.extra[domainFrontingExtraKey]['host'];
+            String ip = e.requestOptions.extra[domainFrontingExtraKey]['ip'];
+            _ehIpProvider.addUnavailableIp(host, ip);
+            log.info('Add unavailable host-ip: $host-$ip');
+          }
+
           handler.next(e);
-          return;
-        }
-
-        if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.badResponse || e.type == DioExceptionType.connectionError) {
-          String host = e.requestOptions.extra[domainFrontingExtraKey]['host'];
-          String ip = e.requestOptions.extra[domainFrontingExtraKey]['ip'];
-          _ehIpProvider.addUnavailableIp(host, ip);
-          log.info('Add unavailable host-ip: $host-$ip');
-        }
-
-        handler.next(e);
-      },
-    ));
+        },
+      ),
+    );
   }
 
   /// https://github.com/dart-lang/io/issues/83
@@ -188,7 +204,9 @@ mRGunUHBcnWEvgJBQl9nJEiU0Zsnvgc/ubhPgXRR4Xq37Z0j4r7g1SgEEzwxA57d
 emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
 -----END CERTIFICATE-----
 ''';
-      SecurityContext.defaultContext.setTrustedCertificatesBytes(Uint8List.fromList(isrgRootX1.codeUnits));
+      SecurityContext.defaultContext.setTrustedCertificatesBytes(
+        Uint8List.fromList(isrgRootX1.codeUnits),
+      );
     }
   }
 
@@ -208,7 +226,10 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
     return _cacheManager.removeCacheByUrl(url);
   }
 
-  Future<void> removeCacheByGalleryUrlAndPage(String galleryUrl, int pageIndex) {
+  Future<void> removeCacheByGalleryUrlAndPage(
+    String galleryUrl,
+    int pageIndex,
+  ) {
     Uri uri = Uri.parse(galleryUrl);
     uri = uri.replace(queryParameters: {'p': pageIndex.toString()});
 
@@ -236,10 +257,7 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
         if (systemProxyAddress.trim().isEmpty) {
           return null;
         }
-        return ProxyConfig(
-          type: ProxyType.http,
-          address: systemProxyAddress,
-        );
+        return ProxyConfig(type: ProxyType.http, address: systemProxyAddress);
       case JProxyType.http:
         return ProxyConfig(
           type: ProxyType.http,
@@ -262,10 +280,7 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
           password: networkSetting.proxyPassword.value,
         );
       case JProxyType.direct:
-        return ProxyConfig(
-          type: ProxyType.direct,
-          address: '',
-        );
+        return ProxyConfig(type: ProxyType.direct, address: '');
     }
   }
 
@@ -277,7 +292,11 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
     _dio.options.receiveTimeout = Duration(milliseconds: receiveTimeout);
   }
 
-  Future<T> requestLogin<T>(String userName, String passWord, HtmlParser<T> parser) async {
+  Future<T> requestLogin<T>(
+    String userName,
+    String passWord,
+    HtmlParser<T> parser,
+  ) async {
     Response response = await _postWithErrorHandler(
       EHConsts.EForums,
       options: Options(contentType: Headers.formUrlEncodedContentType),
@@ -298,7 +317,12 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
     await removeAllCookies();
     await userSetting.clearBeanConfig();
     if (GetPlatform.isWindows || GetPlatform.isLinux) {
-      Directory directory = Directory(join(pathService.getVisibleDir().path, EHConsts.desktopWebviewDirectoryName));
+      Directory directory = Directory(
+        join(
+          pathService.getVisibleDir().path,
+          EHConsts.desktopWebviewDirectoryName,
+        ),
+      );
       if (await directory.exists()) {
         await directory.delete(recursive: true);
       }
@@ -320,9 +344,7 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
   Future<T> requestForum<T>(int ipbMemberId, HtmlParser<T> parser) async {
     Response response = await _getWithErrorHandler(
       EHConsts.EForums,
-      queryParameters: {
-        'showuser': ipbMemberId,
-      },
+      queryParameters: {'showuser': ipbMemberId},
     );
     return _parseResponse(response, parser);
   }
@@ -364,7 +386,9 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
         'hc': preferenceSetting.showAllComments.isTrue ? 1 : 0,
       },
       cancelToken: cancelToken,
-      options: useCacheIfAvailable ? CacheOptions.cacheOptions.toOptions() : CacheOptions.noCacheOptions.toOptions(),
+      options: useCacheIfAvailable
+          ? CacheOptions.cacheOptions.toOptions()
+          : CacheOptions.noCacheOptions.toOptions(),
     );
     return _parseResponse(response, parser);
   }
@@ -380,7 +404,7 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
       data: {
         'method': 'gdata',
         'gidlist': [
-          [gid, token]
+          [gid, token],
         ],
         "namespace": 1,
       },
@@ -404,7 +428,11 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
     return _parseResponse(response, parser);
   }
 
-  Future<T> requestRanklistPage<T>({required RanklistType ranklistType, required int pageNo, required HtmlParser<T> parser}) async {
+  Future<T> requestRanklistPage<T>({
+    required RanklistType ranklistType,
+    required int pageNo,
+    required HtmlParser<T> parser,
+  }) async {
     int tl;
 
     switch (ranklistType) {
@@ -420,15 +448,22 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
       case RanklistType.allTime:
         tl = 11;
         break;
-      default:
-        tl = 15;
     }
 
-    Response response = await _getWithErrorHandler('${EHConsts.ERanklist}?tl=$tl&p=$pageNo');
+    Response response = await _getWithErrorHandler(
+      '${EHConsts.ERanklist}?tl=$tl&p=$pageNo',
+    );
     return _parseResponse(response, parser);
   }
 
-  Future<T> requestSubmitRating<T>(int gid, String token, int apiuid, String apikey, int rating, HtmlParser<T> parser) async {
+  Future<T> requestSubmitRating<T>(
+    int gid,
+    String token,
+    int apiuid,
+    String apikey,
+    int rating,
+    HtmlParser<T> parser,
+  ) async {
     Response response = await _postWithErrorHandler(
       EHConsts.EApi,
       data: {
@@ -443,15 +478,16 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
     return _parseResponse(response, parser);
   }
 
-  Future<T> requestPopupPage<T>(int gid, String token, String act, HtmlParser<T> parser) async {
+  Future<T> requestPopupPage<T>(
+    int gid,
+    String token,
+    String act,
+    HtmlParser<T> parser,
+  ) async {
     /// eg: ?gid=2165080&t=725f6a7a58&act=addfav
     Response response = await _getWithErrorHandler(
       EHConsts.EPopup,
-      queryParameters: {
-        'gid': gid,
-        't': token,
-        'act': act,
-      },
+      queryParameters: {'gid': gid, 't': token, 'act': act},
     );
     return _parseResponse(response, parser);
   }
@@ -462,11 +498,16 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
     return _parseResponse(response, parser);
   }
 
-  Future<T> requestChangeFavoriteSortOrder<T>(FavoriteSortOrder sortOrder, {HtmlParser<T>? parser}) async {
+  Future<T> requestChangeFavoriteSortOrder<T>(
+    FavoriteSortOrder sortOrder, {
+    HtmlParser<T>? parser,
+  }) async {
     Response response = await _getWithErrorHandler(
       EHConsts.EFavorite,
       queryParameters: {
-        'inline_set': sortOrder == FavoriteSortOrder.publishedTime ? 'fs_p' : 'fs_f',
+        'inline_set': sortOrder == FavoriteSortOrder.publishedTime
+            ? 'fs_p'
+            : 'fs_f',
       },
     );
 
@@ -474,16 +515,18 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
   }
 
   /// favcat: the favorite tag index
-  Future<T> requestAddFavorite<T>(int gid, String token, int favcat, String note, {HtmlParser<T>? parser}) async {
+  Future<T> requestAddFavorite<T>(
+    int gid,
+    String token,
+    int favcat,
+    String note, {
+    HtmlParser<T>? parser,
+  }) async {
     /// eg: ?gid=2165080&t=725f6a7a58&act=addfav
     Response response = await _postWithErrorHandler(
       EHConsts.EPopup,
       options: Options(contentType: Headers.formUrlEncodedContentType),
-      queryParameters: {
-        'gid': gid,
-        't': token,
-        'act': 'addfav',
-      },
+      queryParameters: {'gid': gid, 't': token, 'act': 'addfav'},
       data: {
         'favcat': favcat,
         'favnote': note,
@@ -494,16 +537,16 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
     return _parseResponse(response, parser);
   }
 
-  Future<T> requestRemoveFavorite<T>(int gid, String token, {HtmlParser<T>? parser}) async {
+  Future<T> requestRemoveFavorite<T>(
+    int gid,
+    String token, {
+    HtmlParser<T>? parser,
+  }) async {
     /// eg: ?gid=2165080&t=725f6a7a58&act=addfav
     Response response = await _postWithErrorHandler(
       EHConsts.EPopup,
       options: Options(contentType: Headers.formUrlEncodedContentType),
-      queryParameters: {
-        'gid': gid,
-        't': token,
-        'act': 'addfav',
-      },
+      queryParameters: {'gid': gid, 't': token, 'act': 'addfav'},
       data: {
         'favcat': 'favdel',
         'favnote': '',
@@ -523,22 +566,23 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
   }) async {
     Response response = await _getWithErrorHandler(
       href,
-      queryParameters: {
-        if (reloadKey != null) 'nl': reloadKey,
-      },
+      queryParameters: {if (reloadKey != null) 'nl': reloadKey},
       cancelToken: cancelToken,
-      options: useCacheIfAvailable ? CacheOptions.cacheOptionsIgnoreParams.toOptions() : CacheOptions.noCacheOptionsIgnoreParams.toOptions(),
+      options: useCacheIfAvailable
+          ? CacheOptions.cacheOptionsIgnoreParams.toOptions()
+          : CacheOptions.noCacheOptionsIgnoreParams.toOptions(),
     );
     return _parseResponse(response, parser);
   }
 
-  Future<T> requestTorrentPage<T>(int gid, String token, HtmlParser<T> parser) async {
+  Future<T> requestTorrentPage<T>(
+    int gid,
+    String token,
+    HtmlParser<T> parser,
+  ) async {
     Response response = await _getWithErrorHandler(
       EHConsts.ETorrent,
-      queryParameters: {
-        'gid': gid,
-        't': token,
-      },
+      queryParameters: {'gid': gid, 't': token},
       options: CacheOptions.cacheOptions.toOptions(),
     );
     return _parseResponse(response, parser);
@@ -562,7 +606,10 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
     return _parseResponse(response, parser);
   }
 
-  Future<T> requestMyTagsPage<T>({int tagSetNo = 1, required HtmlParser<T> parser}) async {
+  Future<T> requestMyTagsPage<T>({
+    int tagSetNo = 1,
+    required HtmlParser<T> parser,
+  }) async {
     Response response = await _getWithErrorHandler(
       EHConsts.EMyTags,
       queryParameters: {'tagset': tagSetNo},
@@ -570,7 +617,11 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
     return _parseResponse(response, parser);
   }
 
-  Future<T> requestStatPage<T>({required int gid, required String token, required HtmlParser<T> parser}) async {
+  Future<T> requestStatPage<T>({
+    required int gid,
+    required String token,
+    required HtmlParser<T> parser,
+  }) async {
     Response response = await _getWithErrorHandler(
       '${EHConsts.EStat}?gid=$gid&t=$token',
       options: CacheOptions.cacheOptions.toOptions(),
@@ -621,7 +672,11 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
     return _parseResponse(response, parser);
   }
 
-  Future<T> requestDeleteWatchedTag<T>({required int watchedTagId, int tagSetNo = 1, HtmlParser<T>? parser}) async {
+  Future<T> requestDeleteWatchedTag<T>({
+    required int watchedTagId,
+    int tagSetNo = 1,
+    HtmlParser<T>? parser,
+  }) async {
     Response response;
     try {
       response = await _postWithErrorHandler(
@@ -735,7 +790,15 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
     return parser(response.headers, response.data);
   }
 
-  Future<T> voteTag<T>(int gid, String token, int apiuid, String apikey, String tag, bool isVotingUp, {HtmlParser<T>? parser}) async {
+  Future<T> voteTag<T>(
+    int gid,
+    String token,
+    int apiuid,
+    String apikey,
+    String tag,
+    bool isVotingUp, {
+    HtmlParser<T>? parser,
+  }) async {
     Response response = await _postWithErrorHandler(
       EHConsts.EApi,
       data: {
@@ -751,7 +814,15 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
     return _parseResponse(response, parser);
   }
 
-  Future<T> voteComment<T>(int gid, String token, int apiuid, String apikey, int commentId, bool isVotingUp, {HtmlParser<T>? parser}) async {
+  Future<T> voteComment<T>(
+    int gid,
+    String token,
+    int apiuid,
+    String apikey,
+    int commentId,
+    bool isVotingUp, {
+    HtmlParser<T>? parser,
+  }) async {
     Response response = await _postWithErrorHandler(
       EHConsts.EApi,
       data: {
@@ -767,13 +838,13 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
     return _parseResponse(response, parser);
   }
 
-  Future<T> requestTagSuggestion<T>(String keyword, HtmlParser<T> parser) async {
+  Future<T> requestTagSuggestion<T>(
+    String keyword,
+    HtmlParser<T> parser,
+  ) async {
     Response response = await _postWithErrorHandler(
       EHConsts.EApi,
-      data: {
-        'method': "tagsuggest",
-        'text': keyword,
-      },
+      data: {'method': "tagsuggest", 'text': keyword},
     );
     return _parseResponse(response, parser);
   }
@@ -786,9 +857,7 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
     Response response = await _postWithErrorHandler(
       galleryUrl,
       options: Options(contentType: Headers.formUrlEncodedContentType),
-      data: {
-        'commenttext_new': content,
-      },
+      data: {'commenttext_new': content},
     );
     return _parseResponse(response, parser);
   }
@@ -802,10 +871,7 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
     Response response = await _postWithErrorHandler(
       galleryUrl,
       options: Options(contentType: Headers.formUrlEncodedContentType),
-      data: {
-        'edit_comment': commentId,
-        'commenttext_edit': content,
-      },
+      data: {'edit_comment': commentId, 'commenttext_edit': content},
     );
     return _parseResponse(response, parser);
   }
@@ -837,7 +903,10 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
       return _parseResponse(e.response!, parser);
     }
 
-    throw EHSiteException(message: 'Look up response error', type: EHSiteExceptionType.internalError);
+    throw EHSiteException(
+      message: 'Look up response error',
+      type: EHSiteExceptionType.internalError,
+    );
   }
 
   Future<T> requestUnlockArchive<T>({
@@ -850,7 +919,9 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
       url,
       data: FormData.fromMap({
         'dltype': isOriginal ? 'org' : 'res',
-        'dlcheck': isOriginal ? 'Download Original Archive' : 'Download Resample Archive',
+        'dlcheck': isOriginal
+            ? 'Download Original Archive'
+            : 'Download Resample Archive',
       }),
       cancelToken: cancelToken,
     );
@@ -858,7 +929,11 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
     return _parseResponse(response, parser);
   }
 
-  Future<T> requestCancelArchive<T>({required String url, CancelToken? cancelToken, HtmlParser<T>? parser}) async {
+  Future<T> requestCancelArchive<T>({
+    required String url,
+    CancelToken? cancelToken,
+    HtmlParser<T>? parser,
+  }) async {
     Response response = await _postWithErrorHandler(
       url,
       cancelToken: cancelToken,
@@ -890,9 +965,7 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
   Future<T> requestResetImageLimit<T>({HtmlParser<T>? parser}) async {
     Response response = await _postWithErrorHandler(
       EHConsts.EHome,
-      data: FormData.fromMap({
-        'reset_imagelimit': 'Reset Limit',
-      }),
+      data: FormData.fromMap({'reset_imagelimit': 'Reset Limit'}),
     );
 
     return _parseResponse(response, parser);
@@ -934,19 +1007,22 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
     return _parseResponse(response, parser);
   }
 
-  Future<Response> head<T>({required String url, CancelToken? cancelToken, Options? options}) {
-    return _dio.head(
-      url,
-      cancelToken: cancelToken,
-      options: options,
-    );
+  Future<Response> head<T>({
+    required String url,
+    CancelToken? cancelToken,
+    Options? options,
+  }) {
+    return _dio.head(url, cancelToken: cancelToken, options: options);
   }
 
   Future<T> _parseResponse<T>(Response response, HtmlParser<T>? parser) async {
     if (parser == null) {
       return response as T;
     }
-    return isolateService.run((list) => parser(list[0], list[1]), [response.headers, response.data]);
+    return isolateService.run((list) => parser(list[0], list[1]), [
+      response.headers,
+      response.data,
+    ]);
   }
 
   Future<Response> _getWithErrorHandler<T>(
@@ -1010,8 +1086,12 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
   }
 
   Exception _convertExceptionIfGalleryDeleted(DioException e) {
-    if (e.response?.statusCode == 404 && networkSetting.allHostAndIPs.contains(e.requestOptions.uri.host)) {
-      String? errMessage = EHSpiderParser.a404Page2GalleryDeletedHint(e.response!.headers, e.response!.data);
+    if (e.response?.statusCode == 404 &&
+        networkSetting.allHostAndIPs.contains(e.requestOptions.uri.host)) {
+      String? errMessage = EHSpiderParser.a404Page2GalleryDeletedHint(
+        e.response!.headers,
+        e.response!.data,
+      );
       if (!isEmptyOrNull(errMessage)) {
         return EHSiteException(
           type: EHSiteExceptionType.galleryDeleted,
@@ -1020,7 +1100,8 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
         );
       }
     }
-    if (e.response?.statusCode == 403 && networkSetting.allHostAndIPs.contains(e.requestOptions.uri.host)) {
+    if (e.response?.statusCode == 403 &&
+        networkSetting.allHostAndIPs.contains(e.requestOptions.uri.host)) {
       return EHSiteException(
         type: EHSiteExceptionType.cloudflare,
         message: 'cloudflare403'.tr,
@@ -1032,7 +1113,9 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
   }
 
   void _emitEHExceptionIfFailed(Response response) {
-    if (!networkSetting.allHostAndIPs.contains(response.requestOptions.uri.host)) {
+    if (!networkSetting.allHostAndIPs.contains(
+      response.requestOptions.uri.host,
+    )) {
       return;
     }
 
@@ -1040,22 +1123,39 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
       String data = response.data.toString();
 
       if (data.isEmpty) {
-        throw EHSiteException(type: EHSiteExceptionType.blankBody, message: 'sadPanda'.tr, referLink: 'sadPandaReferLink'.tr);
+        throw EHSiteException(
+          type: EHSiteExceptionType.blankBody,
+          message: 'sadPanda'.tr,
+          referLink: 'sadPandaReferLink'.tr,
+        );
       }
 
       if (data.startsWith('Your IP address')) {
-        throw EHSiteException(type: EHSiteExceptionType.banned, message: response.data);
+        throw EHSiteException(
+          type: EHSiteExceptionType.banned,
+          message: response.data,
+        );
       }
       if (data.startsWith('This IP address')) {
-        throw EHSiteException(type: EHSiteExceptionType.banned, message: response.data);
+        throw EHSiteException(
+          type: EHSiteExceptionType.banned,
+          message: response.data,
+        );
       }
 
       if (data.startsWith('You have exceeded your image')) {
-        throw EHSiteException(type: EHSiteExceptionType.exceedLimit, message: 'exceedImageLimits'.tr);
+        throw EHSiteException(
+          type: EHSiteExceptionType.exceedLimit,
+          message: 'exceedImageLimits'.tr,
+        );
       }
 
       if (data.contains('Page load has been aborted due to a fatal error')) {
-        throw EHSiteException(type: EHSiteExceptionType.ehServerError, message: 'ehServerError'.tr, shouldPauseAllDownloadTasks: false);
+        throw EHSiteException(
+          type: EHSiteExceptionType.ehServerError,
+          message: 'ehServerError'.tr,
+          shouldPauseAllDownloadTasks: false,
+        );
       }
     }
   }

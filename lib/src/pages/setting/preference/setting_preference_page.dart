@@ -34,21 +34,30 @@ class SettingPreferencePage extends StatelessWidget {
               _buildDefaultTab(),
               if (styleSetting.isInV2Layout) _buildSimpleDashboardMode(),
               if (styleSetting.isInV2Layout) _buildShowBottomNavigation(),
-              if (styleSetting.isInV2Layout || styleSetting.actualLayout == LayoutMode.desktop) _buildHideScroll2TopButton(),
+              if (styleSetting.isInV2Layout ||
+                  styleSetting.actualLayout == LayoutMode.desktop)
+                _buildHideScroll2TopButton(),
               _buildPreloadGalleryCover(),
               _buildEnableSwipeBackGesture(),
-              if (styleSetting.isInV2Layout) _buildEnableLeftMenuDrawerGesture(),
+              if (styleSetting.isInV2Layout)
+                _buildEnableLeftMenuDrawerGesture(),
               if (styleSetting.isInV2Layout) _buildQuickSearch(),
-              if (styleSetting.isInV2Layout) _buildDrawerGestureEdgeWidth(context),
+              if (styleSetting.isInV2Layout)
+                _buildDrawerGestureEdgeWidth(context),
               _buildShowAllGalleryTitles(),
               _buildShowGalleryTagVoteStatus(),
               _buildShowComments(),
-              if (preferenceSetting.showComments.isTrue) _buildShowAllComments().fadeIn(const Key('showAllComments')),
+              if (preferenceSetting.showComments.isTrue)
+                _buildShowAllComments().fadeIn(const Key('showAllComments')),
               _buildEnableDefaultFavorite(),
               _buildEnableDefaultTagSet(),
-              if (GetPlatform.isDesktop && styleSetting.isInDesktopLayout) _buildLaunchInFullScreen(),
+              if (GetPlatform.isDesktop && styleSetting.isInDesktopLayout)
+                _buildLaunchInFullScreen(),
               _buildTagSearchConfig(),
-              if (preferenceSetting.enableTagZHTranslation.isTrue) _buildShowR18GImageDirectly().fadeIn(const Key('showR18GImageDirectly')),
+              if (preferenceSetting.enableTagZHTranslation.isTrue)
+                _buildShowR18GImageDirectly().fadeIn(
+                  const Key('showR18GImageDirectly'),
+                ),
               _buildShowUtcTime(),
               _buildShowDawnInfo(),
               _buildShowEncounterMonster(),
@@ -68,14 +77,15 @@ class SettingPreferencePage extends StatelessWidget {
         value: preferenceSetting.locale.value,
         elevation: 4,
         alignment: AlignmentDirectional.centerEnd,
-        onChanged: (Locale? newValue) => preferenceSetting.saveLanguage(newValue!),
-        items: LocaleText()
-            .keys
-            .keys
-            .map((localeCode) => DropdownMenuItem(
-                  child: Text(LocaleConsts.localeCode2Description[localeCode]!),
-                  value: localeCode2Locale(localeCode),
-                ))
+        onChanged: (Locale? newValue) =>
+            preferenceSetting.saveLanguage(newValue!),
+        items: LocaleText().keys.keys
+            .map(
+              (localeCode) => DropdownMenuItem(
+                child: Text(LocaleConsts.localeCode2Description[localeCode]!),
+                value: localeCode2Locale(localeCode),
+              ),
+            )
             .toList(),
       ),
     );
@@ -85,15 +95,18 @@ class SettingPreferencePage extends StatelessWidget {
     return ListTile(
       title: Text('enableTagZHTranslation'.tr),
       subtitle: tagTranslationService.loadingState.value == LoadingState.success
-          ? Text('${'version'.tr}: ${tagTranslationService.timeStamp.value!}', style: const TextStyle(fontSize: 12))
+          ? Text(
+              '${'version'.tr}: ${tagTranslationService.timeStamp.value!}',
+              style: const TextStyle(fontSize: 12),
+            )
           : tagTranslationService.loadingState.value == LoadingState.loading
-              ? Text(
-                  '${'downloadTagTranslationHint'.tr}${tagTranslationService.downloadProgress.value}',
-                  style: const TextStyle(fontSize: 12),
-                )
-              : tagTranslationService.loadingState.value == LoadingState.error
-                  ? Text('downloadFailed'.tr, style: const TextStyle(fontSize: 12))
-                  : null,
+          ? Text(
+              '${'downloadTagTranslationHint'.tr}${tagTranslationService.downloadProgress.value}',
+              style: const TextStyle(fontSize: 12),
+            )
+          : tagTranslationService.loadingState.value == LoadingState.error
+          ? Text('downloadFailed'.tr, style: const TextStyle(fontSize: 12))
+          : null,
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -102,7 +115,10 @@ class SettingPreferencePage extends StatelessWidget {
             loadingState: tagTranslationService.loadingState.value,
             indicatorRadius: 10,
             width: 40,
-            idleWidgetBuilder: () => IconButton(onPressed: tagTranslationService.fetchDataFromGithub, icon: const Icon(Icons.refresh)),
+            idleWidgetBuilder: () => IconButton(
+              onPressed: tagTranslationService.fetchDataFromGithub,
+              icon: const Icon(Icons.refresh),
+            ),
             errorWidgetSameWithIdle: true,
             successWidgetSameWithIdle: true,
           ),
@@ -110,11 +126,13 @@ class SettingPreferencePage extends StatelessWidget {
             value: preferenceSetting.enableTagZHTranslation.value,
             onChanged: (value) {
               preferenceSetting.saveEnableTagZHTranslation(value);
-              if (value == true && tagTranslationService.loadingState.value != LoadingState.success) {
+              if (value == true &&
+                  tagTranslationService.loadingState.value !=
+                      LoadingState.success) {
                 tagTranslationService.fetchDataFromGithub();
               }
             },
-          )
+          ),
         ],
       ),
     );
@@ -123,16 +141,23 @@ class SettingPreferencePage extends StatelessWidget {
   Widget _buildTagOrderOptimization() {
     return ListTile(
       title: Text('zhTagSearchOrderOptimization'.tr),
-      subtitle: tagSearchOrderOptimizationService.loadingState.value == LoadingState.success
-          ? Text('${'version'.tr}: ${tagSearchOrderOptimizationService.version.value!}', style: const TextStyle(fontSize: 12))
-          : tagSearchOrderOptimizationService.loadingState.value == LoadingState.loading
-              ? Text(
-                  '${'downloadTagTranslationHint'.tr}${tagSearchOrderOptimizationService.downloadProgress.value}',
-                  style: const TextStyle(fontSize: 12),
-                )
-              : tagSearchOrderOptimizationService.loadingState.value == LoadingState.error
-                  ? Text('downloadFailed'.tr, style: const TextStyle(fontSize: 12))
-                  : Text('zhTagSearchOrderOptimizationHint'.tr),
+      subtitle:
+          tagSearchOrderOptimizationService.loadingState.value ==
+              LoadingState.success
+          ? Text(
+              '${'version'.tr}: ${tagSearchOrderOptimizationService.version.value!}',
+              style: const TextStyle(fontSize: 12),
+            )
+          : tagSearchOrderOptimizationService.loadingState.value ==
+                LoadingState.loading
+          ? Text(
+              '${'downloadTagTranslationHint'.tr}${tagSearchOrderOptimizationService.downloadProgress.value}',
+              style: const TextStyle(fontSize: 12),
+            )
+          : tagSearchOrderOptimizationService.loadingState.value ==
+                LoadingState.error
+          ? Text('downloadFailed'.tr, style: const TextStyle(fontSize: 12))
+          : Text('zhTagSearchOrderOptimizationHint'.tr),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -141,7 +166,10 @@ class SettingPreferencePage extends StatelessWidget {
             loadingState: tagSearchOrderOptimizationService.loadingState.value,
             indicatorRadius: 10,
             width: 40,
-            idleWidgetBuilder: () => IconButton(onPressed: tagSearchOrderOptimizationService.fetchDataFromGithub, icon: const Icon(Icons.refresh)),
+            idleWidgetBuilder: () => IconButton(
+              onPressed: tagSearchOrderOptimizationService.fetchDataFromGithub,
+              icon: const Icon(Icons.refresh),
+            ),
             errorWidgetSameWithIdle: true,
             successWidgetSameWithIdle: true,
           ),
@@ -149,11 +177,13 @@ class SettingPreferencePage extends StatelessWidget {
             value: preferenceSetting.enableTagZHSearchOrderOptimization.value,
             onChanged: (value) {
               preferenceSetting.saveEnableTagZHSearchOrderOptimization(value);
-              if (value == true && tagSearchOrderOptimizationService.loadingState.value != LoadingState.success) {
+              if (value == true &&
+                  tagSearchOrderOptimizationService.loadingState.value !=
+                      LoadingState.success) {
                 tagSearchOrderOptimizationService.fetchDataFromGithub();
               }
             },
-          )
+          ),
         ],
       ),
     );
@@ -166,7 +196,8 @@ class SettingPreferencePage extends StatelessWidget {
         value: preferenceSetting.defaultTab.value,
         elevation: 4,
         alignment: AlignmentDirectional.centerEnd,
-        onChanged: (TabBarIconNameEnum? newValue) => preferenceSetting.saveDefaultTab(newValue!),
+        onChanged: (TabBarIconNameEnum? newValue) =>
+            preferenceSetting.saveDefaultTab(newValue!),
         items: [
           DropdownMenuItem(
             child: Text(TabBarIconNameEnum.home.name.tr),
@@ -217,7 +248,8 @@ class SettingPreferencePage extends StatelessWidget {
         value: preferenceSetting.hideScroll2TopButton.value,
         elevation: 4,
         alignment: AlignmentDirectional.centerEnd,
-        onChanged: (Scroll2TopButtonModeEnum? newValue) => preferenceSetting.saveHideScroll2TopButton(newValue!),
+        onChanged: (Scroll2TopButtonModeEnum? newValue) =>
+            preferenceSetting.saveHideScroll2TopButton(newValue!),
         items: [
           DropdownMenuItem(
             child: Text('whenScrollUp'.tr),
@@ -282,14 +314,19 @@ class SettingPreferencePage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             SliderTheme(
-              data: SliderTheme.of(context).copyWith(showValueIndicator: ShowValueIndicator.always),
+              data: SliderTheme.of(
+                context,
+              ).copyWith(showValueIndicator: ShowValueIndicator.onDrag),
               child: Slider(
                 min: 20,
                 max: 300,
-                label: preferenceSetting.drawerGestureEdgeWidth.value.toString(),
-                value: preferenceSetting.drawerGestureEdgeWidth.value.toDouble(),
+                label: preferenceSetting.drawerGestureEdgeWidth.value
+                    .toString(),
+                value: preferenceSetting.drawerGestureEdgeWidth.value
+                    .toDouble(),
                 onChanged: (value) {
-                  preferenceSetting.drawerGestureEdgeWidth.value = value.toInt();
+                  preferenceSetting.drawerGestureEdgeWidth.value = value
+                      .toInt();
                 },
                 onChangeEnd: (value) {
                   preferenceSetting.saveDrawerGestureEdgeWidth(value.toInt());
@@ -348,7 +385,11 @@ class SettingPreferencePage extends StatelessWidget {
   Widget _buildEnableDefaultFavorite() {
     return SwitchListTile(
       title: Text('enableDefaultFavorite'.tr),
-      subtitle: Text(preferenceSetting.enableDefaultFavorite.isTrue ? 'enableDefaultFavoriteHint'.tr : 'disableDefaultFavoriteHint'.tr),
+      subtitle: Text(
+        preferenceSetting.enableDefaultFavorite.isTrue
+            ? 'enableDefaultFavoriteHint'.tr
+            : 'disableDefaultFavoriteHint'.tr,
+      ),
       value: preferenceSetting.enableDefaultFavorite.value,
       onChanged: preferenceSetting.saveEnableDefaultFavorite,
     );
@@ -357,7 +398,11 @@ class SettingPreferencePage extends StatelessWidget {
   Widget _buildEnableDefaultTagSet() {
     return SwitchListTile(
       title: Text('enableDefaultTagSet'.tr),
-      subtitle: Text(preferenceSetting.enableDefaultTagSet.isTrue ? 'enableDefaultTagSetHint'.tr : 'disableDefaultTagSetHint'.tr),
+      subtitle: Text(
+        preferenceSetting.enableDefaultTagSet.isTrue
+            ? 'enableDefaultTagSetHint'.tr
+            : 'disableDefaultTagSetHint'.tr,
+      ),
       value: preferenceSetting.enableDefaultTagSet.value,
       onChanged: preferenceSetting.saveEnableDefaultTagSet,
     );
@@ -378,15 +423,17 @@ class SettingPreferencePage extends StatelessWidget {
       subtitle: Text(
         preferenceSetting.searchBehaviour.value == SearchBehaviour.inheritAll
             ? 'inheritAllHint'.tr
-            : preferenceSetting.searchBehaviour.value == SearchBehaviour.inheritPartially
-                ? 'inheritPartiallyHint'.tr
-                : 'noneHint'.tr,
+            : preferenceSetting.searchBehaviour.value ==
+                  SearchBehaviour.inheritPartially
+            ? 'inheritPartiallyHint'.tr
+            : 'noneHint'.tr,
       ),
       trailing: DropdownButton<SearchBehaviour>(
         value: preferenceSetting.searchBehaviour.value,
         elevation: 4,
         alignment: AlignmentDirectional.centerEnd,
-        onChanged: (SearchBehaviour? newValue) => preferenceSetting.saveTagSearchConfig(newValue!),
+        onChanged: (SearchBehaviour? newValue) =>
+            preferenceSetting.saveTagSearchConfig(newValue!),
         items: [
           DropdownMenuItem(
             child: Text('inheritAll'.tr),
@@ -396,10 +443,7 @@ class SettingPreferencePage extends StatelessWidget {
             child: Text('inheritPartially'.tr),
             value: SearchBehaviour.inheritPartially,
           ),
-          DropdownMenuItem(
-            child: Text('none'.tr),
-            value: SearchBehaviour.none,
-          ),
+          DropdownMenuItem(child: Text('none'.tr), value: SearchBehaviour.none),
         ],
       ),
     );
@@ -455,7 +499,7 @@ class SettingPreferencePage extends StatelessWidget {
           Switch(
             value: preferenceSetting.useBuiltInBlockedUsers.value,
             onChanged: preferenceSetting.saveUseBuiltInBlockedUsers,
-          )
+          ),
         ],
       ),
     );

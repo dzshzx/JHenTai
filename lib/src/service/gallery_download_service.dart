@@ -62,11 +62,14 @@ import '../utils/snack_util.dart';
 /// Responsible for local images meta-data and download all images of a gallery
 GalleryDownloadService galleryDownloadService = GalleryDownloadService();
 
-class GalleryDownloadService extends GetxController with GridBasePageServiceMixin, JHLifeCircleBeanErrorCatch implements JHLifeCircleBean {
+class GalleryDownloadService extends GetxController
+    with GridBasePageServiceMixin, JHLifeCircleBeanErrorCatch
+    implements JHLifeCircleBean {
   final String downloadImageId = 'downloadImageId';
   final String downloadImageUrlId = 'downloadImageUrlId';
   final String galleryDownloadProgressId = 'galleryDownloadProgressId';
-  final String galleryDownloadSpeedComputerId = 'galleryDownloadSpeedComputerId';
+  final String galleryDownloadSpeedComputerId =
+      'galleryDownloadSpeedComputerId';
   final String galleryDownloadSuccessId = 'galleryDownloadSuccessId';
 
   late EHExecutor executor;
@@ -75,7 +78,9 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
   List<GalleryDownloadedData> gallerys = [];
   Map<int, GalleryDownloadInfo> galleryDownloadInfos = {};
 
-  List<GalleryDownloadedData> gallerysWithGroup(String group) => gallerys.where((g) => galleryDownloadInfos[g.gid]!.group == group).toList();
+  List<GalleryDownloadedData> gallerysWithGroup(String group) => gallerys
+      .where((g) => galleryDownloadInfos[g.gid]!.group == group)
+      .toList();
 
   static const int _maxRetryTimes = 3;
   static const int _maxRetryTimes4FetchImageHashes = 1;
@@ -108,7 +113,11 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
     }
 
     _downloadSettingListener = everAll(
-      [downloadSetting.downloadTaskConcurrency, downloadSetting.maximum, downloadSetting.period],
+      [
+        downloadSetting.downloadTaskConcurrency,
+        downloadSetting.maximum,
+        downloadSetting.period,
+      ],
       (_) {
         updateExecutor();
       },
@@ -127,7 +136,10 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
 
   bool containGallery(int gid) => galleryDownloadInfos.containsKey(gid);
 
-  Future<void> downloadGallery(GalleryDownloadedData gallery, {bool resume = false}) async {
+  Future<void> downloadGallery(
+    GalleryDownloadedData gallery, {
+    bool resume = false,
+  }) async {
     if (!resume && containGallery(gallery.gid)) {
       return;
     }
@@ -144,7 +156,9 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
 
     galleryDownloadInfos[gallery.gid]!.speedComputer.start();
 
-    log.info('Begin to download gallery: ${gallery.title}, original: ${gallery.downloadOriginalImage}');
+    log.info(
+      'Begin to download gallery: ${gallery.title}, original: ${gallery.downloadOriginalImage}',
+    );
 
     _submitTask(
       gid: gallery.gid,
@@ -158,22 +172,29 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
   }
 
   Future<void> pauseDownloadGalleryByGid(int gid) async {
-    GalleryDownloadedData? gallery = gallerys.firstWhereOrNull((gallery) => gallery.gid == gid);
+    GalleryDownloadedData? gallery = gallerys.firstWhereOrNull(
+      (gallery) => gallery.gid == gid,
+    );
     if (gallery != null) {
       return pauseDownloadGallery(gallery);
     }
   }
 
   Future<void> pauseDownloadGallery(GalleryDownloadedData gallery) async {
-    GalleryDownloadInfo galleryDownloadInfo = galleryDownloadInfos[gallery.gid]!;
-    GalleryDownloadProgress downloadProgress = galleryDownloadInfo.downloadProgress;
+    GalleryDownloadInfo galleryDownloadInfo =
+        galleryDownloadInfos[gallery.gid]!;
+    GalleryDownloadProgress downloadProgress =
+        galleryDownloadInfo.downloadProgress;
 
     if (downloadProgress.downloadStatus != DownloadStatus.downloading) {
       return;
     }
 
     if (!await _updateGalleryInDatabase(
-      GalleryDownloadedCompanion(gid: Value(gallery.gid), downloadStatusIndex: Value(DownloadStatus.paused.index)),
+      GalleryDownloadedCompanion(
+        gid: Value(gallery.gid),
+        downloadStatusIndex: Value(DownloadStatus.paused.index),
+      ),
     )) {
       return;
     }
@@ -207,22 +228,29 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
   }
 
   Future<void> resumeDownloadGalleryByGid(int gid) async {
-    GalleryDownloadedData? gallery = gallerys.firstWhereOrNull((gallery) => gallery.gid == gid);
+    GalleryDownloadedData? gallery = gallerys.firstWhereOrNull(
+      (gallery) => gallery.gid == gid,
+    );
     if (gallery != null) {
       return resumeDownloadGallery(gallery);
     }
   }
 
   Future<void> resumeDownloadGallery(GalleryDownloadedData gallery) async {
-    GalleryDownloadInfo galleryDownloadInfo = galleryDownloadInfos[gallery.gid]!;
-    GalleryDownloadProgress downloadProgress = galleryDownloadInfo.downloadProgress;
+    GalleryDownloadInfo galleryDownloadInfo =
+        galleryDownloadInfos[gallery.gid]!;
+    GalleryDownloadProgress downloadProgress =
+        galleryDownloadInfo.downloadProgress;
 
     if (downloadProgress.downloadStatus != DownloadStatus.paused) {
       return;
     }
 
     if (!await _updateGalleryInDatabase(
-      GalleryDownloadedCompanion(gid: Value(gallery.gid), downloadStatusIndex: Value(DownloadStatus.downloading.index)),
+      GalleryDownloadedCompanion(
+        gid: Value(gallery.gid),
+        downloadStatusIndex: Value(DownloadStatus.downloading.index),
+      ),
     )) {
       return;
     }
@@ -250,18 +278,28 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
   }
 
   Future<void> deleteGalleryByGid(int gid) async {
-    GalleryDownloadedData? gallery = gallerys.firstWhereOrNull((gallery) => gallery.gid == gid);
+    GalleryDownloadedData? gallery = gallerys.firstWhereOrNull(
+      (gallery) => gallery.gid == gid,
+    );
     if (gallery != null) {
       return deleteGallery(gallery);
     }
   }
 
-  Future<void> deleteGallery(GalleryDownloadedData gallery, {bool deleteImages = true}) async {
+  Future<void> deleteGallery(
+    GalleryDownloadedData gallery, {
+    bool deleteImages = true,
+  }) async {
     await pauseDownloadGallery(gallery);
 
-    log.info('Delete download gallery: ${gallery.title}, deleteImages:$deleteImages');
+    log.info(
+      'Delete download gallery: ${gallery.title}, deleteImages:$deleteImages',
+    );
 
-    await superResolutionService.deleteSuperResolve(gallery.gid, SuperResolutionType.gallery);
+    await superResolutionService.deleteSuperResolve(
+      gallery.gid,
+      SuperResolutionType.gallery,
+    );
 
     await _clearGalleryDownloadInfoInDatabase(gallery.gid);
     if (deleteImages) {
@@ -271,16 +309,23 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
   }
 
   /// Update local downloaded gallery if there's a new version.
-  Future<void> updateGallery(GalleryDownloadedData oldGallery, GalleryUrl newVersionGalleryUrl) async {
+  Future<void> updateGallery(
+    GalleryDownloadedData oldGallery,
+    GalleryUrl newVersionGalleryUrl,
+  ) async {
     log.info('update gallery: ${oldGallery.title}');
 
     GalleryDetail newGalleryDetail;
     try {
-      ({GalleryDetail galleryDetails, String apikey}) detailPageInfo = await retry(
-        () => ehRequest.requestDetailPage(galleryUrl: newVersionGalleryUrl.url, parser: EHSpiderParser.detailPage2GalleryAndDetailAndApikey),
-        retryIf: (e) => e is DioException,
-        maxAttempts: _maxRetryTimes,
-      );
+      ({GalleryDetail galleryDetails, String apikey}) detailPageInfo =
+          await retry(
+            () => ehRequest.requestDetailPage(
+              galleryUrl: newVersionGalleryUrl.url,
+              parser: EHSpiderParser.detailPage2GalleryAndDetailAndApikey,
+            ),
+            retryIf: (e) => e is DioException,
+            maxAttempts: _maxRetryTimes,
+          );
       newGalleryDetail = detailPageInfo.galleryDetails;
     } on DioException catch (e) {
       log.info('${'updateGalleryError'.tr}, reason: ${e.errorMsg}');
@@ -316,7 +361,10 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
     downloadGallery(newGallery);
   }
 
-  Future<void> importGallery(GalleryDownloadedData gallery, List<GalleryImage> images) async {
+  Future<void> importGallery(
+    GalleryDownloadedData gallery,
+    List<GalleryImage> images,
+  ) async {
     if (containGallery(gallery.gid)) {
       return;
     }
@@ -325,7 +373,9 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
 
     _ensureDownloadDirExists();
 
-    io.Directory galleryDir = io.Directory(computeGalleryDownloadAbsolutePath(gallery.title, gallery.gid));
+    io.Directory galleryDir = io.Directory(
+      computeGalleryDownloadAbsolutePath(gallery.title, gallery.gid),
+    );
     if (!galleryDir.existsSync()) {
       galleryDir.createSync(recursive: true);
     }
@@ -334,11 +384,27 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
     List<GalleryImage> copiedImages = [];
     for (int i = 0; i < images.length; i++) {
       GalleryImage image = images[i];
-      String oldPath = computeImageDownloadAbsolutePathFromRelativePath(image.path!);
-      String newPath = _computeImageDownloadAbsolutePath(gallery.title, gallery.gid, image.url, i);
+      String oldPath = computeImageDownloadAbsolutePathFromRelativePath(
+        image.path!,
+      );
+      String newPath = _computeImageDownloadAbsolutePath(
+        gallery.title,
+        gallery.gid,
+        image.url,
+        i,
+      );
       futures.add(io.File(oldPath).copy(newPath));
 
-      copiedImages.add(image.copyWith(path: _computeImageDownloadRelativePath(gallery.title, gallery.gid, image.url, i)));
+      copiedImages.add(
+        image.copyWith(
+          path: _computeImageDownloadRelativePath(
+            gallery.title,
+            gallery.gid,
+            image.url,
+            i,
+          ),
+        ),
+      );
     }
 
     await Future.wait(futures);
@@ -355,7 +421,9 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
   }
 
   Future<void> reDownloadGalleryByGid(int gid) async {
-    GalleryDownloadedData? gallery = gallerys.firstWhereOrNull((gallery) => gallery.gid == gid);
+    GalleryDownloadedData? gallery = gallerys.firstWhereOrNull(
+      (gallery) => gallery.gid == gid,
+    );
     if (gallery != null) {
       return reDownloadGallery(gallery);
     }
@@ -370,7 +438,9 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
   }
 
   Future<void> reDownloadImage(int gid, int serialNo) async {
-    GalleryDownloadedData? gallery = gallerys.singleWhereOrNull((g) => g.gid == gid);
+    GalleryDownloadedData? gallery = gallerys.singleWhereOrNull(
+      (g) => g.gid == gid,
+    );
     GalleryDownloadInfo? galleryDownloadInfo = galleryDownloadInfos[gid];
     GalleryImage? image = galleryDownloadInfo?.images[serialNo];
 
@@ -386,16 +456,27 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
     galleryDownloadInfo.downloadProgress.hasDownloaded[serialNo] = false;
     galleryDownloadInfo.speedComputer.resetProgress(serialNo);
     galleryDownloadInfo.speedComputer.start();
-    await _updateImageStatus(gallery, image, serialNo, DownloadStatus.downloading);
+    await _updateImageStatus(
+      gallery,
+      image,
+      serialNo,
+      DownloadStatus.downloading,
+    );
     await _updateGalleryDownloadStatus(gallery, DownloadStatus.downloading);
     _deleteImageInDisk(image);
 
-    update(['$galleryDownloadSuccessId::${gallery.gid}', '$galleryDownloadProgressId::${gallery.gid}']);
+    update([
+      '$galleryDownloadSuccessId::${gallery.gid}',
+      '$galleryDownloadProgressId::${gallery.gid}',
+    ]);
 
     _reParseImageUrlAndDownload(gallery, serialNo);
   }
 
-  Future<void> assignPriority(GalleryDownloadedData gallery, int priority) async {
+  Future<void> assignPriority(
+    GalleryDownloadedData gallery,
+    int priority,
+  ) async {
     if (priority == galleryDownloadInfos[gallery.gid]?.priority) {
       return;
     }
@@ -403,21 +484,27 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
     log.info('Assign priority, gid: ${gallery.gid}, priority: $priority');
 
     if (!await _updateGalleryInDatabase(
-      GalleryDownloadedCompanion(gid: Value(gallery.gid), priority: Value(priority)),
+      GalleryDownloadedCompanion(
+        gid: Value(gallery.gid),
+        priority: Value(priority),
+      ),
     )) {
       return;
     }
 
     galleryDownloadInfos[gallery.gid]!.priority = priority;
 
-    if (galleryDownloadInfos[gallery.gid]?.downloadProgress.downloadStatus == DownloadStatus.downloading) {
+    if (galleryDownloadInfos[gallery.gid]?.downloadProgress.downloadStatus ==
+        DownloadStatus.downloading) {
       await pauseDownloadGallery(gallery);
       await resumeDownloadGallery(gallery);
     }
   }
 
   Future<bool> updateGroupByGid(int gid, String group) async {
-    GalleryDownloadedData? gallery = gallerys.firstWhereOrNull((gallery) => gallery.gid == gid);
+    GalleryDownloadedData? gallery = gallerys.firstWhereOrNull(
+      (gallery) => gallery.gid == gid,
+    );
     if (gallery != null) {
       return updateGroup(gallery, group);
     }
@@ -434,7 +521,10 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
     _sortGallerys();
 
     bool success = await _updateGalleryInDatabase(
-      GalleryDownloadedCompanion(gid: Value(gallery.gid), groupName: Value(group)),
+      GalleryDownloadedCompanion(
+        gid: Value(gallery.gid),
+        groupName: Value(group),
+      ),
     );
 
     if (!success) {
@@ -442,12 +532,14 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
     }
 
     _saveGalleryMetadataInDisk(gallery);
-    
+
     return true;
   }
 
   Future<void> renameGroup(String oldGroup, String newGroup) async {
-    List<GalleryDownloadedData> galleryDownloadedDatas = gallerys.where((g) => galleryDownloadInfos[g.gid]!.group == oldGroup).toList();
+    List<GalleryDownloadedData> galleryDownloadedDatas = gallerys
+        .where((g) => galleryDownloadInfos[g.gid]!.group == oldGroup)
+        .toList();
 
     await appDb.transaction(() async {
       if (!allGroups.contains(newGroup) && !await _addGroup(newGroup)) {
@@ -457,7 +549,10 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
       for (GalleryDownloadedData g in galleryDownloadedDatas) {
         galleryDownloadInfos[g.gid]!.group = newGroup;
         await _updateGalleryInDatabase(
-          GalleryDownloadedCompanion(gid: Value(g.gid), groupName: Value(newGroup)),
+          GalleryDownloadedCompanion(
+            gid: Value(g.gid),
+            groupName: Value(newGroup),
+          ),
         );
         _saveGalleryMetadataInDisk(g);
       }
@@ -476,7 +571,10 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
     await appDb.transaction(() async {
       for (GalleryDownloadedData gallery in gallerys) {
         await _updateGalleryInDatabase(
-          GalleryDownloadedCompanion(gid: Value(gallery.gid), sortOrder: Value(galleryDownloadInfos[gallery.gid]!.sortOrder)),
+          GalleryDownloadedCompanion(
+            gid: Value(gallery.gid),
+            sortOrder: Value(galleryDownloadInfos[gallery.gid]!.sortOrder),
+          ),
         );
       }
     });
@@ -505,17 +603,24 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
   }
 
   bool isUpdatingDependent(int gid) {
-    GalleryDownloadedData? gallery = gallerys.firstWhereOrNull((g) => g.gid == gid);
+    GalleryDownloadedData? gallery = gallerys.firstWhereOrNull(
+      (g) => g.gid == gid,
+    );
     if (gallery == null) {
       return false;
     }
 
-    GalleryDownloadedData? oldGallery = gallerys.firstWhereOrNull((g) => g.oldVersionGalleryUrl == gallery.galleryUrl);
+    GalleryDownloadedData? oldGallery = gallerys.firstWhereOrNull(
+      (g) => g.oldVersionGalleryUrl == gallery.galleryUrl,
+    );
     if (oldGallery == null) {
       return false;
     }
 
-    return galleryDownloadInfos[oldGallery.gid]!.downloadProgress.downloadStatus != DownloadStatus.downloaded;
+    return galleryDownloadInfos[oldGallery.gid]!
+            .downloadProgress
+            .downloadStatus !=
+        DownloadStatus.downloaded;
   }
 
   /// Use metadata in each gallery folder to restore download status, then sync to database.
@@ -530,7 +635,9 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
 
     int restoredCount = 0;
     for (io.FileSystemEntity galleryDir in downloadDir.listSync()) {
-      io.File metadataFile = io.File(path.join(galleryDir.path, metadataFileName));
+      io.File metadataFile = io.File(
+        path.join(galleryDir.path, metadataFileName),
+      );
 
       /// metadata file does not exist
       if (!metadataFile.existsSync()) {
@@ -540,13 +647,17 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
       Map metadata = jsonDecode(metadataFile.readAsStringSync());
 
       /// compatible with new field
-      (metadata['gallery'] as Map).putIfAbsent('downloadOriginalImage', () => false);
+      (metadata['gallery'] as Map).putIfAbsent(
+        'downloadOriginalImage',
+        () => false,
+      );
       (metadata['gallery'] as Map).putIfAbsent('sortOrder', () => 0);
       if ((metadata['gallery'] as Map)['insertTime'] == null) {
         (metadata['gallery'] as Map)['insertTime'] = DateTime.now().toString();
       }
       if ((metadata['gallery'] as Map)['priority'] == null) {
-        (metadata['gallery'] as Map)['priority'] = defaultDownloadGalleryPriority;
+        (metadata['gallery'] as Map)['priority'] =
+            defaultDownloadGalleryPriority;
       }
       if ((metadata['gallery'] as Map)['groupName'] == null) {
         (metadata['gallery'] as Map)['groupName'] = 'default'.tr;
@@ -555,11 +666,16 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
         (metadata['gallery'] as Map)['tags'] = '';
       }
       if (metadata['tagRefreshTime'] == null) {
-        (metadata['gallery'] as Map)['tagRefreshTime'] = DateTime.now().toString();
+        (metadata['gallery'] as Map)['tagRefreshTime'] = DateTime.now()
+            .toString();
       }
 
-      GalleryDownloadedData gallery = GalleryDownloadedData.fromJson(metadata['gallery']);
-      List<GalleryImage?> images = (jsonDecode(metadata['images']) as List).map((_map) => _map == null ? null : GalleryImage.fromJson(_map)).toList();
+      GalleryDownloadedData gallery = GalleryDownloadedData.fromJson(
+        metadata['gallery'],
+      );
+      List<GalleryImage?> images = (jsonDecode(metadata['images']) as List)
+          .map((_map) => _map == null ? null : GalleryImage.fromJson(_map))
+          .toList();
 
       /// skip if exists
       if (galleryDownloadInfos.containsKey(gallery.gid)) {
@@ -571,15 +687,27 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
         if (images[serialNo] == null) {
           continue;
         }
-        images[serialNo]!.path = _computeImageDownloadRelativePath(gallery.title, gallery.gid, images[serialNo]!.url, serialNo);
+        images[serialNo]!.path = _computeImageDownloadRelativePath(
+          gallery.title,
+          gallery.gid,
+          images[serialNo]!.url,
+          serialNo,
+        );
         images[serialNo]!.imageHash ??= '';
       }
 
       /// For some reason, downloaded status is not updated correctly, check it again
       if (gallery.downloadStatusIndex != DownloadStatus.downloaded.index) {
-        int downloadedImageCount = images.fold(0, (total, image) => total + (image?.downloadStatus == DownloadStatus.downloaded ? 1 : 0));
+        int downloadedImageCount = images.fold(
+          0,
+          (total, image) =>
+              total +
+              (image?.downloadStatus == DownloadStatus.downloaded ? 1 : 0),
+        );
         if (downloadedImageCount == gallery.pageCount) {
-          gallery = gallery.copyWith(downloadStatusIndex: DownloadStatus.downloaded.index);
+          gallery = gallery.copyWith(
+            downloadStatusIndex: DownloadStatus.downloaded.index,
+          );
         }
       }
 
@@ -611,16 +739,28 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
             continue;
           }
 
-          String newPath = _computeImageDownloadRelativePath(gallery.title, gallery.gid, images[serialNo]!.url, serialNo);
+          String newPath = _computeImageDownloadRelativePath(
+            gallery.title,
+            gallery.gid,
+            images[serialNo]!.url,
+            serialNo,
+          );
 
           if (!await _updateImageInDatabase(
-            ImageCompanion(gid: Value(gallery.gid), serialNo: Value(serialNo), path: Value(newPath)),
+            ImageCompanion(
+              gid: Value(gallery.gid),
+              serialNo: Value(serialNo),
+              path: Value(newPath),
+            ),
           )) {
             log.error('Update image path after download path changed failed');
           }
           images[serialNo]!.path = newPath;
 
-          update(['$downloadImageId::${gallery.gid}::$serialNo', '$downloadImageUrlId::${gallery.gid}::$serialNo']);
+          update([
+            '$downloadImageId::${gallery.gid}::$serialNo',
+            '$downloadImageUrlId::${gallery.gid}::$serialNo',
+          ]);
         }
       }
     });
@@ -635,7 +775,9 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
       );
     }
 
-    if (imageFileData.contains('Downloading original files of this gallery during peak hours requires GP, and you do not have enough.')) {
+    if (imageFileData.contains(
+      'Downloading original files of this gallery during peak hours requires GP, and you do not have enough.',
+    )) {
       return EHImageException(
         type: EHImageExceptionType.peakHours,
         message: 'peakHoursHint'.tr,
@@ -643,7 +785,9 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
       );
     }
 
-    if (imageFileData.contains('Downloading original files of this gallery requires GP, and you do not have enough.')) {
+    if (imageFileData.contains(
+      'Downloading original files of this gallery requires GP, and you do not have enough.',
+    )) {
       return EHImageException(
         type: EHImageExceptionType.peakHours,
         message: 'oldGalleryHint'.tr,
@@ -651,7 +795,9 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
       );
     }
 
-    if (imageFileData.contains('You have reached the image limit, and do not have sufficient GP to buy a download quota.')) {
+    if (imageFileData.contains(
+      'You have reached the image limit, and do not have sufficient GP to buy a download quota.',
+    )) {
       return EHImageException(
         type: EHImageExceptionType.peakHours,
         message: 'exceedLimitHint'.tr,
@@ -696,11 +842,15 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
   Future<void> _generateComicInfoInDisk(GalleryDownloadedData gallery) async {
     GalleryDetail galleryDetail;
     try {
-      ({GalleryDetail galleryDetails, String apikey}) detailPageInfo = await retry(
-        () => ehRequest.requestDetailPage(galleryUrl: gallery.galleryUrl, parser: EHSpiderParser.detailPage2GalleryAndDetailAndApikey),
-        retryIf: (e) => e is DioException,
-        maxAttempts: _maxRetryTimes,
-      );
+      ({GalleryDetail galleryDetails, String apikey}) detailPageInfo =
+          await retry(
+            () => ehRequest.requestDetailPage(
+              galleryUrl: gallery.galleryUrl,
+              parser: EHSpiderParser.detailPage2GalleryAndDetailAndApikey,
+            ),
+            retryIf: (e) => e is DioException,
+            maxAttempts: _maxRetryTimes,
+          );
       galleryDetail = detailPageInfo.galleryDetails;
     } catch (e) {
       log.error('Get gallery detail failed, gallery: ${gallery.gid}', e);
@@ -719,17 +869,28 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
       galleryUrl: galleryDetail.galleryUrl.url,
       uploader: galleryDetail.uploader,
       publishTime: galleryDetail.publishTime,
-      languageAbbreviation: LocaleConsts.language2Abbreviation[galleryDetail.language]?.toLowerCase(),
-      tagDatas: galleryDetail.tags.values.flattened.map((galleryTag) => galleryTag.tagData).toList(),
+      languageAbbreviation: LocaleConsts
+          .language2Abbreviation[galleryDetail.language]
+          ?.toLowerCase(),
+      tagDatas: galleryDetail.tags.values.flattened
+          .map((galleryTag) => galleryTag.tagData)
+          .toList(),
       rating: galleryDetail.realRating,
     );
 
     try {
-      io.File file = io.File(path.join(computeGalleryDownloadAbsolutePath(gallery.title, gallery.gid), 'ComicInfo.xml'));
+      io.File file = io.File(
+        path.join(
+          computeGalleryDownloadAbsolutePath(gallery.title, gallery.gid),
+          'ComicInfo.xml',
+        ),
+      );
       if (!await file.exists()) {
         await file.create(recursive: true);
       }
-      await file.writeAsString(galleryComicInfo.toXmlDocument().toXmlString(pretty: true));
+      await file.writeAsString(
+        galleryComicInfo.toXmlDocument().toXmlString(pretty: true),
+      );
     } catch (e) {
       log.error('Write comic info failed, gallery: ${gallery.gid}', e);
     }
@@ -737,7 +898,10 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
 
   void updateExecutor() {
     executor.concurrency = downloadSetting.downloadTaskConcurrency.value;
-    executor.rate = Rate(downloadSetting.maximum.value, downloadSetting.period.value);
+    executor.rate = Rate(
+      downloadSetting.maximum.value,
+      downloadSetting.period.value,
+    );
   }
 
   /// start executor
@@ -758,14 +922,6 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
     }
   }
 
-  /// shutdown executor
-  Future<void> _shutdownExecutor() async {
-    log.info('Shutdown download executor');
-
-    await pauseAllDownloadGallery();
-    executor.close();
-  }
-
   void _submitTask({
     required int gid,
     required int priority,
@@ -773,13 +929,17 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
   }) {
     galleryDownloadInfos[gid]?.tasks.add(task);
 
-    executor.scheduleTask(priority, task).then((_) => galleryDownloadInfos[gid]?.tasks.remove(task)).onError((e, stackTrace) {
-      galleryDownloadInfos[gid]?.tasks.remove(task);
-      if (e is! CancelException) {
-        log.error('Executor exception!', e, stackTrace);
-        log.uploadError(e);
-      }
-    });
+    executor
+        .scheduleTask(priority, task)
+        .then((_) => galleryDownloadInfos[gid]?.tasks.remove(task))
+        .onError((e, stackTrace) {
+          galleryDownloadInfos[gid]?.tasks.remove(task);
+          if (e is! CancelException) {
+            log.error('Executor exception!', e, stackTrace);
+            log.uploadError(e);
+          }
+          return null;
+        });
   }
 
   /// Rules:
@@ -802,15 +962,19 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
       return 0;
     }
 
-    int groupPriority = galleryDownloadInfos[gallery.gid]!.priority * _priorityBase;
+    int groupPriority =
+        galleryDownloadInfos[gallery.gid]!.priority * _priorityBase;
 
     if (downloadSetting.downloadAllGallerysOfSamePriority.isTrue) {
       return groupPriority;
     }
 
     /// priority is same, order by insert time
-    DateTime insertTime = DateFormat('yyyy-MM-dd HH:mm:ss').parse(gallery.insertTime);
-    int timePriority = int.parse(DateFormat('MMddHHmmss').format(insertTime)) * 2000;
+    DateTime insertTime = DateFormat(
+      'yyyy-MM-dd HH:mm:ss',
+    ).parse(gallery.insertTime);
+    int timePriority =
+        int.parse(DateFormat('MMddHHmmss').format(insertTime)) * 2000;
 
     return groupPriority + timePriority;
   }
@@ -834,9 +998,16 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
     return path.join(downloadSetting.downloadPath.value, '$gid - $title');
   }
 
-  String _computeImageDownloadAbsolutePath(String title, int gid, String imageUrl, int serialNo) {
+  String _computeImageDownloadAbsolutePath(
+    String title,
+    int gid,
+    String imageUrl,
+    int serialNo,
+  ) {
     /// original image's url doesn't has an ext
-    String? ext = imageUrl.contains('fullimg.php') ? 'jpg' : imageUrl.split('.').last;
+    String? ext = imageUrl.contains('fullimg.php')
+        ? 'jpg'
+        : imageUrl.split('.').last;
 
     return path.join(
       computeGalleryDownloadAbsolutePath(title, gid),
@@ -844,14 +1015,21 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
     );
   }
 
-  String _computeImageDownloadRelativePath(String title, int gid, String imageUrl, int serialNo) {
+  String _computeImageDownloadRelativePath(
+    String title,
+    int gid,
+    String imageUrl,
+    int serialNo,
+  ) {
     return path.relative(
       _computeImageDownloadAbsolutePath(title, gid, imageUrl, serialNo),
       from: pathService.getVisibleDir().path,
     );
   }
 
-  static String computeImageDownloadAbsolutePathFromRelativePath(String imageRelativePath) {
+  static String computeImageDownloadAbsolutePathFromRelativePath(
+    String imageRelativePath,
+  ) {
     String path = join(pathService.getVisibleDir().path, imageRelativePath);
 
     /// I don't know why some images can't be loaded on Windows... If you knows, please tell me
@@ -898,7 +1076,9 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
   }
 
   bool _taskHasBeenPausedOrRemoved(GalleryDownloadedData gallery) {
-    return galleryDownloadInfos[gallery.gid] == null || galleryDownloadInfos[gallery.gid]!.downloadProgress.downloadStatus == DownloadStatus.paused;
+    return galleryDownloadInfos[gallery.gid] == null ||
+        galleryDownloadInfos[gallery.gid]!.downloadProgress.downloadStatus ==
+            DownloadStatus.paused;
   }
 
   bool _taskHasBeenRemoved(GalleryDownloadedData gallery) {
@@ -914,13 +1094,18 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
       }
 
       /// If this is a update from old gallery, try to fetch image hashes from JHenTai Server
-      if (gallery.oldVersionGalleryUrl != null && downloadSetting.useJH2UpdateGallery.isTrue) {
-        List<String> imageHashes = await _fetchImageHashesFromJHenTaiServer(gallery);
+      if (gallery.oldVersionGalleryUrl != null &&
+          downloadSetting.useJH2UpdateGallery.isTrue) {
+        List<String> imageHashes = await _fetchImageHashesFromJHenTaiServer(
+          gallery,
+        );
 
         if (imageHashes.length == gallery.pageCount) {
           await _tryCopyImageInfosFromImageHashes(gallery, imageHashes);
         } else {
-          log.error('Image hashes count mismatch, gid: ${gallery.gid}, expected: ${gallery.pageCount}, actual: ${imageHashes.length}');
+          log.error(
+            'Image hashes count mismatch, gid: ${gallery.gid}, expected: ${gallery.pageCount}, actual: ${imageHashes.length}',
+          );
         }
       }
 
@@ -930,17 +1115,23 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
     };
   }
 
-  Future<List<String>> _fetchImageHashesFromJHenTaiServer(GalleryDownloadedData gallery) async {
+  Future<List<String>> _fetchImageHashesFromJHenTaiServer(
+    GalleryDownloadedData gallery,
+  ) async {
     if (_taskHasBeenPausedOrRemoved(gallery)) {
       return [];
     }
 
-    String? cachedImageHashes = await localConfigService.read(configKey: ConfigEnum.galleryImageHash, subConfigKey: gallery.gid.toString());
+    String? cachedImageHashes = await localConfigService.read(
+      configKey: ConfigEnum.galleryImageHash,
+      subConfigKey: gallery.gid.toString(),
+    );
     if (cachedImageHashes != null) {
       return jsonDecode(cachedImageHashes).cast<String>();
     }
 
-    GalleryDownloadInfo galleryDownloadInfo = galleryDownloadInfos[gallery.gid]!;
+    GalleryDownloadInfo galleryDownloadInfo =
+        galleryDownloadInfos[gallery.gid]!;
 
     try {
       JHResponse response = await retry(
@@ -951,14 +1142,22 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
           parser: JHResponseParser.commonParse,
         ),
         retryIf: (e) => e is DioException && e.type != DioExceptionType.cancel,
-        onRetry: (e) => log.download('Failed to fetch image hashes, retry. Reason: ${(e as DioException).message}'),
+        onRetry: (e) => log.download(
+          'Failed to fetch image hashes, retry. Reason: ${(e as DioException).message}',
+        ),
         maxAttempts: _maxRetryTimes4FetchImageHashes,
       );
 
       log.debug('Fetch image hashes response: $response');
       if (response.isSuccess) {
-        FetchImageHashesVO fetchImageHashesVO = FetchImageHashesVO.fromResponse(response.data);
-        localConfigService.write(configKey: ConfigEnum.galleryImageHash, subConfigKey: gallery.gid.toString(), value: jsonEncode(fetchImageHashesVO.hashes));
+        FetchImageHashesVO fetchImageHashesVO = FetchImageHashesVO.fromResponse(
+          response.data,
+        );
+        localConfigService.write(
+          configKey: ConfigEnum.galleryImageHash,
+          subConfigKey: gallery.gid.toString(),
+          value: jsonEncode(fetchImageHashesVO.hashes),
+        );
         return fetchImageHashesVO.hashes;
       } else {
         return [];
@@ -967,20 +1166,29 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
       log.error('Failed to fetch image hashes', e.errorMsg, e.stackTrace);
       return [];
     } catch (e) {
-      log.error('Failed to fetch image hashes', e.toString(), StackTrace.current);
+      log.error(
+        'Failed to fetch image hashes',
+        e.toString(),
+        StackTrace.current,
+      );
       return [];
     }
   }
 
-  Future<void> _processImage(GalleryDownloadedData gallery, int serialNo) async {
+  Future<void> _processImage(
+    GalleryDownloadedData gallery,
+    int serialNo,
+  ) async {
     if (_taskHasBeenPausedOrRemoved(gallery)) {
       return;
     }
 
-    GalleryDownloadInfo galleryDownloadInfo = galleryDownloadInfos[gallery.gid]!;
+    GalleryDownloadInfo galleryDownloadInfo =
+        galleryDownloadInfos[gallery.gid]!;
 
     /// has downloaded this image => nothing to do
-    if (galleryDownloadInfo.images[serialNo]?.downloadStatus == DownloadStatus.downloaded) {
+    if (galleryDownloadInfo.images[serialNo]?.downloadStatus ==
+        DownloadStatus.downloaded) {
       return;
     }
 
@@ -1010,14 +1218,19 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
     );
   }
 
-  AsyncTask<void> _parseImageHrefTask(GalleryDownloadedData gallery, int serialNo) {
+  AsyncTask<void> _parseImageHrefTask(
+    GalleryDownloadedData gallery,
+    int serialNo,
+  ) {
     return () async {
       if (_taskHasBeenPausedOrRemoved(gallery)) {
         return;
       }
 
-      GalleryDownloadInfo galleryDownloadInfo = galleryDownloadInfos[gallery.gid]!;
-      int requestPageIndex = serialNo ~/ galleryDownloadInfo.thumbnailsCountPerPage;
+      GalleryDownloadInfo galleryDownloadInfo =
+          galleryDownloadInfos[gallery.gid]!;
+      int requestPageIndex =
+          serialNo ~/ galleryDownloadInfo.thumbnailsCountPerPage;
 
       DetailPageInfo detailPageInfo;
       try {
@@ -1028,8 +1241,11 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
             cancelToken: galleryDownloadInfo.cancelToken,
             parser: EHSpiderParser.detailPage2RangeAndThumbnails,
           ),
-          retryIf: (e) => e is DioException && e.type != DioExceptionType.cancel,
-          onRetry: (e) => log.download('Parse image hrefs failed, retry. Reason: ${(e as DioException).toString()}'),
+          retryIf: (e) =>
+              e is DioException && e.type != DioExceptionType.cancel,
+          onRetry: (e) => log.download(
+            'Parse image hrefs failed, retry. Reason: ${(e as DioException).toString()}',
+          ),
           maxAttempts: _maxRetryTimes,
         );
       } on DioException catch (e) {
@@ -1042,7 +1258,9 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
           task: _parseImageHrefTask(gallery, serialNo),
         );
       } on EHSiteException catch (e) {
-        log.download('Parse image href error, reason: ${e.message}, gallery url: ${gallery.galleryUrl}');
+        log.download(
+          'Parse image href error, reason: ${e.message}, gallery url: ${gallery.galleryUrl}',
+        );
         snack('error'.tr, e.message, isShort: true);
         if (e.shouldPauseAllDownloadTasks) {
           pauseAllDownloadGallery();
@@ -1054,11 +1272,19 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
 
       /// some gallery's [thumbnailsCountPerPage] is not equal to default setting, we need to compute and update it.
       /// For example, default setting is 40, but some gallerys' thumbnails has only high quality thumbnails, which results in 20.
-      bool thumbnailsCountPerPageChanged = galleryDownloadInfo.thumbnailsCountPerPage != detailPageInfo.thumbnailsCountPerPage;
-      galleryDownloadInfo.thumbnailsCountPerPage = detailPageInfo.thumbnailsCountPerPage;
+      bool thumbnailsCountPerPageChanged =
+          galleryDownloadInfo.thumbnailsCountPerPage !=
+          detailPageInfo.thumbnailsCountPerPage;
+      galleryDownloadInfo.thumbnailsCountPerPage =
+          detailPageInfo.thumbnailsCountPerPage;
 
-      for (int i = detailPageInfo.imageNoFrom; i <= detailPageInfo.imageNoTo; i++) {
-        galleryDownloadInfo.imageHrefs[i] = detailPageInfo.thumbnails[i - detailPageInfo.imageNoFrom];
+      for (
+        int i = detailPageInfo.imageNoFrom;
+        i <= detailPageInfo.imageNoTo;
+        i++
+      ) {
+        galleryDownloadInfo.imageHrefs[i] =
+            detailPageInfo.thumbnails[i - detailPageInfo.imageNoFrom];
       }
 
       /// if gallery's [thumbnailsCountPerPage] is not equal to default setting, we probably can't get target thumbnails this turn
@@ -1067,7 +1293,10 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
         log.download(
           'Parse image hrefs error, thumbnails count per page is not equal to default setting, parse again. Thumbnails count per page: ${detailPageInfo.thumbnailsCountPerPage}, changed: $thumbnailsCountPerPageChanged',
         );
-        await ehRequest.removeCacheByGalleryUrlAndPage(gallery.galleryUrl, requestPageIndex);
+        await ehRequest.removeCacheByGalleryUrlAndPage(
+          gallery.galleryUrl,
+          requestPageIndex,
+        );
         return _submitTask(
           gid: gallery.gid,
           priority: _computeImageTaskPriority(gallery, serialNo),
@@ -1084,17 +1313,27 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
     };
   }
 
-  AsyncTask<void> _parseImageUrlTask(GalleryDownloadedData gallery, int serialNo, {bool reParse = false, String? reloadKey}) {
+  AsyncTask<void> _parseImageUrlTask(
+    GalleryDownloadedData gallery,
+    int serialNo, {
+    bool reParse = false,
+    String? reloadKey,
+  }) {
     return () async {
       if (_taskHasBeenPausedOrRemoved(gallery)) {
         return;
       }
 
-      GalleryDownloadInfo galleryDownloadInfo = galleryDownloadInfos[gallery.gid]!;
+      GalleryDownloadInfo galleryDownloadInfo =
+          galleryDownloadInfos[gallery.gid]!;
 
       /// If this is a update from old gallery, try to copy from existing old image first
       if (gallery.oldVersionGalleryUrl != null) {
-        await _tryCopyImageInfoFromHref(gallery.oldVersionGalleryUrl!, gallery, serialNo);
+        await _tryCopyImageInfoFromHref(
+          gallery.oldVersionGalleryUrl!,
+          gallery,
+          serialNo,
+        );
 
         if (galleryDownloadInfo.images[serialNo] != null) {
           return;
@@ -1105,7 +1344,9 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
       try {
         image = await retry(
           () => ehRequest.requestImagePage(
-            galleryDownloadInfo.imageHrefs[serialNo]!.replacedMPVHref(serialNo + 1),
+            galleryDownloadInfo.imageHrefs[serialNo]!.replacedMPVHref(
+              serialNo + 1,
+            ),
             reloadKey: reloadKey,
             cancelToken: galleryDownloadInfo.cancelToken,
             useCacheIfAvailable: !reParse,
@@ -1113,8 +1354,11 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
                 ? EHSpiderParser.imagePage2OriginalGalleryImage
                 : EHSpiderParser.imagePage2GalleryImage,
           ),
-          retryIf: (e) => e is DioException && e.type != DioExceptionType.cancel,
-          onRetry: (e) => log.download('Parse image url failed, retry. Reason: ${(e as DioException).errorMsg}'),
+          retryIf: (e) =>
+              e is DioException && e.type != DioExceptionType.cancel,
+          onRetry: (e) => log.download(
+            'Parse image url failed, retry. Reason: ${(e as DioException).errorMsg}',
+          ),
           maxAttempts: _maxRetryTimes,
         );
       } on DioException catch (e) {
@@ -1136,7 +1380,11 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
           pauseDownloadGallery(gallery);
         }
 
-        ehRequest.removeCacheByUrl(galleryDownloadInfo.imageHrefs[serialNo]!.replacedMPVHref(serialNo + 1));
+        ehRequest.removeCacheByUrl(
+          galleryDownloadInfo.imageHrefs[serialNo]!.replacedMPVHref(
+            serialNo + 1,
+          ),
+        );
 
         return;
       } on EHSiteException catch (e) {
@@ -1152,14 +1400,21 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
         return;
       }
 
-      image.path = _computeImageDownloadRelativePath(gallery.title, gallery.gid, image.url, serialNo);
+      image.path = _computeImageDownloadRelativePath(
+        gallery.title,
+        gallery.gid,
+        image.url,
+        serialNo,
+      );
       image.downloadStatus = DownloadStatus.downloading;
 
       await _saveNewImageInfoInDatabase(image, serialNo, gallery.gid);
 
       galleryDownloadInfo.images[serialNo] = image;
 
-      log.download('Parse image url success, index: $serialNo, url: ${image.url}');
+      log.download(
+        'Parse image url success, index: $serialNo, url: ${image.url}',
+      );
 
       /// Next step: download image
       return _submitTask(
@@ -1170,27 +1425,40 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
     };
   }
 
-  AsyncTask<void> _downloadImageTask(GalleryDownloadedData gallery, int serialNo) {
+  AsyncTask<void> _downloadImageTask(
+    GalleryDownloadedData gallery,
+    int serialNo,
+  ) {
     return () async {
       if (_taskHasBeenPausedOrRemoved(gallery)) {
         return;
       }
 
-      GalleryDownloadInfo galleryDownloadInfo = galleryDownloadInfos[gallery.gid]!;
+      GalleryDownloadInfo galleryDownloadInfo =
+          galleryDownloadInfos[gallery.gid]!;
       GalleryImage image = galleryDownloadInfo.images[serialNo]!;
 
       _updateImageStatus(gallery, image, serialNo, DownloadStatus.downloading);
 
       /// If this is a update from old gallery, try to copy from existing old image first
       if (gallery.oldVersionGalleryUrl != null) {
-        await _tryCopyImageInfoFromImage(gallery.oldVersionGalleryUrl!, gallery, serialNo);
+        await _tryCopyImageInfoFromImage(
+          gallery.oldVersionGalleryUrl!,
+          gallery,
+          serialNo,
+        );
 
         if (image.downloadStatus == DownloadStatus.downloaded) {
           return;
         }
       }
 
-      String path = _computeImageDownloadAbsolutePath(gallery.title, gallery.gid, image.url, serialNo);
+      String path = _computeImageDownloadAbsolutePath(
+        gallery.title,
+        gallery.gid,
+        image.url,
+        serialNo,
+      );
 
       await _tryLoadFromCacheInsteadDownload(gallery, image, serialNo, path);
       if (image.downloadStatus == DownloadStatus.downloaded) {
@@ -1205,7 +1473,9 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
             path: path,
             receiveTimeout: 3 * 60 * 1000,
             cancelToken: galleryDownloadInfo.cancelToken,
-            onReceiveProgress: (int count, int total) => galleryDownloadInfo.speedComputer.updateProgress(count, total, serialNo),
+            onReceiveProgress: (int count, int total) => galleryDownloadInfo
+                .speedComputer
+                .updateProgress(count, total, serialNo),
           ),
           maxAttempts: _maxRetryTimes,
 
@@ -1215,9 +1485,14 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
               e is DioException &&
               e.type != DioExceptionType.cancel &&
               (e.response == null || e.response!.statusCode != 403) &&
-              galleryDownloadInfo.speedComputer.getImageDownloadedBytes(serialNo) > 0,
+              galleryDownloadInfo.speedComputer.getImageDownloadedBytes(
+                    serialNo,
+                  ) >
+                  0,
           onRetry: (e) {
-            log.download('Download ${gallery.title} image: $serialNo failed, retry. Reason: ${(e as DioException).errorMsg}. Url:${image.url}');
+            log.download(
+              'Download ${gallery.title} image: $serialNo failed, retry. Reason: ${(e as DioException).errorMsg}. Url:${image.url}',
+            );
             galleryDownloadInfo.speedComputer.resetProgress(serialNo);
           },
         );
@@ -1225,7 +1500,9 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
         if (e.type == DioExceptionType.cancel) {
           return;
         }
-        log.download('Download ${gallery.title} image: $serialNo failed, try re-parse. Reason: ${e.errorMsg}. Url:${image.url}');
+        log.download(
+          'Download ${gallery.title} image: $serialNo failed, try re-parse. Reason: ${e.errorMsg}. Url:${image.url}',
+        );
         return _reParseImageUrlAndDownload(gallery, serialNo);
       } on EHSiteException catch (e) {
         log.download('Download Error, reason: ${e.message}');
@@ -1240,20 +1517,28 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
       }
 
       /// what we downloaded is not an valid image
-      if (!response.isRedirect && (response.headers[Headers.contentTypeHeader]?.contains("text/html; charset=UTF-8") ?? false)) {
+      if (!response.isRedirect &&
+          (response.headers[Headers.contentTypeHeader]?.contains(
+                "text/html; charset=UTF-8",
+              ) ??
+              false)) {
         String data = io.File(path).readAsStringSync();
 
         EHImageException? exception = imageData2Exception(data);
-        log.error('Download ${gallery.title} image: $serialNo failed: $exception');
+        log.error(
+          'Download ${gallery.title} image: $serialNo failed: $exception',
+        );
 
         if (exception != null) {
           if (exception.operation == EHImageExceptionAfterOperation.pause) {
             snack('error'.tr, exception.message, isShort: true);
             return pauseDownloadGallery(gallery);
-          } else if (exception.operation == EHImageExceptionAfterOperation.pauseAll) {
+          } else if (exception.operation ==
+              EHImageExceptionAfterOperation.pauseAll) {
             snack('error'.tr, exception.message, isShort: true);
             return pauseAllDownloadGallery();
-          } else if (exception.operation == EHImageExceptionAfterOperation.reParse) {
+          } else if (exception.operation ==
+              EHImageExceptionAfterOperation.reParse) {
             return _reParseImageUrlAndDownload(gallery, serialNo);
           }
         } else {
@@ -1264,19 +1549,28 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
 
       log.download('Download ${gallery.title} image: $serialNo success');
 
-      await _updateImageStatus(gallery, image, serialNo, DownloadStatus.downloaded);
+      await _updateImageStatus(
+        gallery,
+        image,
+        serialNo,
+        DownloadStatus.downloaded,
+      );
 
       await _updateProgressAfterImageDownloaded(gallery, serialNo);
     };
   }
 
   /// the image's url may be invalid, try re-parse and then download
-  Future<void> _reParseImageUrlAndDownload(GalleryDownloadedData gallery, int serialNo) async {
+  Future<void> _reParseImageUrlAndDownload(
+    GalleryDownloadedData gallery,
+    int serialNo,
+  ) async {
     if (_taskHasBeenPausedOrRemoved(gallery)) {
       return;
     }
 
-    GalleryDownloadInfo galleryDownloadInfo = galleryDownloadInfos[gallery.gid]!;
+    GalleryDownloadInfo galleryDownloadInfo =
+        galleryDownloadInfos[gallery.gid]!;
 
     String? reloadKey = galleryDownloadInfo.images[serialNo]?.reloadKey;
     galleryDownloadInfo.images[serialNo] = null;
@@ -1287,7 +1581,12 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
       return _submitTask(
         gid: gallery.gid,
         priority: _computeImageTaskPriority(gallery, serialNo),
-        task: _parseImageUrlTask(gallery, serialNo, reParse: true, reloadKey: reloadKey),
+        task: _parseImageUrlTask(
+          gallery,
+          serialNo,
+          reParse: true,
+          reloadKey: reloadKey,
+        ),
       );
     }
 
@@ -1299,56 +1598,100 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
     );
   }
 
-  Future<void> _tryCopyImageInfoFromHref(String oldVersionGalleryUrl, GalleryDownloadedData newGallery, int newImageSerialNo) async {
-    GalleryDownloadedData? oldGallery = gallerys.firstWhereOrNull((e) => e.galleryUrl == oldVersionGalleryUrl);
+  Future<void> _tryCopyImageInfoFromHref(
+    String oldVersionGalleryUrl,
+    GalleryDownloadedData newGallery,
+    int newImageSerialNo,
+  ) async {
+    GalleryDownloadedData? oldGallery = gallerys.firstWhereOrNull(
+      (e) => e.galleryUrl == oldVersionGalleryUrl,
+    );
     if (oldGallery == null) {
       return;
     }
 
-    String? newImageHash = galleryDownloadInfos[newGallery.gid]!.imageHrefs[newImageSerialNo]!.originImageHash;
+    String? newImageHash = galleryDownloadInfos[newGallery.gid]!
+        .imageHrefs[newImageSerialNo]!
+        .originImageHash;
     if (newImageHash == null) {
       return;
     }
 
-    int? oldImageSerialNo = galleryDownloadInfos[oldGallery.gid]?.images.firstIndexWhereOrNull((e) => e?.imageHash == newImageHash);
+    int? oldImageSerialNo = galleryDownloadInfos[oldGallery.gid]?.images
+        .firstIndexWhereOrNull((e) => e?.imageHash == newImageHash);
     if (oldImageSerialNo == null) {
       return;
     }
 
-    GalleryImage oldImage = galleryDownloadInfos[oldGallery.gid]!.images[oldImageSerialNo]!;
+    GalleryImage oldImage =
+        galleryDownloadInfos[oldGallery.gid]!.images[oldImageSerialNo]!;
     GalleryImage newImage = oldImage.copyWith(
-      path: _computeImageDownloadRelativePath(newGallery.title, newGallery.gid, oldImage.url, newImageSerialNo),
+      path: _computeImageDownloadRelativePath(
+        newGallery.title,
+        newGallery.gid,
+        oldImage.url,
+        newImageSerialNo,
+      ),
       downloadStatus: DownloadStatus.downloading,
     );
 
-    await _saveNewImageInfoInDatabase(newImage, newImageSerialNo, newGallery.gid);
+    await _saveNewImageInfoInDatabase(
+      newImage,
+      newImageSerialNo,
+      newGallery.gid,
+    );
     galleryDownloadInfos[newGallery.gid]!.images[newImageSerialNo] = newImage;
 
     await _copyImageInfo(oldImage, newGallery, newImageSerialNo);
-    await superResolutionService.copyImageInfo(oldGallery, newGallery, oldImageSerialNo, newImageSerialNo);
+    await superResolutionService.copyImageInfo(
+      oldGallery,
+      newGallery,
+      oldImageSerialNo,
+      newImageSerialNo,
+    );
   }
 
   /// If two images' [imageHash] is equal, they are the same image.
-  Future<void> _tryCopyImageInfoFromImage(String oldVersionGalleryUrl, GalleryDownloadedData newGallery, int newImageSerialNo) async {
-    GalleryDownloadedData? oldGallery = gallerys.firstWhereOrNull((e) => e.galleryUrl == oldVersionGalleryUrl);
+  Future<void> _tryCopyImageInfoFromImage(
+    String oldVersionGalleryUrl,
+    GalleryDownloadedData newGallery,
+    int newImageSerialNo,
+  ) async {
+    GalleryDownloadedData? oldGallery = gallerys.firstWhereOrNull(
+      (e) => e.galleryUrl == oldVersionGalleryUrl,
+    );
     if (oldGallery == null) {
       return;
     }
 
-    String newImageHash = galleryDownloadInfos[newGallery.gid]!.images[newImageSerialNo]!.imageHash!;
-    int? oldImageSerialNo = galleryDownloadInfos[oldGallery.gid]?.images.firstIndexWhereOrNull((e) => e?.imageHash == newImageHash);
+    String newImageHash = galleryDownloadInfos[newGallery.gid]!
+        .images[newImageSerialNo]!
+        .imageHash!;
+    int? oldImageSerialNo = galleryDownloadInfos[oldGallery.gid]?.images
+        .firstIndexWhereOrNull((e) => e?.imageHash == newImageHash);
     if (oldImageSerialNo == null) {
       return;
     }
 
-    GalleryImage oldImage = galleryDownloadInfos[oldGallery.gid]!.images[oldImageSerialNo]!;
+    GalleryImage oldImage =
+        galleryDownloadInfos[oldGallery.gid]!.images[oldImageSerialNo]!;
 
     await _copyImageInfo(oldImage, newGallery, newImageSerialNo);
-    await superResolutionService.copyImageInfo(oldGallery, newGallery, oldImageSerialNo, newImageSerialNo);
+    await superResolutionService.copyImageInfo(
+      oldGallery,
+      newGallery,
+      oldImageSerialNo,
+      newImageSerialNo,
+    );
   }
 
-  Future<void> _tryCopyImageInfosFromImageHashes(GalleryDownloadedData newGallery, List<String> imageHashes) async {
-    GalleryDownloadedData? oldGallery = gallerys.firstWhereOrNull((e) => e.galleryUrl == newGallery.oldVersionGalleryUrl);
+  Future<void> _tryCopyImageInfosFromImageHashes(
+    GalleryDownloadedData newGallery,
+    List<String> imageHashes,
+  ) async {
+    GalleryDownloadedData? oldGallery = gallerys.firstWhereOrNull(
+      (e) => e.galleryUrl == newGallery.oldVersionGalleryUrl,
+    );
     if (oldGallery == null) {
       return;
     }
@@ -1358,71 +1701,124 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
         break;
       }
 
-      GalleryDownloadInfo newGalleryDownloadInfo = galleryDownloadInfos[newGallery.gid]!;
-      if (newGalleryDownloadInfo.images[serialNo]?.downloadStatus == DownloadStatus.downloaded) {
+      GalleryDownloadInfo newGalleryDownloadInfo =
+          galleryDownloadInfos[newGallery.gid]!;
+      if (newGalleryDownloadInfo.images[serialNo]?.downloadStatus ==
+          DownloadStatus.downloaded) {
         continue;
       }
 
-      int? oldImageSerialNo = galleryDownloadInfos[oldGallery.gid]?.images.firstIndexWhereOrNull((e) => e?.imageHash == imageHashes[serialNo]);
+      int? oldImageSerialNo = galleryDownloadInfos[oldGallery.gid]?.images
+          .firstIndexWhereOrNull((e) => e?.imageHash == imageHashes[serialNo]);
       if (oldImageSerialNo == null) {
         continue;
       }
 
-      GalleryImage oldImage = galleryDownloadInfos[oldGallery.gid]!.images[oldImageSerialNo]!;
+      GalleryImage oldImage =
+          galleryDownloadInfos[oldGallery.gid]!.images[oldImageSerialNo]!;
 
       GalleryImage newImage = oldImage.copyWith(
-        path: _computeImageDownloadRelativePath(newGallery.title, newGallery.gid, oldImage.url, serialNo),
+        path: _computeImageDownloadRelativePath(
+          newGallery.title,
+          newGallery.gid,
+          oldImage.url,
+          serialNo,
+        ),
         downloadStatus: DownloadStatus.downloaded,
       );
 
       log.download('Copy old image, new serialNo: $serialNo');
-      io.File oldFile = io.File(path.join(pathService.getVisibleDir().path, oldImage.path!));
-      await oldFile.copy(path.join(pathService.getVisibleDir().path, newImage.path!));
+      io.File oldFile = io.File(
+        path.join(pathService.getVisibleDir().path, oldImage.path!),
+      );
+      await oldFile.copy(
+        path.join(pathService.getVisibleDir().path, newImage.path!),
+      );
 
       if (newGalleryDownloadInfo.images[serialNo] == null) {
         await _saveNewImageInfoInDatabase(newImage, serialNo, newGallery.gid);
         newGalleryDownloadInfo.images[serialNo] = newImage;
       } else {
-        await _updateImageStatus(newGallery, newImage, serialNo, DownloadStatus.downloaded);
+        await _updateImageStatus(
+          newGallery,
+          newImage,
+          serialNo,
+          DownloadStatus.downloaded,
+        );
       }
 
       await _updateProgressAfterImageDownloaded(newGallery, serialNo);
 
-      await superResolutionService.copyImageInfo(oldGallery, newGallery, oldImageSerialNo, serialNo);
+      await superResolutionService.copyImageInfo(
+        oldGallery,
+        newGallery,
+        oldImageSerialNo,
+        serialNo,
+      );
     }
 
     _saveGalleryMetadataInDisk(newGallery);
   }
 
-  Future<void> _copyImageInfo(GalleryImage oldImage, GalleryDownloadedData newGallery, int newImageSerialNo) async {
+  Future<void> _copyImageInfo(
+    GalleryImage oldImage,
+    GalleryDownloadedData newGallery,
+    int newImageSerialNo,
+  ) async {
     log.download('Copy old image, new serialNo: $newImageSerialNo');
 
-    GalleryImage newImage = galleryDownloadInfos[newGallery.gid]!.images[newImageSerialNo]!;
+    GalleryImage newImage =
+        galleryDownloadInfos[newGallery.gid]!.images[newImageSerialNo]!;
 
-    io.File oldFile = io.File(path.join(pathService.getVisibleDir().path, oldImage.path!));
-    await oldFile.copy(path.join(pathService.getVisibleDir().path, newImage.path!));
+    io.File oldFile = io.File(
+      path.join(pathService.getVisibleDir().path, oldImage.path!),
+    );
+    await oldFile.copy(
+      path.join(pathService.getVisibleDir().path, newImage.path!),
+    );
 
-    await _updateImageStatus(newGallery, newImage, newImageSerialNo, DownloadStatus.downloaded);
+    await _updateImageStatus(
+      newGallery,
+      newImage,
+      newImageSerialNo,
+      DownloadStatus.downloaded,
+    );
 
     await _updateProgressAfterImageDownloaded(newGallery, newImageSerialNo);
   }
 
-  Future<void> _tryLoadFromCacheInsteadDownload(GalleryDownloadedData gallery, GalleryImage image, int serialNo, String path) async {
+  Future<void> _tryLoadFromCacheInsteadDownload(
+    GalleryDownloadedData gallery,
+    GalleryImage image,
+    int serialNo,
+    String path,
+  ) async {
     io.File? cachedImageFile = await getCachedImageFile(image.url);
     if (cachedImageFile != null && cachedImageFile.existsSync()) {
-      log.debug('download image from cache, gallery: ${gallery.gid}, serialNo:$serialNo');
+      log.debug(
+        'download image from cache, gallery: ${gallery.gid}, serialNo:$serialNo',
+      );
       await cachedImageFile.copy(path);
-      await _updateImageStatus(gallery, image, serialNo, DownloadStatus.downloaded);
+      await _updateImageStatus(
+        gallery,
+        image,
+        serialNo,
+        DownloadStatus.downloaded,
+      );
       await _updateProgressAfterImageDownloaded(gallery, serialNo);
     }
   }
 
-  Future<void> _updateProgressAfterImageDownloaded(GalleryDownloadedData gallery, int serialNo) async {
+  Future<void> _updateProgressAfterImageDownloaded(
+    GalleryDownloadedData gallery,
+    int serialNo,
+  ) async {
     if (_taskHasBeenRemoved(gallery)) {
       return;
     }
 
-    GalleryDownloadProgress downloadProgress = galleryDownloadInfos[gallery.gid]!.downloadProgress;
+    GalleryDownloadProgress downloadProgress =
+        galleryDownloadInfos[gallery.gid]!.downloadProgress;
     downloadProgress.curCount++;
     downloadProgress.hasDownloaded[serialNo] = true;
 
@@ -1439,7 +1835,9 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
   // ALL
 
   Future<void> _instantiateFromDB() async {
-    allGroups = (await GalleryGroupDao.selectGalleryGroups()).map((e) => e.groupName).toList();
+    allGroups = (await GalleryGroupDao.selectGalleryGroups())
+        .map((e) => e.groupName)
+        .toList();
     log.debug('init Gallery groups: $allGroups');
 
     /// Get download info from database
@@ -1462,10 +1860,14 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
             downloadStatus: DownloadStatus.values[image.downloadStatusIndex],
           );
 
-          galleryDownloadInfos[gallery.gid]!.images[image.serialNo] = galleryImage;
+          galleryDownloadInfos[gallery.gid]!.images[image.serialNo] =
+              galleryImage;
           if (galleryImage.downloadStatus == DownloadStatus.downloaded) {
             galleryDownloadInfos[gallery.gid]!.downloadProgress.curCount++;
-            galleryDownloadInfos[gallery.gid]!.downloadProgress.hasDownloaded[image.serialNo] = true;
+            galleryDownloadInfos[gallery.gid]!
+                    .downloadProgress
+                    .hasDownloaded[image.serialNo] =
+                true;
           }
         }
       }
@@ -1487,27 +1889,47 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
     return true;
   }
 
-  Future<void> _updateGalleryDownloadStatus(GalleryDownloadedData gallery, DownloadStatus downloadStatus) async {
+  Future<void> _updateGalleryDownloadStatus(
+    GalleryDownloadedData gallery,
+    DownloadStatus downloadStatus,
+  ) async {
     await _updateGalleryInDatabase(
-      GalleryDownloadedCompanion(gid: Value(gallery.gid), downloadStatusIndex: Value(downloadStatus.index)),
+      GalleryDownloadedCompanion(
+        gid: Value(gallery.gid),
+        downloadStatusIndex: Value(downloadStatus.index),
+      ),
     );
 
-    gallerys[gallerys.indexWhere((e) => e.gid == gallery.gid)] = gallery.copyWith(downloadStatusIndex: downloadStatus.index);
-    galleryDownloadInfos[gallery.gid]!.downloadProgress.downloadStatus = downloadStatus;
+    gallerys[gallerys.indexWhere((e) => e.gid == gallery.gid)] = gallery
+        .copyWith(downloadStatusIndex: downloadStatus.index);
+    galleryDownloadInfos[gallery.gid]!.downloadProgress.downloadStatus =
+        downloadStatus;
 
     _saveGalleryMetadataInDisk(gallery);
   }
 
-  Future<bool> _updateImageStatus(GalleryDownloadedData gallery, GalleryImage image, int serialNo, DownloadStatus downloadStatus) async {
+  Future<bool> _updateImageStatus(
+    GalleryDownloadedData gallery,
+    GalleryImage image,
+    int serialNo,
+    DownloadStatus downloadStatus,
+  ) async {
     if (!await _updateImageInDatabase(
-      ImageCompanion(gid: Value(gallery.gid), serialNo: Value(serialNo), downloadStatusIndex: Value(downloadStatus.index)),
+      ImageCompanion(
+        gid: Value(gallery.gid),
+        serialNo: Value(serialNo),
+        downloadStatusIndex: Value(downloadStatus.index),
+      ),
     )) {
       return false;
     }
 
     image.downloadStatus = downloadStatus;
 
-    update(['$downloadImageId::${gallery.gid}::$serialNo', '$downloadImageUrlId::${gallery.gid}::$serialNo']);
+    update([
+      '$downloadImageId::${gallery.gid}::$serialNo',
+      '$downloadImageUrlId::${gallery.gid}::$serialNo',
+    ]);
 
     _saveGalleryMetadataInDisk(gallery);
 
@@ -1519,7 +1941,10 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
       allGroups.add(group);
     }
 
-    return (await GalleryGroupDao.insertGalleryGroup(GalleryGroupData(groupName: group, sortOrder: 0)) > 0);
+    return (await GalleryGroupDao.insertGalleryGroup(
+          GalleryGroupData(groupName: group, sortOrder: 0),
+        ) >
+        0);
   }
 
   Future<bool> _deleteGroup(String group) async {
@@ -1535,7 +1960,11 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
 
   // MEMORY
 
-  void _initGalleryInfoInMemory(GalleryDownloadedData gallery, {List<GalleryImage?>? images, bool sort = true}) {
+  void _initGalleryInfoInMemory(
+    GalleryDownloadedData gallery, {
+    List<GalleryImage?>? images,
+    bool sort = true,
+  }) {
     if (!allGroups.contains(gallery.groupName)) {
       allGroups.add(gallery.groupName);
     }
@@ -1545,10 +1974,23 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
       tasks: [],
       cancelToken: CancelToken(),
       downloadProgress: GalleryDownloadProgress(
-        curCount: images?.fold<int>(0, (total, image) => total + (image?.downloadStatus == DownloadStatus.downloaded ? 1 : 0)) ?? 0,
+        curCount:
+            images?.fold<int>(
+              0,
+              (total, image) =>
+                  total +
+                  (image?.downloadStatus == DownloadStatus.downloaded ? 1 : 0),
+            ) ??
+            0,
         totalCount: gallery.pageCount,
         downloadStatus: DownloadStatus.values[gallery.downloadStatusIndex],
-        hasDownloaded: images?.map((image) => image?.downloadStatus == DownloadStatus.downloaded).toList() ?? List.generate(gallery.pageCount, (_) => false),
+        hasDownloaded:
+            images
+                ?.map(
+                  (image) => image?.downloadStatus == DownloadStatus.downloaded,
+                )
+                .toList() ??
+            List.generate(gallery.pageCount, (_) => false),
       ),
       imageHrefs: List.generate(gallery.pageCount, (_) => null),
       images: images ?? List.generate(gallery.pageCount, (_) => null),
@@ -1565,22 +2007,34 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
       _sortGallerys();
     }
 
-    update([galleryCountChangedId, '$galleryDownloadProgressId::${gallery.gid}']);
+    update([
+      galleryCountChangedId,
+      '$galleryDownloadProgressId::${gallery.gid}',
+    ]);
   }
 
   void _clearGalleryInfoInMemory(GalleryDownloadedData gallery) {
     gallerys.removeWhere((g) => g.gid == gallery.gid);
-    GalleryDownloadInfo? galleryDownloadInfo = galleryDownloadInfos.remove(gallery.gid);
+    GalleryDownloadInfo? galleryDownloadInfo = galleryDownloadInfos.remove(
+      gallery.gid,
+    );
     galleryDownloadInfo?.speedComputer.dispose();
 
-    update([galleryCountChangedId, '$galleryDownloadProgressId::${gallery.gid}']);
+    update([
+      galleryCountChangedId,
+      '$galleryDownloadProgressId::${gallery.gid}',
+    ]);
   }
 
   // DB
 
-  Future<bool> _saveGalleryInfoAndGroupInDB(GalleryDownloadedData gallery) async {
+  Future<bool> _saveGalleryInfoAndGroupInDB(
+    GalleryDownloadedData gallery,
+  ) async {
     return appDb.transaction(() async {
-      await GalleryGroupDao.insertGalleryGroup(GalleryGroupData(groupName: gallery.groupName, sortOrder: 0));
+      await GalleryGroupDao.insertGalleryGroup(
+        GalleryGroupData(groupName: gallery.groupName, sortOrder: 0),
+      );
 
       return await GalleryDao.insertGallery(
             GalleryDownloadedCompanion.insert(
@@ -1607,7 +2061,11 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
     });
   }
 
-  Future<bool> _saveNewImageInfoInDatabase(GalleryImage image, int serialNo, int gid) async {
+  Future<bool> _saveNewImageInfoInDatabase(
+    GalleryImage image,
+    int serialNo,
+    int gid,
+  ) async {
     return await GalleryImageDao.insertImage(
           ImageData(
             gid: gid,
@@ -1621,7 +2079,9 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
         0;
   }
 
-  Future<bool> _updateGalleryInDatabase(GalleryDownloadedCompanion gallery) async {
+  Future<bool> _updateGalleryInDatabase(
+    GalleryDownloadedCompanion gallery,
+  ) async {
     return await GalleryDao.updateGallery(gallery) > 0;
   }
 
@@ -1636,49 +2096,62 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
     });
   }
 
-  Future<bool> _restoreInfoInDatabase(GalleryDownloadedData gallery, List<GalleryImage?> images) async {
+  Future<bool> _restoreInfoInDatabase(
+    GalleryDownloadedData gallery,
+    List<GalleryImage?> images,
+  ) async {
     if (gallery.downloadStatusIndex == DownloadStatus.downloading.index) {
-      gallery = gallery.copyWith(downloadStatusIndex: DownloadStatus.paused.index);
+      gallery = gallery.copyWith(
+        downloadStatusIndex: DownloadStatus.paused.index,
+      );
     }
 
     if (!await _saveGalleryInfoAndGroupInDB(gallery)) {
       return false;
     }
 
-    return await appDb.transaction(() async {
-      int serialNo = 0;
+    return await appDb
+        .transaction(() async {
+          int serialNo = 0;
 
-      Iterator iterator = images.iterator;
-      while (iterator.moveNext()) {
-        GalleryImage? image = iterator.current;
+          Iterator iterator = images.iterator;
+          while (iterator.moveNext()) {
+            GalleryImage? image = iterator.current;
 
-        if (image == null) {
-          serialNo++;
-          continue;
-        }
+            if (image == null) {
+              serialNo++;
+              continue;
+            }
 
-        if (!await _saveNewImageInfoInDatabase(image, serialNo++, gallery.gid)) {
+            if (!await _saveNewImageInfoInDatabase(
+              image,
+              serialNo++,
+              gallery.gid,
+            )) {
+              return false;
+            }
+          }
+
+          return true;
+        })
+        .catchError((e) {
+          log.error('Restore images into database error}', e);
+          log.uploadError(e);
           return false;
-        }
-      }
-
-      return true;
-    }).catchError((e) {
-      log.error('Restore images into database error}', e);
-      log.uploadError(e);
-      return false;
-    });
+        });
   }
 
   // Disk
 
   void _saveGalleryMetadataInDisk(GalleryDownloadedData gallery) {
-    GalleryDownloadInfo galleryDownloadInfo = galleryDownloadInfos[gallery.gid]!;
+    GalleryDownloadInfo galleryDownloadInfo =
+        galleryDownloadInfos[gallery.gid]!;
 
     Map<String, Object> metadata = {
       'gallery': gallery
           .copyWith(
-            downloadStatusIndex: galleryDownloadInfo.downloadProgress.downloadStatus.index,
+            downloadStatusIndex:
+                galleryDownloadInfo.downloadProgress.downloadStatus.index,
             priority: galleryDownloadInfo.priority,
             groupName: galleryDownloadInfo.group,
           )
@@ -1686,7 +2159,12 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
       'images': jsonEncode(galleryDownloadInfo.images),
     };
 
-    io.File file = io.File(path.join(computeGalleryDownloadAbsolutePath(gallery.title, gallery.gid), metadataFileName));
+    io.File file = io.File(
+      path.join(
+        computeGalleryDownloadAbsolutePath(gallery.title, gallery.gid),
+        metadataFileName,
+      ),
+    );
     if (!file.existsSync()) {
       file.createSync(recursive: true);
     }
@@ -1694,7 +2172,9 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
   }
 
   void _clearDownloadedImageInDisk(GalleryDownloadedData gallery) {
-    io.Directory directory = io.Directory(computeGalleryDownloadAbsolutePath(gallery.title, gallery.gid));
+    io.Directory directory = io.Directory(
+      computeGalleryDownloadAbsolutePath(gallery.title, gallery.gid),
+    );
     if (!directory.existsSync()) {
       return;
     }
@@ -1716,7 +2196,9 @@ class GalleryDownloadService extends GetxController with GridBasePageServiceMixi
 
   void _ensureDownloadDirExists() {
     try {
-      io.Directory(downloadSetting.downloadPath.value).createSync(recursive: true);
+      io.Directory(
+        downloadSetting.downloadPath.value,
+      ).createSync(recursive: true);
     } on Exception catch (e) {
       toast('brokenDownloadPathHint'.tr);
       log.error(e);
@@ -1823,9 +2305,9 @@ class GalleryDownloadSpeedComputer extends SpeedComputer {
   List<int> imageTotalBytes;
 
   GalleryDownloadSpeedComputer(int pageCount, VoidCallback updateCallback)
-      : imageDownloadedBytes = List.generate(pageCount, (_) => 0),
-        imageTotalBytes = List.generate(pageCount, (_) => 1),
-        super(updateCallback: updateCallback);
+    : imageDownloadedBytes = List.generate(pageCount, (_) => 0),
+      imageTotalBytes = List.generate(pageCount, (_) => 1),
+      super(updateCallback: updateCallback);
 
   void updateProgress(int current, int total, int serialNo) {
     imageTotalBytes[serialNo] = total;

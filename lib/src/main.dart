@@ -43,7 +43,6 @@ import 'package:jhentai/src/setting/site_setting.dart';
 import 'package:jhentai/src/setting/super_resolution_setting.dart';
 import 'package:jhentai/src/setting/user_setting.dart';
 import 'package:jhentai/src/widget/app_manager.dart';
-import 'exception/upload_exception.dart';
 import 'package:jhentai/src/l18n/locale_text.dart';
 import 'package:jhentai/src/routes/getx_router_observer.dart';
 import 'package:jhentai/src/routes/routes.dart';
@@ -106,11 +105,13 @@ void main(List<String> args) async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    systemNavigationBarColor: Colors.transparent,
-    systemNavigationBarDividerColor: Colors.transparent,
-    statusBarColor: Colors.transparent,
-  ));
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+      statusBarColor: Colors.transparent,
+    ),
+  );
 
   lifeCircleBeans = topologicalSort(lifeCircleBeans);
   for (JHLifeCircleBean bean in lifeCircleBeans) {
@@ -128,8 +129,14 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'JHenTai',
       themeMode: styleSetting.themeMode.value,
-      theme: ThemeConfig.theme(styleSetting.lightThemeColor.value, Brightness.light),
-      darkTheme: ThemeConfig.theme(styleSetting.darkThemeColor.value, Brightness.dark),
+      theme: ThemeConfig.theme(
+        styleSetting.lightThemeColor.value,
+        Brightness.light,
+      ),
+      darkTheme: ThemeConfig.theme(
+        styleSetting.darkThemeColor.value,
+        Brightness.dark,
+      ),
 
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
@@ -148,7 +155,11 @@ class MyApp extends StatelessWidget {
       translations: LocaleText(),
 
       getPages: Routes.pages,
-      initialRoute: securitySetting.enablePasswordAuth.isTrue || securitySetting.enableBiometricAuth.isTrue ? Routes.lock : Routes.home,
+      initialRoute:
+          securitySetting.enablePasswordAuth.isTrue ||
+              securitySetting.enableBiometricAuth.isTrue
+          ? Routes.lock
+          : Routes.home,
       navigatorObservers: [GetXRouterObserver()],
       builder: (context, child) => AppManager(child: child!),
 

@@ -45,6 +45,8 @@ When changing tables:
 4. Add guarded migration code under `onUpgrade`, using `if (from < N)` checks.
 5. Run `dart run build_runner build` to update `database.g.dart`.
 
+With `build_runner` 2.15+, do not add `--delete-conflicting-outputs`; the option has been removed and is ignored. If generated outputs conflict, inspect why the tracked generated file is stale before deleting or regenerating it.
+
 Migration helpers should be private methods on `AppDb` when logic is non-trivial, following `_migrateDownloadedInfo`, `_migrateSuperResolutionInfo`, and `_createGroupTable`.
 
 Use `transaction()` for data migrations that read old rows and write replacement rows. Log and rethrow migration failures; when an error should not be uploaded, wrap it with `NotUploadException` following the existing `onUpgrade` pattern.

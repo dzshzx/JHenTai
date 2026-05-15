@@ -6,7 +6,7 @@
 
 ## Overview
 
-The project uses Dart 3 with null safety (`sdk: '>=3.0.0 <4.0.0'`).
+The project uses Dart 3 with null safety (`sdk: '>=3.11.5 <4.0.0'`) and Flutter `>=3.41.9`.
 
 Prefer explicit models, enums, typed callbacks, and typed `Future<T>` APIs. The codebase uses generated Drift data types for database rows and hand-written model classes for domain objects.
 

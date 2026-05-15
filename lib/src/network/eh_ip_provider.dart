@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:jhentai/src/service/log.dart';
 
 abstract interface class EHIpProvider {
@@ -37,7 +35,12 @@ class RoundRobinIpProvider implements EHIpProvider {
     do {
       if (_host2UnavailableIps.containsKey(host) &&
           _host2UnavailableIps[host]!.containsKey(_host2Ips[host]![index]) &&
-          DateTime.now().difference(_host2UnavailableIps[host]![_host2Ips[host]![index]]!).inMinutes < 5) {
+          DateTime.now()
+                  .difference(
+                    _host2UnavailableIps[host]![_host2Ips[host]![index]]!,
+                  )
+                  .inMinutes <
+              5) {
         index = (index + 1) % _host2Ips[host]!.length;
       } else {
         break;

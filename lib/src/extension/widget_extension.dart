@@ -23,9 +23,14 @@ extension WidgetExtension on Widget {
     return Theme(
       data: Theme.of(context).copyWith(
         textTheme: Theme.of(context).textTheme.copyWith(
-              bodyMedium: TextStyle(fontSize: UIConfig.settingPageListTileSubTitleTextSize, color: UIConfig.onBackGroundColor(context)),
-              bodySmall: TextStyle(color: UIConfig.settingPageListTileSubTitleColor(context)),
-            ),
+          bodyMedium: TextStyle(
+            fontSize: UIConfig.settingPageListTileSubTitleTextSize,
+            color: UIConfig.onBackGroundColor(context),
+          ),
+          bodySmall: TextStyle(
+            color: UIConfig.settingPageListTileSubTitleColor(context),
+          ),
+        ),
       ),
       child: this,
     );
@@ -43,7 +48,9 @@ extension WidgetExtension on Widget {
 
   Widget enableMouseDrag({bool withScrollBar = true}) {
     return ScrollConfiguration(
-      behavior: withScrollBar ? UIConfig.scrollBehaviourWithScrollBarWithMouse : UIConfig.scrollBehaviourWithoutScrollBarWithMouse,
+      behavior: withScrollBar
+          ? UIConfig.scrollBehaviourWithScrollBarWithMouse
+          : UIConfig.scrollBehaviourWithoutScrollBarWithMouse,
       child: this,
     );
   }
@@ -52,7 +59,8 @@ extension WidgetExtension on Widget {
 extension StateExtension on State {
   void setStateSafely(VoidCallback fn) {
     if (mounted) {
-      setState(fn);
+      fn();
+      (context as Element).markNeedsBuild();
     }
   }
 }

@@ -30,7 +30,7 @@ class GalleryThumbnail {
   double? thumbWidth;
   double? offSet;
 
-//<editor-fold desc="Data Methods">
+  //<editor-fold desc="Data Methods">
   GalleryThumbnail({
     required this.href,
     required this.isLarge,
@@ -56,18 +56,24 @@ class GalleryThumbnail {
 
   @override
   int get hashCode =>
-      href.hashCode ^ isLarge.hashCode ^ thumbUrl.hashCode ^ thumbHeight.hashCode ^ thumbWidth.hashCode ^ offSet.hashCode ^ originImageHash.hashCode;
+      href.hashCode ^
+      isLarge.hashCode ^
+      thumbUrl.hashCode ^
+      thumbHeight.hashCode ^
+      thumbWidth.hashCode ^
+      offSet.hashCode ^
+      originImageHash.hashCode;
 
   @override
   String toString() {
-    return 'GalleryThumbnail{' +
-        ' href: $href,' +
-        ' isLarge: $isLarge,' +
-        ' thumbUrl: $thumbUrl,' +
-        ' thumbHeight: $thumbHeight,' +
-        ' thumbWidth: $thumbWidth,' +
-        ' offSet: $offSet,' +
-        ' originImageHash: $originImageHash,' +
+    return 'GalleryThumbnail{'
+        ' href: $href,'
+        ' isLarge: $isLarge,'
+        ' thumbUrl: $thumbUrl,'
+        ' thumbHeight: $thumbHeight,'
+        ' thumbWidth: $thumbWidth,'
+        ' offSet: $offSet,'
+        ' originImageHash: $originImageHash,'
         '}';
   }
 
@@ -93,13 +99,13 @@ class GalleryThumbnail {
 
   Map<String, dynamic> toMap() {
     return {
-      'href': this.href,
-      'isLarge': this.isLarge,
-      'thumbUrl': this.thumbUrl,
-      'thumbHeight': this.thumbHeight,
-      'thumbWidth': this.thumbWidth,
-      'offSet': this.offSet,
-      'originImageHash': this.originImageHash,
+      'href': href,
+      'isLarge': isLarge,
+      'thumbUrl': thumbUrl,
+      'thumbHeight': thumbHeight,
+      'thumbWidth': thumbWidth,
+      'offSet': offSet,
+      'originImageHash': originImageHash,
     };
   }
 

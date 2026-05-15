@@ -25,8 +25,11 @@ class HistoryPageLogic extends OldBasePageLogic {
     log.info('Get history by page index $pageIndex');
 
     int pageCount = await historyService.getPageCount();
-    List<GalleryHistoryModel> galleryModels = await historyService.getByPageIndex(pageIndex);
-    List<Gallery> gallerys = galleryModels.map(galleryHistoryModel2Gallery).toList();
+    List<GalleryHistoryModel> galleryModels = await historyService
+        .getByPageIndex(pageIndex);
+    List<Gallery> gallerys = galleryModels
+        .map(galleryHistoryModel2Gallery)
+        .toList();
 
     return [
       gallerys,
@@ -52,7 +55,10 @@ class HistoryPageLogic extends OldBasePageLogic {
       builder: (_) => CupertinoActionSheet(
         actions: <CupertinoActionSheetAction>[
           CupertinoActionSheetAction(
-            child: Text('delete'.tr, style: TextStyle(color: UIConfig.alertColor(context))),
+            child: Text(
+              'delete'.tr,
+              style: TextStyle(color: UIConfig.alertColor(context)),
+            ),
             onPressed: () {
               backRoute();
               delete(gallery.gid);
@@ -61,7 +67,7 @@ class HistoryPageLogic extends OldBasePageLogic {
         ],
         cancelButton: CupertinoActionSheetAction(
           child: Text('cancel'.tr),
-          onPressed: () => backRoute(),
+          onPressed: backRoute,
         ),
       ),
     );

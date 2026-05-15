@@ -7,7 +7,6 @@ import 'package:jhentai/src/pages/details/thumbnails/thumbnails_page_logic.dart'
 import 'package:jhentai/src/pages/details/thumbnails/thumbnails_page_state.dart';
 import 'package:jhentai/src/service/gallery_download_service.dart';
 import 'package:jhentai/src/widget/eh_image.dart';
-import 'package:jhentai/src/widget/keep_alive.dart';
 
 import '../../../config/ui_config.dart';
 import '../../../mixin/scroll_to_top_logic_mixin.dart';
@@ -19,7 +18,9 @@ import '../../../widget/eh_wheel_speed_controller.dart';
 import '../../../widget/loading_state_indicator.dart';
 
 class ThumbnailsPage extends StatelessWidget with Scroll2TopPageMixin {
-  final ThumbnailsPageLogic logic = Get.put<ThumbnailsPageLogic>(ThumbnailsPageLogic());
+  final ThumbnailsPageLogic logic = Get.put<ThumbnailsPageLogic>(
+    ThumbnailsPageLogic(),
+  );
   final ThumbnailsPageState state = Get.find<ThumbnailsPageLogic>().state;
 
   @override
@@ -52,7 +53,10 @@ class ThumbnailsPage extends StatelessWidget with Scroll2TopPageMixin {
 
   AppBar buildAppBar() {
     return AppBar(
-      title: Text(_mainTitleText, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+      title: Text(
+        _mainTitleText,
+        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+      ),
       actions: [
         IconButton(
           icon: const Icon(FontAwesomeIcons.paperPlane, size: 21),
@@ -89,51 +93,61 @@ class ThumbnailsPage extends StatelessWidget with Scroll2TopPageMixin {
         id: ThumbnailsPageLogic.thumbnailsId,
         builder: (_) {
           return SliverGrid(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                if (index == state.thumbnails.length - 1 && state.loadingState == LoadingState.idle) {
-                  SchedulerBinding.instance.addPostFrameCallback((_) => logic.loadMoreThumbnails());
-                }
+            delegate: SliverChildBuilderDelegate((context, index) {
+              if (index == state.thumbnails.length - 1 &&
+                  state.loadingState == LoadingState.idle) {
+                SchedulerBinding.instance.addPostFrameCallback(
+                  (_) => logic.loadMoreThumbnails(),
+                );
+              }
 
-                GalleryImage? downloadedImage = galleryDownloadService
-                    .galleryDownloadInfos[logic.detailsPageState.galleryDetails!.galleryUrl.gid]?.images[state.absoluteIndexOfThumbnails[index]];
+              GalleryImage? downloadedImage = galleryDownloadService
+                  .galleryDownloadInfos[logic
+                      .detailsPageState
+                      .galleryDetails!
+                      .galleryUrl
+                      .gid]
+                  ?.images[state.absoluteIndexOfThumbnails[index]];
 
-                return Column(
-                  children: [
-                    Expanded(
-                      child: Center(
-                        child: GestureDetector(
-                          onTap: () => logic.detailsPageLogic.goToReadPage(state.absoluteIndexOfThumbnails[index]),
-                          child: LayoutBuilder(
-                            builder: (_, constraints) {
-                              return downloadedImage?.downloadStatus == DownloadStatus.downloaded
-                                  ? EHImage(
-                                galleryImage: downloadedImage!,
-                                containerHeight: constraints.maxHeight,
-                                containerWidth: constraints.maxWidth,
-                                borderRadius: BorderRadius.circular(8),
-                                maxBytes: 128 * 1024,
-                              )
-                                  : EHThumbnail(
-                                thumbnail: state.thumbnails[index],
-                                containerHeight: constraints.maxHeight,
-                                containerWidth: constraints.maxWidth,
-                                borderRadius: BorderRadius.circular(8),
-                              );
-                            },
-                          ),
+              return Column(
+                children: [
+                  Expanded(
+                    child: Center(
+                      child: GestureDetector(
+                        onTap: () => logic.detailsPageLogic.goToReadPage(
+                          state.absoluteIndexOfThumbnails[index],
+                        ),
+                        child: LayoutBuilder(
+                          builder: (_, constraints) {
+                            return downloadedImage?.downloadStatus ==
+                                    DownloadStatus.downloaded
+                                ? EHImage(
+                                    galleryImage: downloadedImage!,
+                                    containerHeight: constraints.maxHeight,
+                                    containerWidth: constraints.maxWidth,
+                                    borderRadius: BorderRadius.circular(8),
+                                    maxBytes: 128 * 1024,
+                                  )
+                                : EHThumbnail(
+                                    thumbnail: state.thumbnails[index],
+                                    containerHeight: constraints.maxHeight,
+                                    containerWidth: constraints.maxWidth,
+                                    borderRadius: BorderRadius.circular(8),
+                                  );
+                          },
                         ),
                       ),
                     ),
-                    Text(
-                      (state.absoluteIndexOfThumbnails[index] + 1).toString(),
-                      style: TextStyle(color: UIConfig.detailsPageThumbnailIndexColor(context)),
-                    ).paddingOnly(top: 3),
-                  ],
-                );
-              },
-              childCount: state.thumbnails.length,
-            ),
+                  ),
+                  Text(
+                    (state.absoluteIndexOfThumbnails[index] + 1).toString(),
+                    style: TextStyle(
+                      color: UIConfig.detailsPageThumbnailIndexColor(context),
+                    ),
+                  ).paddingOnly(top: 3),
+                ],
+              );
+            }, childCount: state.thumbnails.length),
             gridDelegate: styleSetting.crossAxisCountInDetailPage.value == null
                 ? const SliverGridDelegateWithMaxCrossAxisExtent(
                     mainAxisExtent: UIConfig.detailsPageThumbnailHeight,
@@ -142,10 +156,12 @@ class ThumbnailsPage extends StatelessWidget with Scroll2TopPageMixin {
                     crossAxisSpacing: 5,
                   )
                 : SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: styleSetting.crossAxisCountInDetailPage.value!,
+                    crossAxisCount:
+                        styleSetting.crossAxisCountInDetailPage.value!,
                     mainAxisSpacing: 20,
                     crossAxisSpacing: 5,
-                    childAspectRatio: UIConfig.detailsPageGridViewCardAspectRatio,
+                    childAspectRatio:
+                        UIConfig.detailsPageGridViewCardAspectRatio,
                   ),
           );
         },

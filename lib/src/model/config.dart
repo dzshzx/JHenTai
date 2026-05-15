@@ -33,19 +33,22 @@ class CloudConfig {
       type: CloudConfigTypeEnum.fromCode(json["type"]),
       version: json["version"],
       config: json["config"],
-      ctime: DateTime.fromMillisecondsSinceEpoch(json["ctime"], isUtc: true).toLocal(),
+      ctime: DateTime.fromMillisecondsSinceEpoch(
+        json["ctime"],
+        isUtc: true,
+      ).toLocal(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      "id": this.id,
-      "shareCode": this.shareCode,
-      "identificationCode": this.identificationCode,
-      "type": this.type.code,
-      "version": this.version,
-      "config": this.config,
-      "ctime": this.ctime.toUtc().millisecondsSinceEpoch,
+      "id": id,
+      "shareCode": shareCode,
+      "identificationCode": identificationCode,
+      "type": type.code,
+      "version": version,
+      "config": config,
+      "ctime": ctime.toUtc().millisecondsSinceEpoch,
     };
   }
 }

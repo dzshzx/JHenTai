@@ -92,8 +92,8 @@ class EHImage extends StatelessWidget {
     Widget child = advancedSetting.inNoImageMode.isTrue
         ? const SizedBox()
         : galleryImage.path == null
-            ? buildNetworkImage(context)
-            : buildFileImage(context);
+        ? buildNetworkImage(context)
+        : buildFileImage(context);
 
     if (heroTag != null && styleSetting.isInMobileLayout) {
       child = Hero(tag: heroTag!, child: child);
@@ -104,7 +104,10 @@ class EHImage extends StatelessWidget {
         builder: (_, constraints) => Container(
           height: constraints.maxHeight,
           width: constraints.maxWidth,
-          decoration: BoxDecoration(color: containerColor, borderRadius: borderRadius),
+          decoration: BoxDecoration(
+            color: containerColor,
+            borderRadius: borderRadius,
+          ),
           child: child,
         ),
       );
@@ -113,7 +116,10 @@ class EHImage extends StatelessWidget {
     return Container(
       height: containerHeight,
       width: containerWidth,
-      decoration: BoxDecoration(color: containerColor, borderRadius: borderRadius),
+      decoration: BoxDecoration(
+        color: containerColor,
+        borderRadius: borderRadius,
+      ),
       child: child,
     );
   }
@@ -132,34 +138,52 @@ class EHImage extends StatelessWidget {
         switch (state.extendedImageLoadState) {
           case LoadState.loading:
             return loadingProgressWidgetBuilder != null
-                ? loadingProgressWidgetBuilder!.call(_computeLoadingProgress(state.loadingProgress, state.extendedImageInfo))
+                ? loadingProgressWidgetBuilder!.call(
+                    _computeLoadingProgress(
+                      state.loadingProgress,
+                      state.extendedImageInfo,
+                    ),
+                  )
                 : Center(child: UIConfig.loadingAnimation(context));
           case LoadState.failed:
             return failedWidgetBuilder?.call(state) ??
                 Center(
-                  child: GestureDetector(child: const Icon(Icons.sentiment_very_dissatisfied), onTap: state.reLoadImage),
+                  child: GestureDetector(
+                    child: const Icon(Icons.sentiment_very_dissatisfied),
+                    onTap: state.reLoadImage,
+                  ),
                 );
           case LoadState.completed:
             state.returnLoadStateChangedWidget = true;
 
-            Widget child = completedWidgetBuilder?.call(state) ?? _buildExtendedRawImage(state);
+            Widget child =
+                completedWidgetBuilder?.call(state) ??
+                _buildExtendedRawImage(state);
 
             if (borderRadius != BorderRadius.zero) {
               child = ClipRRect(child: child, borderRadius: borderRadius);
             }
 
             if (state.slidePageState != null) {
-              child = ExtendedImageSlidePageHandler(child: child, extendedImageSlidePageState: state.slidePageState);
+              child = ExtendedImageSlidePageHandler(
+                child: child,
+                extendedImageSlidePageState: state.slidePageState,
+              );
             }
 
             child = Center(
               child: Container(
-                decoration: BoxDecoration(boxShadow: shadows, borderRadius: borderRadius),
+                decoration: BoxDecoration(
+                  boxShadow: shadows,
+                  borderRadius: borderRadius,
+                ),
                 child: child,
               ),
             );
 
-            return forceFadeIn || !state.wasSynchronouslyLoaded ? child.fadeIn() : child;
+            return forceFadeIn || !state.wasSynchronouslyLoaded
+                ? child.fadeIn()
+                : child;
         }
       },
       maxBytes: maxBytes,
@@ -168,49 +192,69 @@ class EHImage extends StatelessWidget {
 
   Widget buildFileImage(BuildContext context) {
     if (galleryImage.downloadStatus == DownloadStatus.paused) {
-      return pausedWidgetBuilder?.call() ?? const Center(child: CircularProgressIndicator());
+      return pausedWidgetBuilder?.call() ??
+          const Center(child: CircularProgressIndicator());
     }
 
     if (galleryImage.downloadStatus == DownloadStatus.downloading) {
-      return downloadingWidgetBuilder?.call() ?? const Center(child: CircularProgressIndicator());
+      return downloadingWidgetBuilder?.call() ??
+          const Center(child: CircularProgressIndicator());
     }
 
     return ExtendedImage.file(
-      io.File(GalleryDownloadService.computeImageDownloadAbsolutePathFromRelativePath(galleryImage.path!)),
+      io.File(
+        GalleryDownloadService.computeImageDownloadAbsolutePathFromRelativePath(
+          galleryImage.path!,
+        ),
+      ),
       fit: fit,
       height: containerHeight,
       width: containerWidth,
-      enableLoadState: loadingWidgetBuilder != null || failedWidgetBuilder != null || completedWidgetBuilder != null,
+      enableLoadState:
+          loadingWidgetBuilder != null ||
+          failedWidgetBuilder != null ||
+          completedWidgetBuilder != null,
       enableSlideOutPage: enableSlideOutPage,
       borderRadius: borderRadius,
-      shape: borderRadius != null ? BoxShape.rectangle : null,
+      shape: BoxShape.rectangle,
       clearMemoryCacheWhenDispose: clearMemoryCacheWhenDispose,
       loadStateChanged: (ExtendedImageState state) {
         switch (state.extendedImageLoadState) {
           case LoadState.loading:
-            return loadingWidgetBuilder != null ? loadingWidgetBuilder!.call() : Center(child: UIConfig.loadingAnimation(context));
+            return loadingWidgetBuilder != null
+                ? loadingWidgetBuilder!.call()
+                : Center(child: UIConfig.loadingAnimation(context));
           case LoadState.failed:
             return failedWidgetBuilder?.call(state) ??
                 Center(
-                  child: GestureDetector(child: const Icon(Icons.sentiment_very_dissatisfied), onTap: state.reLoadImage),
+                  child: GestureDetector(
+                    child: const Icon(Icons.sentiment_very_dissatisfied),
+                    onTap: state.reLoadImage,
+                  ),
                 );
           case LoadState.completed:
             state.returnLoadStateChangedWidget = true;
 
-            Widget child = completedWidgetBuilder?.call(state) ?? _buildExtendedRawImage(state);
+            Widget child =
+                completedWidgetBuilder?.call(state) ??
+                _buildExtendedRawImage(state);
 
-            if (borderRadius != null) {
-              child = ClipRRect(child: child, borderRadius: borderRadius);
-            }
+            child = ClipRRect(child: child, borderRadius: borderRadius);
 
             if (state.slidePageState != null) {
-              child = ExtendedImageSlidePageHandler(child: child, extendedImageSlidePageState: state.slidePageState);
+              child = ExtendedImageSlidePageHandler(
+                child: child,
+                extendedImageSlidePageState: state.slidePageState,
+              );
             }
 
             return FadeIn(
               child: Center(
                 child: Container(
-                  decoration: BoxDecoration(boxShadow: shadows, borderRadius: borderRadius),
+                  decoration: BoxDecoration(
+                    boxShadow: shadows,
+                    borderRadius: borderRadius,
+                  ),
                   child: child,
                 ),
               ),
@@ -222,7 +266,10 @@ class EHImage extends StatelessWidget {
     );
   }
 
-  double _computeLoadingProgress(ImageChunkEvent? loadingProgress, ImageInfo? extendedImageInfo) {
+  double _computeLoadingProgress(
+    ImageChunkEvent? loadingProgress,
+    ImageInfo? extendedImageInfo,
+  ) {
     if (loadingProgress == null) {
       return 0.01;
     }
@@ -248,14 +295,24 @@ class EHImage extends StatelessWidget {
   Widget _buildExtendedRawImage(ExtendedImageState state) {
     FittedSizes fittedSizes = applyBoxFit(
       fit,
-      Size(state.extendedImageInfo!.image.width.toDouble(), state.extendedImageInfo!.image.height.toDouble()),
-      Size(containerWidth ?? double.infinity, containerHeight ?? double.infinity),
+      Size(
+        state.extendedImageInfo!.image.width.toDouble(),
+        state.extendedImageInfo!.image.height.toDouble(),
+      ),
+      Size(
+        containerWidth ?? double.infinity,
+        containerHeight ?? double.infinity,
+      ),
     );
 
     return ExtendedRawImage(
       image: state.extendedImageInfo?.image,
-      height: fittedSizes.destination.height == 0 ? null : fittedSizes.destination.height,
-      width: fittedSizes.destination.width == 0 ? null : fittedSizes.destination.width,
+      height: fittedSizes.destination.height == 0
+          ? null
+          : fittedSizes.destination.height,
+      width: fittedSizes.destination.width == 0
+          ? null
+          : fittedSizes.destination.width,
       scale: state.extendedImageInfo?.scale ?? 1.0,
       fit: fit,
     );

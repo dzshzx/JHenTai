@@ -56,11 +56,17 @@ class _CookiePageState extends State<CookiePage> {
                         children: [
                           LoadingStateIndicator(
                             loadingState: _refreshIgneousState,
-                            loadingWidgetBuilder: () => const CupertinoActivityIndicator().marginOnly(right: 10),
-                            idleWidgetBuilder: () => IconButton(icon: const Icon(Icons.refresh), onPressed: _refreshIgneousCookie),
+                            loadingWidgetBuilder: () =>
+                                const CupertinoActivityIndicator().marginOnly(
+                                  right: 10,
+                                ),
+                            idleWidgetBuilder: () => IconButton(
+                              icon: const Icon(Icons.refresh),
+                              onPressed: _refreshIgneousCookie,
+                            ),
                             successWidgetSameWithIdle: true,
                             errorWidgetSameWithIdle: true,
-                          )
+                          ),
                         ],
                       )
                     : null,
@@ -83,7 +89,10 @@ class _CookiePageState extends State<CookiePage> {
       CookieUtil.parse2String(
         ehRequest.cookies
             .where(
-              (cookie) => cookie.name == 'ipb_member_id' || cookie.name == 'ipb_pass_hash' || cookie.name == 'igneous',
+              (cookie) =>
+                  cookie.name == 'ipb_member_id' ||
+                  cookie.name == 'ipb_pass_hash' ||
+                  cookie.name == 'igneous',
             )
             .toList(),
       ),
@@ -109,19 +118,23 @@ class _CookiePageState extends State<CookiePage> {
     try {
       Response response = await _dio!.request(
         EHConsts.EXIndex,
-        options: Options(headers: {
-          'cookie': CookieUtil.parse2String(
-            [
+        options: Options(
+          headers: {
+            'cookie': CookieUtil.parse2String([
               Cookie('ipb_member_id', userSetting.ipbMemberId.value.toString()),
               Cookie('ipb_pass_hash', userSetting.ipbPassHash.value!),
-            ],
-          )
-        }),
+            ]),
+          },
+        ),
       );
 
-      log.info('Refresh igneous cookie, set-cookie: ${response.headers.value('set-cookie')}');
+      log.info(
+        'Refresh igneous cookie, set-cookie: ${response.headers.value('set-cookie')}',
+      );
 
-      List<String>? cookiePairs = response.headers.value('set-cookie')?.split(';');
+      List<String>? cookiePairs = response.headers
+          .value('set-cookie')
+          ?.split(';');
       if (cookiePairs == null) {
         snack('refreshIgneousFailed'.tr, 'Sad panda');
         setStateSafely(() {
@@ -172,7 +185,7 @@ class _CookiePageState extends State<CookiePage> {
         _refreshIgneousState = LoadingState.error;
       });
       return;
-    } catch (e, s) {
+    } catch (e) {
       log.error('Refresh igneous failed: $e');
       snack('refreshIgneousFailed'.tr, e.toString());
       setStateSafely(() {
@@ -187,50 +200,68 @@ class _CookiePageState extends State<CookiePage> {
       return;
     }
 
-    _dio = Dio(BaseOptions(
-      connectTimeout: Duration(milliseconds: networkSetting.connectTimeout.value),
-      receiveTimeout: Duration(milliseconds: networkSetting.receiveTimeout.value),
-    ));
+    _dio = Dio(
+      BaseOptions(
+        connectTimeout: Duration(
+          milliseconds: networkSetting.connectTimeout.value,
+        ),
+        receiveTimeout: Duration(
+          milliseconds: networkSetting.receiveTimeout.value,
+        ),
+      ),
+    );
 
     EHIpProvider _ehIpProvider = RoundRobinIpProvider(NetworkSetting.host2IPs);
 
-    _dio!.interceptors.add(InterceptorsWrapper(
-      onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
-        if (networkSetting.enableDomainFronting.isFalse) {
-          handler.next(options);
-          return;
-        }
+    _dio!.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
+          if (networkSetting.enableDomainFronting.isFalse) {
+            handler.next(options);
+            return;
+          }
 
-        String rawPath = options.path;
-        String host = options.uri.host;
-        if (!_ehIpProvider.supports(host)) {
-          handler.next(options);
-          return;
-        }
+          String rawPath = options.path;
+          String host = options.uri.host;
+          if (!_ehIpProvider.supports(host)) {
+            handler.next(options);
+            return;
+          }
 
-        String ip = _ehIpProvider.nextIP(host);
-        handler.next(options.copyWith(
-          path: rawPath.replaceFirst(host, ip),
-          headers: {...options.headers, 'host': host},
-          extra: options.extra..[EHRequest.domainFrontingExtraKey] = {'host': host, 'ip': ip},
-        ));
-      },
-      onError: (DioException e, ErrorInterceptorHandler handler) {
-        if (!e.requestOptions.extra.containsKey(EHRequest.domainFrontingExtraKey)) {
+          String ip = _ehIpProvider.nextIP(host);
+          handler.next(
+            options.copyWith(
+              path: rawPath.replaceFirst(host, ip),
+              headers: {...options.headers, 'host': host},
+              extra: options.extra
+                ..[EHRequest.domainFrontingExtraKey] = {'host': host, 'ip': ip},
+            ),
+          );
+        },
+        onError: (DioException e, ErrorInterceptorHandler handler) {
+          if (!e.requestOptions.extra.containsKey(
+            EHRequest.domainFrontingExtraKey,
+          )) {
+            handler.next(e);
+            return;
+          }
+
+          if (e.type == DioExceptionType.connectionTimeout ||
+              e.type == DioExceptionType.badResponse ||
+              e.type == DioExceptionType.connectionError) {
+            String host = e
+                .requestOptions
+                .extra[EHRequest.domainFrontingExtraKey]['host'];
+            String ip =
+                e.requestOptions.extra[EHRequest.domainFrontingExtraKey]['ip'];
+            _ehIpProvider.addUnavailableIp(host, ip);
+            log.info('Refresh igneous, add unavailable host-ip: $host-$ip');
+          }
+
           handler.next(e);
-          return;
-        }
-
-        if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.badResponse || e.type == DioExceptionType.connectionError) {
-          String host = e.requestOptions.extra[EHRequest.domainFrontingExtraKey]['host'];
-          String ip = e.requestOptions.extra[EHRequest.domainFrontingExtraKey]['ip'];
-          _ehIpProvider.addUnavailableIp(host, ip);
-          log.info('Refresh igneous, add unavailable host-ip: $host-$ip');
-        }
-
-        handler.next(e);
-      },
-    ));
+        },
+      ),
+    );
 
     _dio!.interceptors.add(EHTimeoutTranslator());
   }

@@ -153,8 +153,7 @@ class ComicPageInfo {
 enum YesEnum {
   no('No'),
   yes('Yes'),
-  yesAndRightToLeft('YesAndRightToLeft'),
-  ;
+  yesAndRightToLeft('YesAndRightToLeft');
 
   final String desc;
 
@@ -178,8 +177,7 @@ enum MangaEnum {
   unknown('Unknown'),
   no('No'),
   yes('Yes'),
-  yesAndRightToLeft('YesAndRightToLeft'),
-  ;
+  yesAndRightToLeft('YesAndRightToLeft');
 
   final String desc;
 
@@ -216,8 +214,7 @@ enum AgeRatingEnum {
   r18Plus('R18+'),
   ratingPending('Rating Pending'),
   teen('Teen'),
-  x18Plus('X18+'),
-  ;
+  x18Plus('X18+');
 
   final String desc;
 
@@ -272,8 +269,7 @@ enum ComicPageTypeEnum {
   preview('Preview'),
   backCover('BackCover'),
   other('Other'),
-  deleted('Deleted'),
-  ;
+  deleted('Deleted');
 
   final String desc;
 
@@ -319,7 +315,6 @@ class EHGalleryComicInfo extends ComicInfo {
   final String? uploader;
   final String publishTime;
   final String? languageAbbreviation;
-  @override
   final List<TagData> tagDatas;
   final double rating;
 
@@ -333,16 +328,24 @@ class EHGalleryComicInfo extends ComicInfo {
   String? get alternateSeries => japaneseTitle;
 
   @override
-  String? get writer => tagDatas.where((tagData) => tagData.namespace == 'artist').map((tagData) => tagData.key).join(',');
+  String? get writer => tagDatas
+      .where((tagData) => tagData.namespace == 'artist')
+      .map((tagData) => tagData.key)
+      .join(',');
 
   @override
-  String? get penciller => tagDatas.where((tagData) => tagData.namespace == 'artist').map((tagData) => tagData.key).join(',');
+  String? get penciller => tagDatas
+      .where((tagData) => tagData.namespace == 'artist')
+      .map((tagData) => tagData.key)
+      .join(',');
 
   @override
   String get genre => category;
 
   @override
-  String? get tags => tagDatas.map((tagData) => '${tagData.namespace}:${tagData.key}').join(',');
+  String? get tags => tagDatas
+      .map((tagData) => '${tagData.namespace}:${tagData.key}')
+      .join(',');
 
   @override
   String get web => galleryUrl;
@@ -351,22 +354,32 @@ class EHGalleryComicInfo extends ComicInfo {
   String? get languageISO => languageAbbreviation;
 
   @override
-  YesEnum get blackAndWhite => tagDatas.none((tagData) => tagData.key == 'full color') ? YesEnum.yes : YesEnum.no;
+  YesEnum get blackAndWhite =>
+      tagDatas.none((tagData) => tagData.key == 'full color')
+      ? YesEnum.yes
+      : YesEnum.no;
 
   @override
   MangaEnum get manga => category == 'Manga' ? MangaEnum.yes : MangaEnum.no;
 
   @override
-  String get characters => tagDatas.where((tagData) => tagData.namespace == 'character').map((tagData) => tagData.key).join(',');
+  String get characters => tagDatas
+      .where((tagData) => tagData.namespace == 'character')
+      .map((tagData) => tagData.key)
+      .join(',');
 
   @override
-  AgeRatingEnum get ageRating => category == 'Non-H' ? AgeRatingEnum.kidsToAdults : AgeRatingEnum.adults;
+  AgeRatingEnum get ageRating =>
+      category == 'Non-H' ? AgeRatingEnum.kidsToAdults : AgeRatingEnum.adults;
 
   @override
   double get communityRating => rating;
-  
+
   @override
-  String get locations => tagDatas.where((tagData) => tagData.namespace == 'location').map((tagData) => tagData.key).join(',');
+  String get locations => tagDatas
+      .where((tagData) => tagData.namespace == 'location')
+      .map((tagData) => tagData.key)
+      .join(',');
 
   EHGalleryComicInfo({
     required this.rawTitle,
@@ -390,7 +403,10 @@ class EHGalleryComicInfo extends ComicInfo {
     builder.element(
       'ComicInfo',
       nest: () {
-        builder.attribute('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
+        builder.attribute(
+          'xmlns:xsi',
+          'http://www.w3.org/2001/XMLSchema-instance',
+        );
         builder.attribute('xmlns:xsn', 'http://www.w3.org/2001/XMLSchema');
 
         builder.element('Title', nest: title);
@@ -420,7 +436,10 @@ class EHGalleryComicInfo extends ComicInfo {
           builder.element('Locations', nest: locations);
         }
         builder.element('AgeRating', nest: ageRating.desc);
-        builder.element('CommunityRating', nest: communityRating.toStringAsFixed(1));
+        builder.element(
+          'CommunityRating',
+          nest: communityRating.toStringAsFixed(1),
+        );
       },
     );
 

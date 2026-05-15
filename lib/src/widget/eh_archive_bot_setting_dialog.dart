@@ -11,23 +11,29 @@ class EHArchiveBotSettingDialog extends StatefulWidget {
   final String? apiKey;
   final bool useProxy;
 
-  const EHArchiveBotSettingDialog({super.key, required this.apiAddress, required this.apiKey, required this.useProxy});
+  const EHArchiveBotSettingDialog({
+    super.key,
+    required this.apiAddress,
+    required this.apiKey,
+    required this.useProxy,
+  });
 
   @override
-  State<EHArchiveBotSettingDialog> createState() => _EHArchiveBotSettingDialogState();
+  State<EHArchiveBotSettingDialog> createState() =>
+      _EHArchiveBotSettingDialogState();
 }
 
 class _EHArchiveBotSettingDialogState extends State<EHArchiveBotSettingDialog> {
-  TextEditingController _apiAddressController = TextEditingController();
-  TextEditingController _apiKeyController = TextEditingController();
+  final TextEditingController _apiAddressController = TextEditingController();
+  final TextEditingController _apiKeyController = TextEditingController();
   late bool _useProxy;
 
   @override
   void initState() {
-    if(widget.apiAddress != null) {
+    if (widget.apiAddress != null) {
       _apiAddressController.text = widget.apiAddress!;
     }
-    if(widget.apiKey != null) {
+    if (widget.apiKey != null) {
       _apiKeyController.text = widget.apiKey!;
     }
     _useProxy = widget.useProxy;
@@ -47,16 +53,24 @@ class _EHArchiveBotSettingDialogState extends State<EHArchiveBotSettingDialog> {
             onPressed: () {
               Telegram.joinChannel(inviteLink: 'https://t.me/EH_ArBot');
             },
-          )
+          ),
         ],
       ),
-      contentPadding: const EdgeInsets.only(left: 8.0, top: 16.0, right: 0, bottom: 24.0),
+      contentPadding: const EdgeInsets.only(
+        left: 8.0,
+        top: 16.0,
+        right: 0,
+        bottom: 24.0,
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           ListTile(
             minLeadingWidth: 40,
-            leading: Text('apiAddress'.tr, style: const TextStyle(fontSize: 14)),
+            leading: Text(
+              'apiAddress'.tr,
+              style: const TextStyle(fontSize: 14),
+            ),
             title: TextField(
               enabled: !_useProxy,
               controller: _apiAddressController,
@@ -106,14 +120,17 @@ class _EHArchiveBotSettingDialogState extends State<EHArchiveBotSettingDialog> {
             ),
           ),
           SwitchListTile(
-            title: Text('useProxyServer'.tr, style: const TextStyle(fontSize: 14)),
+            title: Text(
+              'useProxyServer'.tr,
+              style: const TextStyle(fontSize: 14),
+            ),
             value: _useProxy,
             onChanged: (bool value) async {
               setStateSafely(() {
                 _useProxy = value;
               });
             },
-          )
+          ),
         ],
       ),
       actions: [
@@ -122,7 +139,9 @@ class _EHArchiveBotSettingDialogState extends State<EHArchiveBotSettingDialog> {
           onPressed: () {
             setStateSafely(() {
               archiveBotSetting.saveAllConfig(
-                _apiAddressController.text.isBlank! ? null : _apiAddressController.text,
+                _apiAddressController.text.isBlank!
+                    ? null
+                    : _apiAddressController.text,
                 _apiKeyController.text.isBlank! ? null : _apiKeyController.text,
                 _useProxy,
               );

@@ -25,18 +25,21 @@ class EHCacheManager extends Interceptor {
     // Found
     302,
     // Temporary Redirect
-    307
+    307,
   ];
 
   static const String realUriExtraKey = 'realUri';
 
   EHCacheManager({required CacheOptions options})
-      : assert(options.store != null),
-        _options = options,
-        _store = options.store!;
+    : assert(options.store != null),
+      _options = options,
+      _store = options.store!;
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     CacheOptions cacheOptions = _getCacheOptions(options);
 
     options.extra[realUriExtraKey] = _computeCachedUrl(options, cacheOptions);
@@ -46,7 +49,9 @@ class EHCacheManager extends Interceptor {
       return;
     }
 
-    CacheResponse? cacheResponse = await _getCacheStore(cacheOptions).get(CacheOptions.defaultCacheKeyBuilder(options));
+    CacheResponse? cacheResponse = await _getCacheStore(
+      cacheOptions,
+    ).get(CacheOptions.defaultCacheKeyBuilder(options));
     if (cacheResponse != null && cacheResponse.url == options.uri.toString()) {
       if (cacheResponse.expired()) {
         await _deleteCacheResponse(cacheResponse, cacheOptions);
@@ -78,7 +83,9 @@ class EHCacheManager extends Interceptor {
   }
 
   Future<void> removeCacheByUrl(String url) {
-    String cacheKey = CacheOptions.defaultCacheKeyBuilder(RequestOptions(extra: {EHCacheManager.realUriExtraKey: url}));
+    String cacheKey = CacheOptions.defaultCacheKeyBuilder(
+      RequestOptions(extra: {EHCacheManager.realUriExtraKey: url}),
+    );
     return _store.delete(cacheKey);
   }
 
@@ -116,8 +123,11 @@ class EHCacheManager extends Interceptor {
 
     return cachedUrl;
   }
-  
-  bool _shouldSkipRequest(RequestOptions requestOptions, CacheOptions cacheOptions) {
+
+  bool _shouldSkipRequest(
+    RequestOptions requestOptions,
+    CacheOptions cacheOptions,
+  ) {
     if (requestOptions.method.toUpperCase() == 'POST') {
       return true;
     }
@@ -142,28 +152,42 @@ class EHCacheManager extends Interceptor {
       return true;
     }
 
-    if (!allowedStatusCodes.contains(response?.statusCode)) {
+    if (!allowedStatusCodes.contains(response.statusCode)) {
       return true;
     }
 
     return false;
   }
 
-  Future<void> _saveResponse(Response response, CacheOptions cacheOptions) async {
-    CacheResponse cacheResponse = CacheResponse.fromResponse(response, cacheOptions);
+  Future<void> _saveResponse(
+    Response response,
+    CacheOptions cacheOptions,
+  ) async {
+    CacheResponse cacheResponse = CacheResponse.fromResponse(
+      response,
+      cacheOptions,
+    );
 
     await _getCacheStore(cacheOptions).upsertCache(cacheResponse);
 
     response.extra[CacheResponse.extraKey] = cacheResponse.cacheKey;
   }
 
-  Future<CacheResponse> _updateCacheResponse(CacheResponse cacheResponse, CacheOptions cacheOptions) async {
-    CacheResponse newCacheResponse = cacheResponse.copyWith(expireDate: DateTime.now().add(cacheOptions.expire));
+  Future<CacheResponse> _updateCacheResponse(
+    CacheResponse cacheResponse,
+    CacheOptions cacheOptions,
+  ) async {
+    CacheResponse newCacheResponse = cacheResponse.copyWith(
+      expireDate: DateTime.now().add(cacheOptions.expire),
+    );
     await _getCacheStore(cacheOptions).upsertCache(newCacheResponse);
     return newCacheResponse;
   }
 
-  Future<void> _deleteCacheResponse(CacheResponse cacheResponse, CacheOptions cacheOptions) async {
+  Future<void> _deleteCacheResponse(
+    CacheResponse cacheResponse,
+    CacheOptions cacheOptions,
+  ) async {
     await _getCacheStore(cacheOptions).delete(cacheResponse.cacheKey);
   }
 }
@@ -190,22 +214,43 @@ class CacheOptions {
 
   static const _extraKey = '@cache_options@';
 
-  static get noCacheOptions => CacheOptions(policy: CachePolicy.noCache, expire: networkSetting.pageCacheMaxAge.value);
+  static get noCacheOptions => CacheOptions(
+    policy: CachePolicy.noCache,
+    expire: networkSetting.pageCacheMaxAge.value,
+  );
 
-  static get noCacheOptionsIgnoreParams => CacheOptions(policy: CachePolicy.noCache, expire: networkSetting.pageCacheMaxAge.value, ignoreParams: true);
+  static get noCacheOptionsIgnoreParams => CacheOptions(
+    policy: CachePolicy.noCache,
+    expire: networkSetting.pageCacheMaxAge.value,
+    ignoreParams: true,
+  );
 
-  static get cacheOptions => CacheOptions(policy: CachePolicy.cache, expire: networkSetting.pageCacheMaxAge.value);
+  static get cacheOptions => CacheOptions(
+    policy: CachePolicy.cache,
+    expire: networkSetting.pageCacheMaxAge.value,
+  );
 
-  static get cacheOptionsIgnoreParams => CacheOptions(policy: CachePolicy.cache, expire: networkSetting.pageCacheMaxAge.value, ignoreParams: true);
+  static get cacheOptionsIgnoreParams => CacheOptions(
+    policy: CachePolicy.cache,
+    expire: networkSetting.pageCacheMaxAge.value,
+    ignoreParams: true,
+  );
 
-  const CacheOptions({this.policy = CachePolicy.cache, required this.expire, this.store, this.ignoreParams = false});
+  const CacheOptions({
+    this.policy = CachePolicy.cache,
+    required this.expire,
+    this.store,
+    this.ignoreParams = false,
+  });
 
   static CacheOptions? fromExtra(RequestOptions request) {
     return request.extra[_extraKey];
   }
 
   static String defaultCacheKeyBuilder(RequestOptions request) {
-    return md5.convert(utf8.encode(request.extra[EHCacheManager.realUriExtraKey])).toString();
+    return md5
+        .convert(utf8.encode(request.extra[EHCacheManager.realUriExtraKey]))
+        .toString();
   }
 
   Map<String, dynamic> toExtra() {
@@ -216,8 +261,16 @@ class CacheOptions {
     return Options(extra: toExtra());
   }
 
-  CacheOptions copyWith({CachePolicy? policy, Duration? expire, SqliteCacheStore? store}) {
-    return CacheOptions(policy: policy ?? this.policy, expire: expire ?? this.expire, store: store ?? this.store);
+  CacheOptions copyWith({
+    CachePolicy? policy,
+    Duration? expire,
+    SqliteCacheStore? store,
+  }) {
+    return CacheOptions(
+      policy: policy ?? this.policy,
+      expire: expire ?? this.expire,
+      store: store ?? this.store,
+    );
   }
 }
 
@@ -234,15 +287,26 @@ class CacheResponse {
 
   static const extraKey = '@cache_key@';
 
-  CacheResponse({required this.url, required this.cacheKey, required this.content, required this.headers, required this.expireDate});
+  CacheResponse({
+    required this.url,
+    required this.cacheKey,
+    required this.content,
+    required this.headers,
+    required this.expireDate,
+  });
 
   static CacheResponse fromResponse(Response response, CacheOptions options) {
     return CacheResponse(
-      content: _serializeContent(response.requestOptions.responseType, response.data),
+      content: _serializeContent(
+        response.requestOptions.responseType,
+        response.data,
+      ),
       expireDate: DateTime.now().add(options.expire),
       headers: utf8.encode(jsonEncode(response.headers.map)),
       cacheKey: CacheOptions.defaultCacheKeyBuilder(response.requestOptions),
-      url: response.requestOptions.extra[EHCacheManager.realUriExtraKey] ?? response.requestOptions.uri.toString(),
+      url:
+          response.requestOptions.extra[EHCacheManager.realUriExtraKey] ??
+          response.requestOptions.uri.toString(),
     );
   }
 
@@ -296,7 +360,13 @@ class CacheResponse {
     }
   }
 
-  CacheResponse copyWith({String? url, String? cacheKey, Uint8List? content, Uint8List? headers, DateTime? expireDate}) {
+  CacheResponse copyWith({
+    String? url,
+    String? cacheKey,
+    Uint8List? content,
+    Uint8List? headers,
+    DateTime? expireDate,
+  }) {
     return CacheResponse(
       url: url ?? this.url,
       cacheKey: cacheKey ?? this.cacheKey,
@@ -341,7 +411,13 @@ class SqliteCacheStore {
       if (value == null) {
         return null;
       }
-      return CacheResponse(url: value.url, cacheKey: value.cacheKey, content: value.content, headers: value.headers, expireDate: value.expireDate);
+      return CacheResponse(
+        url: value.url,
+        cacheKey: value.cacheKey,
+        content: value.content,
+        headers: value.headers,
+        expireDate: value.expireDate,
+      );
     });
   }
 

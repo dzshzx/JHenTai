@@ -13,7 +13,10 @@ import '../../blank_page.dart';
 import 'desktop_layout_page_logic.dart';
 
 class DesktopLayoutPage extends StatelessWidget {
-  final DesktopLayoutPageLogic logic = Get.put(DesktopLayoutPageLogic(), permanent: true);
+  final DesktopLayoutPageLogic logic = Get.put(
+    DesktopLayoutPageLogic(),
+    permanent: true,
+  );
   final DesktopLayoutPageState state = Get.find<DesktopLayoutPageLogic>().state;
 
   DesktopLayoutPage({Key? key}) : super(key: key);
@@ -24,9 +27,7 @@ class DesktopLayoutPage extends StatelessWidget {
       children: [
         _leftTabBar(context),
         VerticalDivider(width: 1, color: UIConfig.layoutDividerColor(context)),
-        Expanded(
-          child: _buildDoubleColumn(context),
-        ),
+        Expanded(child: _buildDoubleColumn(context)),
       ],
     );
   }
@@ -63,11 +64,20 @@ class DesktopLayoutPage extends StatelessWidget {
             child: Center(
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  border: state.selectedTabIndex == index ? Border(left: BorderSide(width: 3, color: UIConfig.desktopLeftTabIconColor(context))) : null,
+                  border: state.selectedTabIndex == index
+                      ? Border(
+                          left: BorderSide(
+                            width: 3,
+                            color: UIConfig.desktopLeftTabIconColor(context),
+                          ),
+                        )
+                      : null,
                 ),
                 child: IconButton(
                   onPressed: () => logic.handleTapTabBarButton(index),
-                  icon: state.selectedTabIndex == index ? state.icons[index].selectedIcon : state.icons[index].unselectedIcon,
+                  icon: state.selectedTabIndex == index
+                      ? state.icons[index].selectedIcon
+                      : state.icons[index].unselectedIcon,
                   color: UIConfig.desktopLeftTabIconColor(context),
                 ),
               ),
@@ -78,7 +88,8 @@ class DesktopLayoutPage extends StatelessWidget {
             child: Center(
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
-                transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                transitionBuilder: (child, animation) =>
+                    FadeTransition(opacity: animation, child: child),
                 child: state.hoveringTabIndex != index
                     ? null
                     : Text(
@@ -129,7 +140,7 @@ class DesktopLayoutPage extends StatelessWidget {
       onGenerateInitialRoutes: (_, __) => [
         GetPageRoute(
           settings: const RouteSettings(name: Routes.desktopHome),
-          page: () => DesktopHomePage(),
+          page: DesktopHomePage.new,
           popGesture: false,
           transition: Transition.fadeIn,
           showCupertinoParallax: false,
@@ -142,7 +153,9 @@ class DesktopLayoutPage extends StatelessWidget {
           settings: settings,
 
           /// setting name may include path params
-          page: Routes.pages.firstWhere((page) => settings.name!.split('?')[0] == page.name).page,
+          page: Routes.pages
+              .firstWhere((page) => settings.name!.split('?')[0] == page.name)
+              .page,
 
           popGesture: preferenceSetting.enableSwipeBackGesture.isTrue,
           transition: Transition.fadeIn,
@@ -172,7 +185,9 @@ class DesktopLayoutPage extends StatelessWidget {
           settings: settings,
 
           /// setting name may include path params
-          page: Routes.pages.firstWhere((page) => settings.name!.split('?')[0] == page.name).page,
+          page: Routes.pages
+              .firstWhere((page) => settings.name!.split('?')[0] == page.name)
+              .page,
 
           /// do not use swipe back in tablet layout!
           popGesture: false,

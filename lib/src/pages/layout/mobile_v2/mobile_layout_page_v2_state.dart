@@ -33,7 +33,10 @@ class MobileLayoutPageV2State with DoubleTapToRefreshStateMixin {
   ScrollController scrollController = ScrollController();
 
   /// selectedNavigationIndex's order in [shouldRender] tabs
-  int get selectedDrawerTabOrder => icons.where((icon) => icon.shouldRender).toList().indexWhere((icon) => icon.name == icons[selectedDrawerTabIndex].name);
+  int get selectedDrawerTabOrder => icons
+      .where((icon) => icon.shouldRender)
+      .toList()
+      .indexWhere((icon) => icon.name == icons[selectedDrawerTabIndex].name);
 
   static GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
 
@@ -44,18 +47,25 @@ class MobileLayoutPageV2State with DoubleTapToRefreshStateMixin {
         routeName: Routes.dashboard,
         selectedIcon: const Icon(Icons.home),
         unselectedIcon: const Icon(Icons.home_outlined),
-        page: () => preferenceSetting.simpleDashboardMode.isTrue ? const SimpleDashboardPage() : const DashboardPage(),
+        page: () => preferenceSetting.simpleDashboardMode.isTrue
+            ? const SimpleDashboardPage()
+            : const DashboardPage(),
         scrollController: () => preferenceSetting.simpleDashboardMode.isTrue
-            ? Get.find<SimpleDashboardPageLogic>().scroll2TopState.scrollController
+            ? Get.find<SimpleDashboardPageLogic>()
+                  .scroll2TopState
+                  .scrollController
             : Get.find<DashboardPageLogic>().scroll2TopState.scrollController,
         shouldRender: false,
       ),
       TabBarIcon(
         name: TabBarIconNameEnum.search,
         routeName: Routes.mobileV2Search,
-        selectedIcon: const Icon(Icons.search, shadows: [Shadow(blurRadius: 2)]),
+        selectedIcon: const Icon(
+          Icons.search,
+          shadows: [Shadow(blurRadius: 2)],
+        ),
         unselectedIcon: const Icon(Icons.search),
-        page: () => SearchPageMobileV2(),
+        page: SearchPageMobileV2.new,
         shouldRender: false,
         enterNewRoute: true,
       ),
@@ -64,17 +74,26 @@ class MobileLayoutPageV2State with DoubleTapToRefreshStateMixin {
         routeName: Routes.popular,
         selectedIcon: const Icon(Icons.whatshot),
         unselectedIcon: const Icon(Icons.whatshot_outlined),
-        page: () => PopularPage(showMenuButton: true, showTitle: true, name: 'popular'.tr),
-        scrollController: () => Get.find<PopularPageLogic>().scroll2TopState.scrollController,
+        page: () => PopularPage(
+          showMenuButton: true,
+          showTitle: true,
+          name: 'popular'.tr,
+        ),
+        scrollController: () =>
+            Get.find<PopularPageLogic>().scroll2TopState.scrollController,
         shouldRender: false,
       ),
       TabBarIcon(
         name: TabBarIconNameEnum.ranklist,
         routeName: Routes.ranklist,
-        selectedIcon: const Icon(Icons.bar_chart_rounded, shadows: [Shadow(blurRadius: 2)]),
+        selectedIcon: const Icon(
+          Icons.bar_chart_rounded,
+          shadows: [Shadow(blurRadius: 2)],
+        ),
         unselectedIcon: const Icon(Icons.bar_chart_outlined),
         page: () => const RanklistPage(showMenuButton: true, showTitle: true),
-        scrollController: () => Get.find<RanklistPageLogic>().scroll2TopState.scrollController,
+        scrollController: () =>
+            Get.find<RanklistPageLogic>().scroll2TopState.scrollController,
         shouldRender: false,
       ),
       TabBarIcon(
@@ -82,8 +101,13 @@ class MobileLayoutPageV2State with DoubleTapToRefreshStateMixin {
         routeName: Routes.favorite,
         selectedIcon: const Icon(Icons.favorite),
         unselectedIcon: const Icon(Icons.favorite_outline),
-        page: () => FavoritePage(showMenuButton: true, showTitle: true, name: 'favorite'.tr),
-        scrollController: () => Get.find<FavoritePageLogic>().scroll2TopState.scrollController,
+        page: () => FavoritePage(
+          showMenuButton: true,
+          showTitle: true,
+          name: 'favorite'.tr,
+        ),
+        scrollController: () =>
+            Get.find<FavoritePageLogic>().scroll2TopState.scrollController,
         shouldRender: false,
       ),
       TabBarIcon(
@@ -91,17 +115,30 @@ class MobileLayoutPageV2State with DoubleTapToRefreshStateMixin {
         routeName: Routes.watched,
         selectedIcon: const Icon(Icons.visibility),
         unselectedIcon: const Icon(Icons.visibility_outlined),
-        page: () => WatchedPage(showMenuButton: true, showTitle: true, name: 'watched'.tr),
-        scrollController: () => Get.find<WatchedPageLogic>().scroll2TopState.scrollController,
+        page: () => WatchedPage(
+          showMenuButton: true,
+          showTitle: true,
+          name: 'watched'.tr,
+        ),
+        scrollController: () =>
+            Get.find<WatchedPageLogic>().scroll2TopState.scrollController,
         shouldRender: false,
       ),
       TabBarIcon(
         name: TabBarIconNameEnum.history,
         routeName: Routes.history,
-        selectedIcon: const Icon(Icons.history, shadows: [Shadow(blurRadius: 2)]),
+        selectedIcon: const Icon(
+          Icons.history,
+          shadows: [Shadow(blurRadius: 2)],
+        ),
         unselectedIcon: const Icon(Icons.history_outlined),
-        page: () => HistoryPage(showMenuButton: true, showTitle: true, name: 'history'.tr),
-        scrollController: () => Get.find<HistoryPageLogic>().scroll2TopState.scrollController,
+        page: () => HistoryPage(
+          showMenuButton: true,
+          showTitle: true,
+          name: 'history'.tr,
+        ),
+        scrollController: () =>
+            Get.find<HistoryPageLogic>().scroll2TopState.scrollController,
         shouldRender: false,
       ),
       TabBarIcon(
@@ -123,7 +160,11 @@ class MobileLayoutPageV2State with DoubleTapToRefreshStateMixin {
       ),
     ];
 
-    selectedDrawerTabIndex = icons.firstIndexWhereOrNull((icon) => icon.name == preferenceSetting.defaultTab.value) ?? 0;
+    selectedDrawerTabIndex =
+        icons.firstIndexWhereOrNull(
+          (icon) => icon.name == preferenceSetting.defaultTab.value,
+        ) ??
+        0;
     icons[selectedDrawerTabIndex].shouldRender = true;
   }
 }

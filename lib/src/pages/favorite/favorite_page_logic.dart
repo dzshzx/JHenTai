@@ -11,7 +11,6 @@ import 'package:jhentai/src/widget/eh_favorite_sort_order_dialog.dart';
 
 import '../../enum/config_enum.dart';
 import '../../exception/eh_site_exception.dart';
-import '../../model/gallery.dart';
 import '../../model/search_config.dart';
 import '../../service/local_config_service.dart';
 import '../../utils/eh_spider_parser.dart';
@@ -36,7 +35,9 @@ class FavoritePageLogic extends BasePageLogic {
       return;
     }
 
-    FavoriteSortOrder? result = await Get.dialog(EHFavoriteSortOrderDialog(init: state.favoriteSortOrder));
+    FavoriteSortOrder? result = await Get.dialog(
+      EHFavoriteSortOrderDialog(init: state.favoriteSortOrder),
+    );
     if (result == null) {
       return;
     }
@@ -59,7 +60,10 @@ class FavoritePageLogic extends BasePageLogic {
     updateSafely();
 
     try {
-      await ehRequest.requestChangeFavoriteSortOrder(result, parser: EHSpiderParser.galleryPage2GalleryPageInfo);
+      await ehRequest.requestChangeFavoriteSortOrder(
+        result,
+        parser: EHSpiderParser.galleryPage2GalleryPageInfo,
+      );
     } on DioException catch (e) {
       /// handle with domain fronting, manually load more
       if (e.response?.statusCode == 403 && e.response!.redirects.isNotEmpty) {

@@ -14,7 +14,6 @@ import 'package:jhentai/src/pages/details/details_page.dart';
 import 'package:jhentai/src/pages/details/details_page_logic.dart';
 import 'package:jhentai/src/pages/details/details_page_state.dart';
 import 'package:html/dom.dart' as dom;
-import 'package:jhentai/src/widget/keep_alive.dart';
 
 import '../../../../../config/ui_config.dart';
 import '../../../../../widget/eh_thumbnail.dart';
@@ -45,7 +44,7 @@ class DetailPreviewPage extends DetailsPage {
         child: CustomScrollView(
           cacheExtent: 5000,
           controller: state.scrollController,
-          scrollBehavior: UIConfig.scrollBehaviourWithScrollBarWithMouse  ,
+          scrollBehavior: UIConfig.scrollBehaviourWithScrollBarWithMouse,
           slivers: [
             buildDetail(context),
             buildDivider(),
@@ -64,19 +63,31 @@ class DetailPreviewPage extends DetailsPage {
   @override
   Widget buildActions(BuildContext context) {
     return SliverPadding(
-      padding: const EdgeInsets.only(top: 20, left: UIConfig.detailPagePadding, right: UIConfig.detailPagePadding),
+      padding: const EdgeInsets.only(
+        top: 20,
+        left: UIConfig.detailPagePadding,
+        right: UIConfig.detailPagePadding,
+      ),
       sliver: SliverToBoxAdapter(
         child: SizedBox(
           height: UIConfig.detailsPageActionsHeight,
           child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) => ListView(
               scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-              itemExtent: max(UIConfig.detailsPageActionExtent, (constraints.maxWidth - 15 * 2) / 9),
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
+              ),
+              itemExtent: max(
+                UIConfig.detailsPageActionExtent,
+                (constraints.maxWidth - 15 * 2) / 9,
+              ),
               padding: EdgeInsets.zero,
               children: [
                 IconTextButton(
-                  icon: Icon(Icons.visibility, color: UIConfig.detailsPageActionIconColor(context)),
+                  icon: Icon(
+                    Icons.visibility,
+                    color: UIConfig.detailsPageActionIconColor(context),
+                  ),
                   text: Text(
                     'read'.tr,
                     style: TextStyle(
@@ -88,7 +99,10 @@ class DetailPreviewPage extends DetailsPage {
                   onPressed: () {},
                 ),
                 IconTextButton(
-                  icon: Icon(Icons.download, color: UIConfig.detailsPageActionIconColor(context)),
+                  icon: Icon(
+                    Icons.download,
+                    color: UIConfig.detailsPageActionIconColor(context),
+                  ),
                   text: Text(
                     'download'.tr,
                     style: TextStyle(
@@ -101,7 +115,9 @@ class DetailPreviewPage extends DetailsPage {
                 ),
                 IconTextButton(
                   icon: Icon(
-                    state.galleryDetails!.favoriteTagIndex != null ? Icons.favorite : Icons.favorite_border,
+                    state.galleryDetails!.favoriteTagIndex != null
+                        ? Icons.favorite
+                        : Icons.favorite_border,
                     color: UIConfig.detailsPageActionIconColor(context),
                   ),
                   text: Text(
@@ -118,11 +134,17 @@ class DetailPreviewPage extends DetailsPage {
                 ),
                 IconTextButton(
                   icon: Icon(
-                    state.galleryDetails!.hasRated ? Icons.star : Icons.star_border,
-                    color: state.galleryDetails!.hasRated ? UIConfig.alertColor(context) : UIConfig.detailsPageActionTextColor(context),
+                    state.galleryDetails!.hasRated
+                        ? Icons.star
+                        : Icons.star_border,
+                    color: state.galleryDetails!.hasRated
+                        ? UIConfig.alertColor(context)
+                        : UIConfig.detailsPageActionTextColor(context),
                   ),
                   text: Text(
-                    state.galleryDetails!.hasRated ? state.galleryDetails!.rating.toString() : 'rating'.tr,
+                    state.galleryDetails!.hasRated
+                        ? state.galleryDetails!.rating.toString()
+                        : 'rating'.tr,
                     style: TextStyle(
                       fontSize: UIConfig.detailsPageActionTextSize,
                       color: UIConfig.detailsPageActionTextColor(context),
@@ -132,7 +154,10 @@ class DetailPreviewPage extends DetailsPage {
                   onPressed: () {},
                 ),
                 IconTextButton(
-                  icon: Icon(Icons.archive, color: UIConfig.detailsPageActionIconColor(context)),
+                  icon: Icon(
+                    Icons.archive,
+                    color: UIConfig.detailsPageActionIconColor(context),
+                  ),
                   text: Text(
                     'archive'.tr,
                     style: TextStyle(
@@ -144,7 +169,10 @@ class DetailPreviewPage extends DetailsPage {
                   onPressed: () {},
                 ),
                 IconTextButton(
-                  icon: Icon(Icons.cloud_download, color: UIConfig.detailsPageActionIconColor(context)),
+                  icon: Icon(
+                    Icons.cloud_download,
+                    color: UIConfig.detailsPageActionIconColor(context),
+                  ),
                   text: Text(
                     'H@H',
                     style: TextStyle(
@@ -156,7 +184,10 @@ class DetailPreviewPage extends DetailsPage {
                   onPressed: () {},
                 ),
                 IconTextButton(
-                  icon: Icon(Icons.saved_search, color: UIConfig.detailsPageActionIconColor(context)),
+                  icon: Icon(
+                    Icons.saved_search,
+                    color: UIConfig.detailsPageActionIconColor(context),
+                  ),
                   text: Text(
                     'similar'.tr,
                     style: TextStyle(
@@ -168,7 +199,10 @@ class DetailPreviewPage extends DetailsPage {
                   onPressed: () {},
                 ),
                 IconTextButton(
-                  icon: Icon(Icons.file_present, color: UIConfig.detailsPageActionIconColor(context)),
+                  icon: Icon(
+                    Icons.file_present,
+                    color: UIConfig.detailsPageActionIconColor(context),
+                  ),
                   text: Text(
                     '${'torrent'.tr}(${state.galleryDetails?.torrentCount ?? '.'})',
                     style: TextStyle(
@@ -180,7 +214,10 @@ class DetailPreviewPage extends DetailsPage {
                   onPressed: () {},
                 ),
                 IconTextButton(
-                  icon: Icon(Icons.analytics, color: UIConfig.detailsPageActionIconColor(context)),
+                  icon: Icon(
+                    Icons.analytics,
+                    color: UIConfig.detailsPageActionIconColor(context),
+                  ),
                   text: Text(
                     'statistic'.tr,
                     style: TextStyle(
@@ -202,33 +239,39 @@ class DetailPreviewPage extends DetailsPage {
   @override
   Widget buildThumbnails() {
     return SliverPadding(
-      padding: const EdgeInsets.only(top: 36, left: UIConfig.detailPagePadding, right: UIConfig.detailPagePadding),
+      padding: const EdgeInsets.only(
+        top: 36,
+        left: UIConfig.detailPagePadding,
+        right: UIConfig.detailPagePadding,
+      ),
       sliver: SliverGrid(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            return Column(
-              children: [
-                Expanded(
-                  child: Center(
-                    child: GestureDetector(
-                      child: LayoutBuilder(
-                        builder: (_, constraints) => EHThumbnail(
-                          thumbnail: state.galleryDetails!.thumbnails[index],
-                          containerHeight: constraints.maxHeight,
-                          containerWidth: constraints.maxWidth,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+        delegate: SliverChildBuilderDelegate((context, index) {
+          return Column(
+            children: [
+              Expanded(
+                child: Center(
+                  child: GestureDetector(
+                    child: LayoutBuilder(
+                      builder: (_, constraints) => EHThumbnail(
+                        thumbnail: state.galleryDetails!.thumbnails[index],
+                        containerHeight: constraints.maxHeight,
+                        containerWidth: constraints.maxWidth,
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 3),
-                Text((index + 1).toString(), style: TextStyle(color: UIConfig.detailsPageThumbnailIndexColor(context))),
-              ],
-            );
-          },
-          childCount: state.galleryDetails!.thumbnails.length,
-        ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                (index + 1).toString(),
+                style: TextStyle(
+                  color: UIConfig.detailsPageThumbnailIndexColor(context),
+                ),
+              ),
+            ],
+          );
+        }, childCount: state.galleryDetails!.thumbnails.length),
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
           mainAxisExtent: UIConfig.detailsPageThumbnailHeight,
           maxCrossAxisExtent: UIConfig.detailsPageThumbnailWidth,
@@ -245,7 +288,12 @@ class DetailPreviewPage extends DetailsPage {
       padding: const EdgeInsets.only(top: 12, bottom: 40),
       sliver: SliverToBoxAdapter(
         child: Center(
-          child: Text('noMoreData'.tr, style: TextStyle(color: UIConfig.loadingStateIndicatorButtonColor(context))),
+          child: Text(
+            'noMoreData'.tr,
+            style: TextStyle(
+              color: UIConfig.loadingStateIndicatorButtonColor(context),
+            ),
+          ),
         ),
       ),
     );
@@ -264,13 +312,26 @@ class DetailsPreviewPageLogic extends DetailsPageLogic {
 
 class DetailsPreviewPageState extends DetailsPageState {
   DetailsPreviewPageState() {
-    galleryUrl = const GalleryUrl(isEH: true, gid: 2454686, token: '4227b22404');
+    galleryUrl = const GalleryUrl(
+      isEH: true,
+      gid: 2454686,
+      token: '4227b22404',
+    );
 
     galleryDetails = GalleryDetail(
-      galleryUrl: const GalleryUrl(isEH: true, gid: 2454686, token: '4227b22404'),
+      galleryUrl: const GalleryUrl(
+        isEH: true,
+        gid: 2454686,
+        token: '4227b22404',
+      ),
       rawTitle: 'Title - This is the detail preview page',
       category: 'Doujinshi',
-      cover: GalleryImage(url: 'https://ehgt.org/e5/21/e5217336083e509d7f5757c0b19dc45f1b0ae6ab-4871964-2490-3523-png_250.jpg', height: 354, width: 250),
+      cover: GalleryImage(
+        url:
+            'https://ehgt.org/e5/21/e5217336083e509d7f5757c0b19dc45f1b0ae6ab-4871964-2490-3523-png_250.jpg',
+        height: 354,
+        width: 250,
+      ),
       pageCount: 66,
       rating: 4.5,
       realRating: 4,
@@ -284,17 +345,27 @@ class DetailsPreviewPageState extends DetailsPageState {
       archivePageUrl: 'archivePageUrl page url - preview',
       tags: LinkedHashMap.of({
         'language': [
-          GalleryTag(tagData: TagData(namespace: 'language', key: 'chinese')),
+          GalleryTag(
+            tagData: const TagData(namespace: 'language', key: 'chinese'),
+          ),
         ],
         'artist': [
-          GalleryTag(tagData: TagData(namespace: 'artist', key: 'JTMonster')),
-          GalleryTag(tagData: TagData(namespace: 'artist', key: '酱天小禽兽')),
+          GalleryTag(
+            tagData: const TagData(namespace: 'artist', key: 'JTMonster'),
+          ),
+          GalleryTag(
+            tagData: const TagData(namespace: 'artist', key: '酱天小禽兽'),
+          ),
         ],
         'character': [
-          GalleryTag(tagData: TagData(namespace: 'artist', key: 'Hibiki')),
+          GalleryTag(
+            tagData: const TagData(namespace: 'artist', key: 'Hibiki'),
+          ),
         ],
         'female': [
-          GalleryTag(tagData: TagData(namespace: 'artist', key: 'Hibiki')),
+          GalleryTag(
+            tagData: const TagData(namespace: 'artist', key: 'Hibiki'),
+          ),
         ],
       }),
       publishTime: '2022-02-22 12:12:12',
@@ -305,7 +376,9 @@ class DetailsPreviewPageState extends DetailsPageState {
           username: 'Your name',
           score: '+66',
           scoreDetails: ['JTMONSTER +66'],
-          content: dom.Element.html('<p>Comment - This is a comment from mine, you can see the color of the uploader is different</p>'),
+          content: dom.Element.html(
+            '<p>Comment - This is a comment from mine, you can see the color of the uploader is different</p>',
+          ),
           time: '2022-02-22 12:23',
           fromMe: true,
           votedUp: true,
@@ -316,7 +389,9 @@ class DetailsPreviewPageState extends DetailsPageState {
           username: 'Others',
           score: '-666',
           scoreDetails: ['JTMONSTER -666'],
-          content: dom.Element.html('<p>Comment - This is a comment from others</p>'),
+          content: dom.Element.html(
+            '<p>Comment - This is a comment from others</p>',
+          ),
           time: '2022-02-22 12:23',
           fromMe: false,
           votedUp: false,
@@ -326,32 +401,38 @@ class DetailsPreviewPageState extends DetailsPageState {
       thumbnails: [
         GalleryThumbnail(
           href: 'href - preview',
-          thumbUrl: 'https://ehgt.org/e5/21/e5217336083e509d7f5757c0b19dc45f1b0ae6ab-4871964-2490-3523-png_250.jpg',
+          thumbUrl:
+              'https://ehgt.org/e5/21/e5217336083e509d7f5757c0b19dc45f1b0ae6ab-4871964-2490-3523-png_250.jpg',
           isLarge: true,
         ),
         GalleryThumbnail(
           href: 'href - preview',
-          thumbUrl: 'https://ehgt.org/db/f5/dbf5141490676994fe3d7df681cb30a5080b6f11-8415428-2796-4015-jpg_250.jpg',
+          thumbUrl:
+              'https://ehgt.org/db/f5/dbf5141490676994fe3d7df681cb30a5080b6f11-8415428-2796-4015-jpg_250.jpg',
           isLarge: true,
         ),
         GalleryThumbnail(
           href: 'href - preview',
-          thumbUrl: 'https://ehgt.org/e1/ba/e1bab290a2ca1217955d395bd6e0a56874383c4e-8159354-2796-4015-jpg_250.jpg',
+          thumbUrl:
+              'https://ehgt.org/e1/ba/e1bab290a2ca1217955d395bd6e0a56874383c4e-8159354-2796-4015-jpg_250.jpg',
           isLarge: true,
         ),
         GalleryThumbnail(
           href: 'href - preview',
-          thumbUrl: 'https://ehgt.org/c1/fc/c1fc4299c883bb5a6e2e7142a635b9349f07030d-7593228-2796-4015-jpg_250.jpg',
+          thumbUrl:
+              'https://ehgt.org/c1/fc/c1fc4299c883bb5a6e2e7142a635b9349f07030d-7593228-2796-4015-jpg_250.jpg',
           isLarge: true,
         ),
         GalleryThumbnail(
           href: 'href - preview',
-          thumbUrl: 'https://ehgt.org/54/66/5466d5c0318f708c5f7d0d71930a68ca549fa73c-954881-1800-2544-jpg_250.jpg',
+          thumbUrl:
+              'https://ehgt.org/54/66/5466d5c0318f708c5f7d0d71930a68ca549fa73c-954881-1800-2544-jpg_250.jpg',
           isLarge: true,
         ),
         GalleryThumbnail(
           href: 'href - preview',
-          thumbUrl: 'https://ehgt.org/6d/06/6d06775741f61da2d9989ed5e42dd0e672858b7a-3183575-2115-3036-jpg_250.jpg',
+          thumbUrl:
+              'https://ehgt.org/6d/06/6d06775741f61da2d9989ed5e42dd0e672858b7a-3183575-2115-3036-jpg_250.jpg',
           isLarge: true,
         ),
       ],

@@ -17,19 +17,24 @@ class EHMouseButtonListener extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
-    final DeviceGestureSettings? gestureSettings = MediaQuery.maybeOf(context)?.gestureSettings;
+    final Map<Type, GestureRecognizerFactory> gestures =
+        <Type, GestureRecognizerFactory>{};
+    final DeviceGestureSettings? gestureSettings = MediaQuery.maybeOf(
+      context,
+    )?.gestureSettings;
 
     if (onForthButtonTapDown != null || onFifthButtonTapDown != null) {
-      gestures[ForthAndFifthButtonTapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<ForthAndFifthButtonTapGestureRecognizer>(
-        () => ForthAndFifthButtonTapGestureRecognizer(),
-        (ForthAndFifthButtonTapGestureRecognizer instance) {
-          instance
-            ..onForthTapDown = onForthButtonTapDown
-            ..onFifthTapDown = onFifthButtonTapDown
-            ..gestureSettings = gestureSettings;
-        },
-      );
+      gestures[ForthAndFifthButtonTapGestureRecognizer] =
+          GestureRecognizerFactoryWithHandlers<
+            ForthAndFifthButtonTapGestureRecognizer
+          >(ForthAndFifthButtonTapGestureRecognizer.new, (
+            ForthAndFifthButtonTapGestureRecognizer instance,
+          ) {
+            instance
+              ..onForthTapDown = onForthButtonTapDown
+              ..onFifthTapDown = onFifthButtonTapDown
+              ..gestureSettings = gestureSettings;
+          });
     }
 
     return RawGestureDetector(
@@ -57,12 +62,16 @@ class ForthAndFifthButtonTapGestureRecognizer extends BaseTapGestureRecognizer {
   bool isPointerAllowed(PointerDownEvent event) {
     switch (event.buttons) {
       case kForwardMouseButton:
-        if (onForthTapDown == null && onForthTapUp == null && onForthTapCancel == null) {
+        if (onForthTapDown == null &&
+            onForthTapUp == null &&
+            onForthTapCancel == null) {
           return false;
         }
         break;
       case kBackMouseButton:
-        if (onFifthTapDown == null && onFifthTapUp == null && onFifthTapCancel == null) {
+        if (onFifthTapDown == null &&
+            onFifthTapUp == null &&
+            onFifthTapCancel == null) {
           return false;
         }
         break;
@@ -73,7 +82,11 @@ class ForthAndFifthButtonTapGestureRecognizer extends BaseTapGestureRecognizer {
   }
 
   @override
-  void handleTapCancel({required PointerDownEvent down, PointerCancelEvent? cancel, required String reason}) {
+  void handleTapCancel({
+    required PointerDownEvent down,
+    PointerCancelEvent? cancel,
+    required String reason,
+  }) {
     final String note = reason == '' ? reason : '$reason ';
     switch (down.buttons) {
       case kForwardMouseButton:
@@ -100,12 +113,18 @@ class ForthAndFifthButtonTapGestureRecognizer extends BaseTapGestureRecognizer {
     switch (down.buttons) {
       case kForwardMouseButton:
         if (onForthTapDown != null) {
-          invokeCallback<void>('onForthTapDown', () => onForthTapDown!(details));
+          invokeCallback<void>(
+            'onForthTapDown',
+            () => onForthTapDown!(details),
+          );
         }
         break;
       case kBackMouseButton:
         if (onFifthTapDown != null) {
-          invokeCallback<void>('onFifthTapDown', () => onFifthTapDown!(details));
+          invokeCallback<void>(
+            'onFifthTapDown',
+            () => onFifthTapDown!(details),
+          );
         }
         break;
       default:
@@ -113,7 +132,10 @@ class ForthAndFifthButtonTapGestureRecognizer extends BaseTapGestureRecognizer {
   }
 
   @override
-  void handleTapUp({required PointerDownEvent down, required PointerUpEvent up}) {
+  void handleTapUp({
+    required PointerDownEvent down,
+    required PointerUpEvent up,
+  }) {
     final TapUpDetails details = TapUpDetails(
       kind: up.kind,
       globalPosition: up.position,

@@ -19,7 +19,9 @@ import 'archive_download_service.dart';
 /// Load galleries in download directory but is not downloaded by JHenTai
 LocalGalleryService localGalleryService = LocalGalleryService();
 
-class LocalGalleryService extends GetxController with GridBasePageServiceMixin, JHLifeCircleBeanErrorCatch implements JHLifeCircleBean {
+class LocalGalleryService extends GetxController
+    with GridBasePageServiceMixin, JHLifeCircleBeanErrorCatch
+    implements JHLifeCircleBean {
   static const String rootPath = '';
 
   LoadingState loadingState = LoadingState.idle;
@@ -66,8 +68,13 @@ class LocalGalleryService extends GetxController with GridBasePageServiceMixin, 
   }
 
   List<GalleryImage> getGalleryImages(LocalGallery gallery) {
-    List<File> imageFiles = Directory(gallery.path).listSync().whereType<File>().where((image) => FileUtil.isImageExtension(image.path)).toList()
-      ..sort(FileUtil.naturalCompareFile);
+    List<File> imageFiles =
+        Directory(gallery.path)
+            .listSync()
+            .whereType<File>()
+            .where((image) => FileUtil.isImageExtension(image.path))
+            .toList()
+          ..sort(FileUtil.naturalCompareFile);
 
     return imageFiles
         .map(
@@ -86,17 +93,23 @@ class LocalGalleryService extends GetxController with GridBasePageServiceMixin, 
     Directory dir = Directory(gallery.path);
 
     List<File> allFiles = dir.listSync().whereType<File>().toList();
-    List<File> imageFiles = dir.listSync().whereType<File>().where((image) => FileUtil.isImageExtension(image.path)).toList();
+    List<File> imageFiles = dir
+        .listSync()
+        .whereType<File>()
+        .where((image) => FileUtil.isImageExtension(image.path))
+        .toList();
     if (allFiles.length == imageFiles.length) {
       dir.delete(recursive: true).catchError((e) {
         log.error('Delete local gallery error!', e);
         log.uploadError(e);
+        return dir;
       });
     } else {
       for (File file in imageFiles) {
         file.delete().catchError((e) {
           log.error('Delete local gallery error!', e);
           log.uploadError(e);
+          return file;
         });
       }
     }
@@ -108,99 +121,134 @@ class LocalGalleryService extends GetxController with GridBasePageServiceMixin, 
   }
 
   Future<void> _loadGalleriesFromDisk() {
-    List<Future> futures = downloadSetting.extraGalleryScanPath.map((path) => _parseDirectory(Directory(path), true)).toList();
+    List<Future> futures = downloadSetting.extraGalleryScanPath
+        .map((path) => _parseDirectory(Directory(path), true))
+        .toList();
 
-    return Future.wait(futures).onError((error, stackTrace) {
-      log.error('_loadGalleriesFromDisk failed, path: ${downloadSetting.extraGalleryScanPath}', error, stackTrace);
-      return [];
-    }).whenComplete(() {
-      allGallerys.sort((a, b) => FileUtil.naturalCompare(a.title, b.title));
-      for (List<LocalGallery> dirs in path2GalleryDir.values) {
-        dirs.sort((a, b) => FileUtil.naturalCompare(a.title, b.title));
-      }
-    });
+    return Future.wait(futures)
+        .onError((error, stackTrace) {
+          log.error(
+            '_loadGalleriesFromDisk failed, path: ${downloadSetting.extraGalleryScanPath}',
+            error,
+            stackTrace,
+          );
+          return [];
+        })
+        .whenComplete(() {
+          allGallerys.sort((a, b) => FileUtil.naturalCompare(a.title, b.title));
+          for (List<LocalGallery> dirs in path2GalleryDir.values) {
+            dirs.sort((a, b) => FileUtil.naturalCompare(a.title, b.title));
+          }
+        });
   }
 
-  Future<LocalGalleryParseResult> _parseDirectory(Directory directory, bool isRootDir) {
+  Future<LocalGalleryParseResult> _parseDirectory(
+    Directory directory,
+    bool isRootDir,
+  ) {
     Completer<LocalGalleryParseResult> completer = Completer();
     LocalGalleryParseResult result = LocalGalleryParseResult();
 
     Future<bool> future = directory.exists();
 
     /// skip if it is JHenTai gallery directory -> metadata file exists
-    future = future.then<bool>((success) {
-      if (success) {
-        return File(join(directory.path, GalleryDownloadService.metadataFileName)).exists().then((value) => !value);
-      } else {
-        completer.isCompleted ? null : completer.complete(result);
-        return false;
-      }
-    }).catchError((e, stack) {
-      completer.isCompleted ? null : completer.completeError(e, stack);
-      return false;
-    });
+    future = future
+        .then<bool>((success) {
+          if (success) {
+            return File(
+              join(directory.path, GalleryDownloadService.metadataFileName),
+            ).exists().then((value) => !value);
+          } else {
+            completer.isCompleted ? null : completer.complete(result);
+            return false;
+          }
+        })
+        .catchError((e, stack) {
+          completer.isCompleted ? null : completer.completeError(e, stack);
+          return false;
+        });
 
-    future = future.then<bool>((success) {
-      if (success) {
-        return File(join(directory.path, ArchiveDownloadService.metadataFileName)).exists().then((value) => !value);
-      } else {
-        completer.isCompleted ? null : completer.complete(result);
-        return false;
-      }
-    }).catchError((e, stack) {
-      completer.isCompleted ? null : completer.completeError(e, stack);
-      return false;
-    });
+    future = future
+        .then<bool>((success) {
+          if (success) {
+            return File(
+              join(directory.path, ArchiveDownloadService.metadataFileName),
+            ).exists().then((value) => !value);
+          } else {
+            completer.isCompleted ? null : completer.complete(result);
+            return false;
+          }
+        })
+        .catchError((e, stack) {
+          completer.isCompleted ? null : completer.completeError(e, stack);
+          return false;
+        });
 
     /// recursively list all files in directory
-    future = future.then<bool>((success) {
-      if (success) {
-        List<Future> subFutures = [];
-        List<File> images = [];
-        String parentPath = isRootDir ? rootPath : directory.parent.path;
+    future = future
+        .then<bool>((success) {
+          if (success) {
+            List<Future> subFutures = [];
+            List<File> images = [];
+            String parentPath = isRootDir ? rootPath : directory.parent.path;
 
-        directory.list().listen(
-          (entity) {
-            if (entity is File && FileUtil.isImageExtension(entity.path) && result.isLegalGalleryDir == false) {
-              result.isLegalGalleryDir = true;
-              images.add(entity);
-            } else if (entity is Directory) {
-              subFutures.add(
-                _parseDirectory(entity, false).then((subResult) {
-                  if (subResult.isLegalGalleryDir || subResult.isLegalNestedGalleryDir) {
-                    result.isLegalNestedGalleryDir = true;
-                    (path2SubDir[parentPath] ??= []).addIfNotExists(directory.path);
-                    path2SubDir[parentPath]!.sort((a, b) => FileUtil.naturalCompare(basenameWithoutExtension(a), basenameWithoutExtension(b)));
-                  }
-                }),
-              );
-            }
-          },
-          onDone: () {
-            if (result.isLegalGalleryDir) {
-              images.sort(FileUtil.naturalCompareFile);
-              _initGalleryInfoInMemory(directory, images[0], parentPath);
-            }
+            directory.list().listen(
+              (entity) {
+                if (entity is File &&
+                    FileUtil.isImageExtension(entity.path) &&
+                    result.isLegalGalleryDir == false) {
+                  result.isLegalGalleryDir = true;
+                  images.add(entity);
+                } else if (entity is Directory) {
+                  subFutures.add(
+                    _parseDirectory(entity, false).then((subResult) {
+                      if (subResult.isLegalGalleryDir ||
+                          subResult.isLegalNestedGalleryDir) {
+                        result.isLegalNestedGalleryDir = true;
+                        (path2SubDir[parentPath] ??= []).addIfNotExists(
+                          directory.path,
+                        );
+                        path2SubDir[parentPath]!.sort(
+                          (a, b) => FileUtil.naturalCompare(
+                            basenameWithoutExtension(a),
+                            basenameWithoutExtension(b),
+                          ),
+                        );
+                      }
+                    }),
+                  );
+                }
+              },
+              onDone: () {
+                if (result.isLegalGalleryDir) {
+                  images.sort(FileUtil.naturalCompareFile);
+                  _initGalleryInfoInMemory(directory, images[0], parentPath);
+                }
 
-            Future.wait(subFutures).then((_) {
-              completer.isCompleted ? null : completer.complete(result);
-            });
-          },
-          onError: completer.completeError,
-        );
-      } else {
-        completer.isCompleted ? null : completer.complete(result);
-      }
-      return success;
-    }).catchError((e, stack) {
-      completer.isCompleted ? null : completer.completeError(e, stack);
-      return false;
-    });
+                Future.wait(subFutures).then((_) {
+                  completer.isCompleted ? null : completer.complete(result);
+                });
+              },
+              onError: completer.completeError,
+            );
+          } else {
+            completer.isCompleted ? null : completer.complete(result);
+          }
+          return success;
+        })
+        .catchError((e, stack) {
+          completer.isCompleted ? null : completer.completeError(e, stack);
+          return false;
+        });
 
     return completer.future;
   }
 
-  void _initGalleryInfoInMemory(Directory galleryDir, File coverImage, String parentPath) {
+  void _initGalleryInfoInMemory(
+    Directory galleryDir,
+    File coverImage,
+    String parentPath,
+  ) {
     LocalGallery gallery = LocalGallery(
       title: basename(galleryDir.path),
       path: galleryDir.path,

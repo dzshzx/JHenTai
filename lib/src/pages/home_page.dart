@@ -43,7 +43,8 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with LoginRequiredMixin, WindowListener, WindowWidgetMixin {
+class _HomePageState extends State<HomePage>
+    with LoginRequiredMixin, WindowListener, WindowWidgetMixin {
   StreamSubscription? _intentDataStreamSubscription;
   String? _lastDetectedText;
 
@@ -70,29 +71,29 @@ class _HomePageState extends State<HomePage> with LoginRequiredMixin, WindowList
   Widget build(BuildContext context) {
     return buildWindow(
       child: LayoutBuilder(
-        builder: (_, __) => Obx(
-          () {
-            if (styleSetting.layout.value == LayoutMode.mobileV2 || styleSetting.layout.value == LayoutMode.mobile) {
-              styleSetting.actualLayout = LayoutMode.mobileV2;
-              return MobileLayoutPageV2();
-            }
+        builder: (_, __) => Obx(() {
+          if (styleSetting.layout.value == LayoutMode.mobileV2 ||
+              styleSetting.layout.value == LayoutMode.mobile) {
+            styleSetting.actualLayout = LayoutMode.mobileV2;
+            return MobileLayoutPageV2();
+          }
 
-            /// Device width is under 600, degrade to mobileV2 layout.
-            if (fullScreenWidth < 600) {
-              styleSetting.actualLayout = LayoutMode.mobileV2;
-              untilRoute2BlankPage();
-              return MobileLayoutPageV2();
-            }
+          /// Device width is under 600, degrade to mobileV2 layout.
+          if (fullScreenWidth < 600) {
+            styleSetting.actualLayout = LayoutMode.mobileV2;
+            untilRoute2BlankPage();
+            return MobileLayoutPageV2();
+          }
 
-            if (styleSetting.layout.value == LayoutMode.tabletV2 || styleSetting.layout.value == LayoutMode.tablet) {
-              styleSetting.actualLayout = LayoutMode.tabletV2;
-              return TabletLayoutPageV2();
-            }
+          if (styleSetting.layout.value == LayoutMode.tabletV2 ||
+              styleSetting.layout.value == LayoutMode.tablet) {
+            styleSetting.actualLayout = LayoutMode.tabletV2;
+            return const TabletLayoutPageV2();
+          }
 
-            styleSetting.actualLayout = LayoutMode.desktop;
-            return DesktopLayoutPage();
-          },
-        ),
+          styleSetting.actualLayout = LayoutMode.desktop;
+          return DesktopLayoutPage();
+        }),
       ),
     );
   }
@@ -103,83 +104,100 @@ class _HomePageState extends State<HomePage> with LoginRequiredMixin, WindowList
       return;
     }
 
-    ReceiveSharingIntent.instance.getInitialMedia().then(
-      (List<SharedMediaFile> files) {
-        if (files.isEmpty) {
-          return;
-        }
+    ReceiveSharingIntent.instance
+        .getInitialMedia()
+        .then((List<SharedMediaFile> files) {
+          if (files.isEmpty) {
+            return;
+          }
 
-        SharedMediaFile file = files.first;
-        if (file.type != SharedMediaType.url && file.type != SharedMediaType.text) {
-          return;
-        }
+          SharedMediaFile file = files.first;
+          if (file.type != SharedMediaType.url &&
+              file.type != SharedMediaType.text) {
+            return;
+          }
 
-        GalleryUrl? galleryUrl = GalleryUrl.tryParse(file.path);
-        if (galleryUrl != null) {
-          toRoute(
-            Routes.details,
-            arguments: DetailsPageArgument(galleryUrl: galleryUrl),
-            offAllBefore: false,
-            preventDuplicates: false,
-          );
-          return;
-        }
+          GalleryUrl? galleryUrl = GalleryUrl.tryParse(file.path);
+          if (galleryUrl != null) {
+            toRoute(
+              Routes.details,
+              arguments: DetailsPageArgument(galleryUrl: galleryUrl),
+              offAllBefore: false,
+              preventDuplicates: false,
+            );
+            return;
+          }
 
-        GalleryImagePageUrl? galleryImagePageUrl = GalleryImagePageUrl.tryParse(file.path);
-        if (galleryImagePageUrl != null) {
-          toRoute(
-            Routes.imagePage,
-            arguments: GalleryImagePageArgument(galleryImagePageUrl: galleryImagePageUrl),
-            offAllBefore: false,
-          );
-          return;
-        }
+          GalleryImagePageUrl? galleryImagePageUrl =
+              GalleryImagePageUrl.tryParse(file.path);
+          if (galleryImagePageUrl != null) {
+            toRoute(
+              Routes.imagePage,
+              arguments: GalleryImagePageArgument(
+                galleryImagePageUrl: galleryImagePageUrl,
+              ),
+              offAllBefore: false,
+            );
+            return;
+          }
 
-        toast('Invalid jump link', isShort: false);
-      },
-    ).whenComplete(() {
-      ReceiveSharingIntent.instance.reset();
-    });
+          toast('Invalid jump link', isShort: false);
+        })
+        .whenComplete(() {
+          ReceiveSharingIntent.instance.reset();
+        });
 
-    _intentDataStreamSubscription = ReceiveSharingIntent.instance.getMediaStream().listen(
-      (List<SharedMediaFile> files) {
-        if (files.isEmpty) {
-          return;
-        }
+    _intentDataStreamSubscription = ReceiveSharingIntent.instance
+        .getMediaStream()
+        .listen(
+          (List<SharedMediaFile> files) {
+            if (files.isEmpty) {
+              return;
+            }
 
-        SharedMediaFile file = files.first;
-        if (file.type != SharedMediaType.url && file.type != SharedMediaType.text) {
-          return;
-        }
+            SharedMediaFile file = files.first;
+            if (file.type != SharedMediaType.url &&
+                file.type != SharedMediaType.text) {
+              return;
+            }
 
-        GalleryUrl? galleryUrl = GalleryUrl.tryParse(file.path);
-        if (galleryUrl != null) {
-          untilRoute(currentRoute: Routes.details, predicate: (route) => route.settings.name != Routes.read);
-          toRoute(
-            Routes.details,
-            arguments: DetailsPageArgument(galleryUrl: galleryUrl),
-            offAllBefore: false,
-            preventDuplicates: false,
-          );
-          return;
-        }
+            GalleryUrl? galleryUrl = GalleryUrl.tryParse(file.path);
+            if (galleryUrl != null) {
+              untilRoute(
+                currentRoute: Routes.details,
+                predicate: (route) => route.settings.name != Routes.read,
+              );
+              toRoute(
+                Routes.details,
+                arguments: DetailsPageArgument(galleryUrl: galleryUrl),
+                offAllBefore: false,
+                preventDuplicates: false,
+              );
+              return;
+            }
 
-        GalleryImagePageUrl? galleryImagePageUrl = GalleryImagePageUrl.tryParse(file.path);
-        if (galleryImagePageUrl != null) {
-          untilRoute(currentRoute: Routes.details, predicate: (route) => route.settings.name != Routes.read);
-          toRoute(
-            Routes.imagePage,
-            arguments: GalleryImagePageArgument(galleryImagePageUrl: galleryImagePageUrl),
-            offAllBefore: false,
-          );
-          return;
-        }
-      },
-      onError: (e) {
-        log.error('ReceiveSharingIntent Error!', e);
-        log.uploadError(e);
-      },
-    );
+            GalleryImagePageUrl? galleryImagePageUrl =
+                GalleryImagePageUrl.tryParse(file.path);
+            if (galleryImagePageUrl != null) {
+              untilRoute(
+                currentRoute: Routes.details,
+                predicate: (route) => route.settings.name != Routes.read,
+              );
+              toRoute(
+                Routes.imagePage,
+                arguments: GalleryImagePageArgument(
+                  galleryImagePageUrl: galleryImagePageUrl,
+                ),
+                offAllBefore: false,
+              );
+              return;
+            }
+          },
+          onError: (e) {
+            log.error('ReceiveSharingIntent Error!', e);
+            log.uploadError(e);
+          },
+        );
   }
 
   /// a gallery url exists in clipboard, show dialog to check whether enter detail page
@@ -190,7 +208,9 @@ class _HomePageState extends State<HomePage> with LoginRequiredMixin, WindowList
 
     String rawText = await FlutterClipboard.paste();
     GalleryUrl? galleryUrl = GalleryUrl.tryParse(rawText);
-    GalleryImagePageUrl? galleryImagePageUrl = GalleryImagePageUrl.tryParse(rawText);
+    GalleryImagePageUrl? galleryImagePageUrl = GalleryImagePageUrl.tryParse(
+      rawText,
+    );
 
     if (galleryUrl == null && galleryImagePageUrl == null) {
       return;
@@ -231,7 +251,9 @@ class _HomePageState extends State<HomePage> with LoginRequiredMixin, WindowList
           }
           toRoute(
             Routes.imagePage,
-            arguments: GalleryImagePageArgument(galleryImagePageUrl: galleryImagePageUrl),
+            arguments: GalleryImagePageArgument(
+              galleryImagePageUrl: galleryImagePageUrl,
+            ),
             offAllBefore: false,
           );
         },

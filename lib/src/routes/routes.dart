@@ -114,12 +114,14 @@ class Routes {
   static const String tagSets = "/setting_EH/tagSets";
 
   static const String blockingRules = "/setting_preference/blockingRules";
-  static const String configureBlockingRules = "/setting_preference/blockRules/configureBlockingRules";
+  static const String configureBlockingRules =
+      "/setting_preference/blockRules/configureBlockingRules";
 
   static const String hostMapping = "/setting_network/hostMapping";
   static const String proxy = "/setting_network/proxy";
 
-  static const String extraGalleryScanPath = "/setting_download/extraGalleryScanPath";
+  static const String extraGalleryScanPath =
+      "/setting_download/extraGalleryScanPath";
   static const String archiveBotSettings = '/setting/download/archive_bot';
 
   static const String superResolution = "/setting_advanced/superResolution";
@@ -128,7 +130,10 @@ class Routes {
 
   static const String configSync = "/setting_cloud/configSync";
 
-  static final Transition defaultTransition = preferenceSetting.enableSwipeBackGesture.isTrue ? Transition.cupertino : Transition.fadeIn;
+  static final Transition defaultTransition =
+      preferenceSetting.enableSwipeBackGesture.isTrue
+      ? Transition.cupertino
+      : Transition.fadeIn;
 
   static List<EHPage> pages = <EHPage>[
     EHPage(
@@ -152,7 +157,7 @@ class Routes {
     ),
     EHPage(
       name: read,
-      page: () => ReadPage(),
+      page: ReadPage.new,
       transition: defaultTransition,
       side: Side.fullScreen,
     ),
@@ -170,13 +175,13 @@ class Routes {
     ),
     EHPage(
       name: desktopHome,
-      page: () => DesktopHomePage(),
+      page: DesktopHomePage.new,
       transition: defaultTransition,
       side: Side.left,
     ),
     EHPage(
       name: mobileLayoutV2,
-      page: () => MobileLayoutPageV2(),
+      page: MobileLayoutPageV2.new,
       transition: defaultTransition,
       side: Side.left,
     ),
@@ -187,7 +192,7 @@ class Routes {
     ),
     EHPage(
       name: imagePage,
-      page: () => GalleryImagePage(),
+      page: GalleryImagePage.new,
       transition: defaultTransition,
     ),
     EHPage(
@@ -222,7 +227,7 @@ class Routes {
     ),
     EHPage(
       name: history,
-      page: () => HistoryPage(),
+      page: HistoryPage.new,
       transition: defaultTransition,
       side: Side.left,
     ),
@@ -240,13 +245,13 @@ class Routes {
     ),
     EHPage(
       name: mobileV2Search,
-      page: () => SearchPageMobileV2(),
+      page: SearchPageMobileV2.new,
       transition: defaultTransition,
       side: Side.left,
     ),
     EHPage(
       name: downloadSearch,
-      page: () => DownloadSearchPage(),
+      page: DownloadSearchPage.new,
       transition: defaultTransition,
       side: Side.left,
     ),
@@ -264,13 +269,16 @@ class Routes {
     ),
     EHPage(
       name: quickSearch,
-      page: () => QuickSearchPage(automaticallyImplyLeading: true).withEscOrFifthButton2BackRightRoute(),
+      page: () => const QuickSearchPage(
+        automaticallyImplyLeading: true,
+      ).withEscOrFifthButton2BackRightRoute(),
       transition: defaultTransition,
       offAllBefore: false,
     ),
     EHPage(
       name: settingAccount,
-      page: () => const SettingAccountPage().withEscOrFifthButton2BackRightRoute(),
+      page: () =>
+          const SettingAccountPage().withEscOrFifthButton2BackRightRoute(),
       transition: defaultTransition,
     ),
     EHPage(
@@ -280,7 +288,8 @@ class Routes {
     ),
     EHPage(
       name: settingStyle,
-      page: () => const SettingStylePage().withEscOrFifthButton2BackRightRoute(),
+      page: () =>
+          const SettingStylePage().withEscOrFifthButton2BackRightRoute(),
       transition: defaultTransition,
     ),
     EHPage(
@@ -290,7 +299,8 @@ class Routes {
     ),
     EHPage(
       name: settingPreference,
-      page: () => SettingPreferencePage().withEscOrFifthButton2BackRightRoute(),
+      page: () =>
+          const SettingPreferencePage().withEscOrFifthButton2BackRightRoute(),
       transition: defaultTransition,
     ),
     EHPage(
@@ -300,27 +310,32 @@ class Routes {
     ),
     EHPage(
       name: settingDownload,
-      page: () => const SettingDownloadPage().withEscOrFifthButton2BackRightRoute(),
+      page: () =>
+          const SettingDownloadPage().withEscOrFifthButton2BackRightRoute(),
       transition: defaultTransition,
     ),
     EHPage(
       name: settingPerformance,
-      page: () => SettingPerformancePage().withEscOrFifthButton2BackRightRoute(),
+      page: () =>
+          SettingPerformancePage().withEscOrFifthButton2BackRightRoute(),
       transition: defaultTransition,
     ),
     EHPage(
       name: settingMouseWheel,
-      page: () => const SettingMouseWheelPage().withEscOrFifthButton2BackRightRoute(),
+      page: () =>
+          const SettingMouseWheelPage().withEscOrFifthButton2BackRightRoute(),
       transition: defaultTransition,
     ),
     EHPage(
       name: settingAdvanced,
-      page: () => const SettingAdvancedPage().withEscOrFifthButton2BackRightRoute(),
+      page: () =>
+          const SettingAdvancedPage().withEscOrFifthButton2BackRightRoute(),
       transition: defaultTransition,
     ),
     EHPage(
       name: settingCloud,
-      page: () => const SettingCloudPage().withEscOrFifthButton2BackRightRoute(),
+      page: () =>
+          const SettingCloudPage().withEscOrFifthButton2BackRightRoute(),
       transition: defaultTransition,
     ),
     EHPage(
@@ -330,12 +345,14 @@ class Routes {
     ),
     EHPage(
       name: settingSecurity,
-      page: () => const SettingSecurityPage().withEscOrFifthButton2BackRightRoute(),
+      page: () =>
+          const SettingSecurityPage().withEscOrFifthButton2BackRightRoute(),
       transition: defaultTransition,
     ),
     EHPage(
       name: settingAbout,
-      page: () => const SettingAboutPage().withEscOrFifthButton2BackRightRoute(),
+      page: () =>
+          const SettingAboutPage().withEscOrFifthButton2BackRightRoute(),
       transition: defaultTransition,
     ),
     EHPage(
@@ -352,19 +369,22 @@ class Routes {
     ),
     EHPage(
       name: themeColor,
-      page: () => const SettingThemeColorPage().withEscOrFifthButton2BackRightRoute(),
+      page: () =>
+          const SettingThemeColorPage().withEscOrFifthButton2BackRightRoute(),
       transition: defaultTransition,
       offAllBefore: false,
     ),
     EHPage(
       name: pageListStyle,
-      page: () => SettingPageListStylePage().withEscOrFifthButton2BackRightRoute(),
+      page: () =>
+          SettingPageListStylePage().withEscOrFifthButton2BackRightRoute(),
       transition: defaultTransition,
       offAllBefore: false,
     ),
     EHPage(
       name: profile,
-      page: () => SettingEHProfilePage().withEscOrFifthButton2BackRightRoute(),
+      page: () =>
+          const SettingEHProfilePage().withEscOrFifthButton2BackRightRoute(),
       transition: defaultTransition,
       offAllBefore: false,
     ),
@@ -382,31 +402,36 @@ class Routes {
     ),
     EHPage(
       name: configureBlockingRules,
-      page: () => ConfigureBlockingRulePage().withEscOrFifthButton2BackRightRoute(),
+      page: () =>
+          ConfigureBlockingRulePage().withEscOrFifthButton2BackRightRoute(),
       transition: defaultTransition,
       offAllBefore: false,
     ),
     EHPage(
       name: proxy,
-      page: () => const SettingProxyPage().withEscOrFifthButton2BackRightRoute(),
+      page: () =>
+          const SettingProxyPage().withEscOrFifthButton2BackRightRoute(),
       transition: defaultTransition,
       offAllBefore: false,
     ),
     EHPage(
       name: extraGalleryScanPath,
-      page: () => const ExtraGalleryScanPathPage().withEscOrFifthButton2BackRightRoute(),
+      page: () => const ExtraGalleryScanPathPage()
+          .withEscOrFifthButton2BackRightRoute(),
       transition: defaultTransition,
       offAllBefore: false,
     ),
     EHPage(
       name: archiveBotSettings,
-      page: () => const ArchiveBotSettingsPage().withEscOrFifthButton2BackRightRoute(),
+      page: () =>
+          const ArchiveBotSettingsPage().withEscOrFifthButton2BackRightRoute(),
       transition: defaultTransition,
       offAllBefore: false,
     ),
     EHPage(
       name: superResolution,
-      page: () => const SettingSuperResolutionPage().withEscOrFifthButton2BackRightRoute(),
+      page: () => const SettingSuperResolutionPage()
+          .withEscOrFifthButton2BackRightRoute(),
       transition: defaultTransition,
       offAllBefore: false,
     ),

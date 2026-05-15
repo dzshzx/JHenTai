@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:jhentai/src/extension/dio_exception_extension.dart';
 import 'package:jhentai/src/extension/widget_extension.dart';
@@ -73,7 +72,11 @@ class _ArchiveBotSettingsPageState extends State<ArchiveBotSettingsPage> {
   Widget _buildApiKeySetting() {
     return ListTile(
       title: Text('apiSetting'.tr),
-      subtitle: Text(archiveBotSetting.apiKey.value == null ? 'apiKeyHint'.tr : archiveBotSetting.apiKey.value.toString()),
+      subtitle: Text(
+        archiveBotSetting.apiKey.value == null
+            ? 'apiKeyHint'.tr
+            : archiveBotSetting.apiKey.value.toString(),
+      ),
       trailing: const Icon(Icons.keyboard_arrow_right),
       onTap: _showApiKeyDialog,
     );
@@ -88,7 +91,8 @@ class _ArchiveBotSettingsPageState extends State<ArchiveBotSettingsPage> {
           LoadingStateIndicator(
             loadingState: _balanceState,
             useCupertinoIndicator: true,
-            successWidgetBuilder: () => Text(_balance.value == null ? '' : '${_balance.value} GP'),
+            successWidgetBuilder: () =>
+                Text(_balance.value == null ? '' : '${_balance.value} GP'),
             errorWidgetBuilder: () => const Icon(Icons.error_outline),
           ),
         ],
@@ -116,18 +120,6 @@ class _ArchiveBotSettingsPageState extends State<ArchiveBotSettingsPage> {
     );
   }
 
-  Widget _buildUseProxyServer() {
-    return SwitchListTile(
-      title: Text('useProxyServer'.tr),
-      subtitle: Text('useProxyServerHint'.tr),
-      value: archiveBotSetting.useProxyServer.value,
-      onChanged: (bool value) async {
-        await archiveBotSetting.saveUseProxyServer(value);
-        setStateSafely(() {});
-      },
-    );
-  }
-
   Future<void> _showApiKeyDialog() async {
     bool? result = await showDialog(
       context: context,
@@ -139,9 +131,7 @@ class _ArchiveBotSettingsPageState extends State<ArchiveBotSettingsPage> {
     );
 
     if (result == true) {
-      setStateSafely(() {
-        _checkBalance();
-      });
+      setStateSafely(_checkBalance);
     }
   }
 
@@ -206,7 +196,13 @@ class _ArchiveBotSettingsPageState extends State<ArchiveBotSettingsPage> {
           _checkinState = LoadingState.success;
           _balance.value = checkInVO.currentGP;
         });
-        snack('checkInSuccess'.tr, 'checkInSuccessHint'.trArgs([checkInVO.getGP.toString(), checkInVO.currentGP.toString()]));
+        snack(
+          'checkInSuccess'.tr,
+          'checkInSuccessHint'.trArgs([
+            checkInVO.getGP.toString(),
+            checkInVO.currentGP.toString(),
+          ]),
+        );
       } else {
         snack('checkInFailed'.tr, response.errorMessage);
         setStateSafely(() => _checkinState = LoadingState.error);

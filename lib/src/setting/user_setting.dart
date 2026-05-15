@@ -8,7 +8,9 @@ import '../service/jh_service.dart';
 
 UserSetting userSetting = UserSetting();
 
-class UserSetting with JHLifeCircleBeanWithConfigStorage implements JHLifeCircleBean {
+class UserSetting
+    with JHLifeCircleBeanWithConfigStorage
+    implements JHLifeCircleBean {
   RxnString userName = RxnString();
   RxnInt ipbMemberId = RxnInt();
   RxnString ipbPassHash = RxnString();
@@ -61,7 +63,9 @@ class UserSetting with JHLifeCircleBeanWithConfigStorage implements JHLifeCircle
     String? avatarImgUrl,
     String? nickName,
   }) async {
-    log.debug('saveUserInfo: $userName, $ipbMemberId, $ipbPassHash, $avatarImgUrl, $nickName');
+    log.debug(
+      'saveUserInfo: $userName, $ipbMemberId, $ipbPassHash, $avatarImgUrl, $nickName',
+    );
     this.userName.value = userName;
     this.ipbPassHash.value = ipbPassHash;
     this.ipbMemberId.value = ipbMemberId;
@@ -84,13 +88,13 @@ class UserSetting with JHLifeCircleBeanWithConfigStorage implements JHLifeCircle
 
   Future<void> saveDefaultFavoriteIndex(int? index) async {
     log.debug('saveDefaultFavoriteIndex: $index');
-    this.defaultFavoriteIndex.value = index;
+    defaultFavoriteIndex.value = index;
     await saveBeanConfig();
   }
 
   Future<void> saveDefaultTagSetNo(int? number) async {
     log.debug('saveDefaultTagSet: $number');
-    this.defaultTagSetNo.value = number;
+    defaultTagSetNo.value = number;
     await saveBeanConfig();
   }
 

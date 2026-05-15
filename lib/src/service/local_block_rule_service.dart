@@ -18,7 +18,9 @@ abstract interface class ExtraBlockRuleProvider {
   Map<String, List<LocalBlockRule>> get extraGroupedRules;
 }
 
-class LocalBlockRuleService with JHLifeCircleBeanErrorCatch implements JHLifeCircleBean {
+class LocalBlockRuleService
+    with JHLifeCircleBeanErrorCatch
+    implements JHLifeCircleBean {
   final List<LocalBlockRuleHandler> handlers = [];
   final List<ExtraBlockRuleProvider> extraBlockRuleProviders = [];
 
@@ -54,7 +56,10 @@ class LocalBlockRuleService with JHLifeCircleBeanErrorCatch implements JHLifeCir
   @override
   Future<void> doAfterBeanReady() async {}
 
-  LocalBlockRuleHandler getHandlerByRule(LocalBlockRule rule) => handlers.where((h) => h.matchRule(rule)).sorted((a, b) => a.order - b.order).first;
+  LocalBlockRuleHandler getHandlerByRule(LocalBlockRule rule) => handlers
+      .where((h) => h.matchRule(rule))
+      .sorted((a, b) => a.order - b.order)
+      .first;
 
   void registerExtraBlockRuleProvider(ExtraBlockRuleProvider provider) {
     extraBlockRuleProviders.add(provider);
@@ -80,7 +85,9 @@ class LocalBlockRuleService with JHLifeCircleBeanErrorCatch implements JHLifeCir
         .toList();
   }
 
-  Future<({bool success, String? msg})> upsertBlockRule(LocalBlockRule rule) async {
+  Future<({bool success, String? msg})> upsertBlockRule(
+    LocalBlockRule rule,
+  ) async {
     log.info('Upsert block rule: $rule');
 
     LocalBlockRuleHandler handler = getHandlerByRule(rule);
@@ -104,14 +111,19 @@ class LocalBlockRuleService with JHLifeCircleBeanErrorCatch implements JHLifeCir
     return Future.value((success: true, msg: null));
   }
 
-  Future<({bool success, String? msg})> replaceBlockRulesByGroup(String groupId, List<LocalBlockRule> rules) async {
+  Future<({bool success, String? msg})> replaceBlockRulesByGroup(
+    String groupId,
+    List<LocalBlockRule> rules,
+  ) async {
     log.info('Replace block rules, groupId:$groupId, rules:$rules');
 
     for (LocalBlockRule rule in rules) {
       LocalBlockRuleHandler handler = getHandlerByRule(rule);
       ({bool success, String? msg}) validateResult = handler.validateRule(rule);
       if (!validateResult.success) {
-        log.info('Replace block rule failed, rule:$rule, result:$validateResult');
+        log.info(
+          'Replace block rule failed, rule:$rule, result:$validateResult',
+        );
         return validateResult;
       }
     }
@@ -135,7 +147,9 @@ class LocalBlockRuleService with JHLifeCircleBeanErrorCatch implements JHLifeCir
     return Future.value((success: true, msg: null));
   }
 
-  Future<({bool success, String? msg})> removeLocalBlockRulesByGroupId(String groupId) async {
+  Future<({bool success, String? msg})> removeLocalBlockRulesByGroupId(
+    String groupId,
+  ) async {
     log.info('Remove block rules, group id: $groupId');
 
     bool success = await BlockRuleDao.deleteBlockRuleByGroupId(groupId) > 0;
@@ -154,23 +168,29 @@ class LocalBlockRuleService with JHLifeCircleBeanErrorCatch implements JHLifeCir
   Future<List<T>> executeRules<T>(List<T> items) async {
     List<T> results = List.of(items);
 
-    LocalBlockTargetEnum? targetEnum = LocalBlockTargetEnum.values.where((e) => e.model == T).firstOrNull;
+    LocalBlockTargetEnum? targetEnum = LocalBlockTargetEnum.values
+        .where((e) => e.model == T)
+        .firstOrNull;
     if (targetEnum == null) {
       return results;
     }
 
     try {
-      List<BlockRuleData> datas = await BlockRuleDao.selectBlockRulesByTarget(targetEnum.code);
+      List<BlockRuleData> datas = await BlockRuleDao.selectBlockRulesByTarget(
+        targetEnum.code,
+      );
 
       Map<String, List<LocalBlockRule>> groupedRules = datas
-          .map((data) => LocalBlockRule(
-                id: data.id,
-                groupId: data.groupId,
-                target: LocalBlockTargetEnum.fromCode(data.target),
-                attribute: LocalBlockAttributeEnum.fromCode(data.attribute),
-                pattern: LocalBlockPatternEnum.fromCode(data.pattern),
-                expression: data.expression,
-              ))
+          .map(
+            (data) => LocalBlockRule(
+              id: data.id,
+              groupId: data.groupId,
+              target: LocalBlockTargetEnum.fromCode(data.target),
+              attribute: LocalBlockAttributeEnum.fromCode(data.attribute),
+              pattern: LocalBlockPatternEnum.fromCode(data.pattern),
+              expression: data.expression,
+            ),
+          )
           .groupListsBy((rule) => rule.groupId!);
 
       groupedRules.forEach((groupId, rules) {
@@ -186,7 +206,8 @@ class LocalBlockRuleService with JHLifeCircleBeanErrorCatch implements JHLifeCir
 
       for (ExtraBlockRuleProvider provider in extraBlockRuleProviders) {
         if (provider.target == targetEnum) {
-          Map<String, List<LocalBlockRule>> extraGroupedRules = provider.extraGroupedRules;
+          Map<String, List<LocalBlockRule>> extraGroupedRules =
+              provider.extraGroupedRules;
           extraGroupedRules.forEach((groupId, rules) {
             results.removeWhere((item) {
               bool hit = true;
@@ -217,7 +238,8 @@ abstract interface class LocalBlockRuleHandler<ITEM> {
   bool executeRule(ITEM item, LocalBlockRule rule);
 }
 
-abstract interface class AttributeGetter<ATTRIBUTE, I> extends LocalBlockRuleHandler<I> {
+abstract interface class AttributeGetter<ATTRIBUTE, I>
+    extends LocalBlockRuleHandler<I> {
   bool matchRuleAttribute(LocalBlockAttributeEnum attribute);
 
   List<ATTRIBUTE> getItemAttributes(I item);
@@ -248,8 +270,11 @@ mixin GalleryTagAttributeGetter on AttributeGetter<String, Gallery> {
     for (List<GalleryTag> tags in item.tags.values) {
       for (GalleryTag tag in tags) {
         tagStrings.add('${tag.tagData.namespace}:${tag.tagData.key}');
-        if (tag.tagData.translatedNamespace != null && tag.tagData.tagName != null) {
-          tagStrings.add('${tag.tagData.translatedNamespace}:${tag.tagData.tagName}');
+        if (tag.tagData.translatedNamespace != null &&
+            tag.tagData.tagName != null) {
+          tagStrings.add(
+            '${tag.tagData.translatedNamespace}:${tag.tagData.tagName}',
+          );
         }
       }
     }
@@ -281,7 +306,8 @@ mixin GalleryGidAttributeGetter on AttributeGetter<String, Gallery> {
     return [item.gid.toString()];
   }
 }
-mixin CommentUsernameAttributeGetter on AttributeGetter<String, GalleryComment> {
+mixin CommentUsernameAttributeGetter
+    on AttributeGetter<String, GalleryComment> {
   @override
   bool matchRuleAttribute(LocalBlockAttributeEnum attribute) {
     return attribute == LocalBlockAttributeEnum.userName;
@@ -332,7 +358,8 @@ mixin CommentContentAttributeGetter on AttributeGetter<String, GalleryComment> {
   }
 }
 
-abstract class EqualLocalBlockRuleHandler<ITEM> implements LocalBlockRuleHandler<ITEM>, AttributeGetter<String, ITEM> {
+abstract class EqualLocalBlockRuleHandler<ITEM>
+    implements LocalBlockRuleHandler<ITEM>, AttributeGetter<String, ITEM> {
   @override
   int get order => 10;
 
@@ -344,7 +371,8 @@ abstract class EqualLocalBlockRuleHandler<ITEM> implements LocalBlockRuleHandler
 
   @override
   bool matchRule(LocalBlockRule rule) {
-    return rule.pattern == LocalBlockPatternEnum.equal && matchRuleAttribute(rule.attribute);
+    return rule.pattern == LocalBlockPatternEnum.equal &&
+        matchRuleAttribute(rule.attribute);
   }
 
   @override
@@ -353,7 +381,8 @@ abstract class EqualLocalBlockRuleHandler<ITEM> implements LocalBlockRuleHandler
   }
 }
 
-abstract class GreaterThanLocalBlockRuleHandler<ITEM> implements LocalBlockRuleHandler<ITEM>, AttributeGetter<double, ITEM> {
+abstract class GreaterThanLocalBlockRuleHandler<ITEM>
+    implements LocalBlockRuleHandler<ITEM>, AttributeGetter<double, ITEM> {
   @override
   int get order => 10;
 
@@ -365,7 +394,8 @@ abstract class GreaterThanLocalBlockRuleHandler<ITEM> implements LocalBlockRuleH
 
   @override
   bool matchRule(LocalBlockRule rule) {
-    return rule.pattern == LocalBlockPatternEnum.gt && matchRuleAttribute(rule.attribute);
+    return rule.pattern == LocalBlockPatternEnum.gt &&
+        matchRuleAttribute(rule.attribute);
   }
 
   @override
@@ -378,7 +408,8 @@ abstract class GreaterThanLocalBlockRuleHandler<ITEM> implements LocalBlockRuleH
   }
 }
 
-abstract class GreaterThanEqualLocalBlockRuleHandler<ITEM> implements LocalBlockRuleHandler<ITEM>, AttributeGetter<double, ITEM> {
+abstract class GreaterThanEqualLocalBlockRuleHandler<ITEM>
+    implements LocalBlockRuleHandler<ITEM>, AttributeGetter<double, ITEM> {
   @override
   int get order => 10;
 
@@ -390,7 +421,8 @@ abstract class GreaterThanEqualLocalBlockRuleHandler<ITEM> implements LocalBlock
 
   @override
   bool matchRule(LocalBlockRule rule) {
-    return rule.pattern == LocalBlockPatternEnum.gte && matchRuleAttribute(rule.attribute);
+    return rule.pattern == LocalBlockPatternEnum.gte &&
+        matchRuleAttribute(rule.attribute);
   }
 
   @override
@@ -403,7 +435,8 @@ abstract class GreaterThanEqualLocalBlockRuleHandler<ITEM> implements LocalBlock
   }
 }
 
-abstract class SmallerThanLocalBlockRuleHandler<ITEM> implements LocalBlockRuleHandler<ITEM>, AttributeGetter<double, ITEM> {
+abstract class SmallerThanLocalBlockRuleHandler<ITEM>
+    implements LocalBlockRuleHandler<ITEM>, AttributeGetter<double, ITEM> {
   @override
   int get order => 10;
 
@@ -415,7 +448,8 @@ abstract class SmallerThanLocalBlockRuleHandler<ITEM> implements LocalBlockRuleH
 
   @override
   bool matchRule(LocalBlockRule rule) {
-    return rule.pattern == LocalBlockPatternEnum.st && matchRuleAttribute(rule.attribute);
+    return rule.pattern == LocalBlockPatternEnum.st &&
+        matchRuleAttribute(rule.attribute);
   }
 
   @override
@@ -428,7 +462,8 @@ abstract class SmallerThanLocalBlockRuleHandler<ITEM> implements LocalBlockRuleH
   }
 }
 
-abstract class SmallerThanEqualLocalBlockRuleHandler<ITEM> implements LocalBlockRuleHandler<ITEM>, AttributeGetter<double, ITEM> {
+abstract class SmallerThanEqualLocalBlockRuleHandler<ITEM>
+    implements LocalBlockRuleHandler<ITEM>, AttributeGetter<double, ITEM> {
   @override
   int get order => 10;
 
@@ -440,7 +475,8 @@ abstract class SmallerThanEqualLocalBlockRuleHandler<ITEM> implements LocalBlock
 
   @override
   bool matchRule(LocalBlockRule rule) {
-    return rule.pattern == LocalBlockPatternEnum.ste && matchRuleAttribute(rule.attribute);
+    return rule.pattern == LocalBlockPatternEnum.ste &&
+        matchRuleAttribute(rule.attribute);
   }
 
   @override
@@ -453,7 +489,8 @@ abstract class SmallerThanEqualLocalBlockRuleHandler<ITEM> implements LocalBlock
   }
 }
 
-abstract class LikeLocalBlockRuleHandler<ITEM> implements LocalBlockRuleHandler<ITEM>, AttributeGetter<String, ITEM> {
+abstract class LikeLocalBlockRuleHandler<ITEM>
+    implements LocalBlockRuleHandler<ITEM>, AttributeGetter<String, ITEM> {
   @override
   int get order => 10;
 
@@ -465,7 +502,8 @@ abstract class LikeLocalBlockRuleHandler<ITEM> implements LocalBlockRuleHandler<
 
   @override
   bool matchRule(LocalBlockRule rule) {
-    return rule.pattern == LocalBlockPatternEnum.like && matchRuleAttribute(rule.attribute);
+    return rule.pattern == LocalBlockPatternEnum.like &&
+        matchRuleAttribute(rule.attribute);
   }
 
   @override
@@ -474,7 +512,8 @@ abstract class LikeLocalBlockRuleHandler<ITEM> implements LocalBlockRuleHandler<
   }
 }
 
-abstract class NotContainLocalBlockRuleHandler<ITEM> implements LocalBlockRuleHandler<ITEM>, AttributeGetter<String, ITEM> {
+abstract class NotContainLocalBlockRuleHandler<ITEM>
+    implements LocalBlockRuleHandler<ITEM>, AttributeGetter<String, ITEM> {
   @override
   int get order => 10;
 
@@ -486,7 +525,8 @@ abstract class NotContainLocalBlockRuleHandler<ITEM> implements LocalBlockRuleHa
 
   @override
   bool matchRule(LocalBlockRule rule) {
-    return rule.pattern == LocalBlockPatternEnum.notContain && matchRuleAttribute(rule.attribute);
+    return rule.pattern == LocalBlockPatternEnum.notContain &&
+        matchRuleAttribute(rule.attribute);
   }
 
   @override
@@ -495,7 +535,8 @@ abstract class NotContainLocalBlockRuleHandler<ITEM> implements LocalBlockRuleHa
   }
 }
 
-abstract class RegexLocalBlockRuleHandler<ITEM> implements LocalBlockRuleHandler<ITEM>, AttributeGetter<String, ITEM> {
+abstract class RegexLocalBlockRuleHandler<ITEM>
+    implements LocalBlockRuleHandler<ITEM>, AttributeGetter<String, ITEM> {
   @override
   int get order => 10;
 
@@ -507,7 +548,8 @@ abstract class RegexLocalBlockRuleHandler<ITEM> implements LocalBlockRuleHandler
 
   @override
   bool matchRule(LocalBlockRule rule) {
-    return rule.pattern == LocalBlockPatternEnum.regex && matchRuleAttribute(rule.attribute);
+    return rule.pattern == LocalBlockPatternEnum.regex &&
+        matchRuleAttribute(rule.attribute);
   }
 
   @override
@@ -522,56 +564,101 @@ abstract class RegexLocalBlockRuleHandler<ITEM> implements LocalBlockRuleHandler
   }
 }
 
-class GalleryTagEqualLocalBlockRuleHandler extends EqualLocalBlockRuleHandler<Gallery> with GalleryTagAttributeGetter {}
+class GalleryTagEqualLocalBlockRuleHandler
+    extends EqualLocalBlockRuleHandler<Gallery>
+    with GalleryTagAttributeGetter {}
 
-class GalleryUploaderEqualLocalBlockRuleHandler extends EqualLocalBlockRuleHandler<Gallery> with GalleryUploaderAttributeGetter {}
+class GalleryUploaderEqualLocalBlockRuleHandler
+    extends EqualLocalBlockRuleHandler<Gallery>
+    with GalleryUploaderAttributeGetter {}
 
-class GalleryGidEqualLocalBlockRuleHandler extends EqualLocalBlockRuleHandler<Gallery> with GalleryGidAttributeGetter {}
+class GalleryGidEqualLocalBlockRuleHandler
+    extends EqualLocalBlockRuleHandler<Gallery>
+    with GalleryGidAttributeGetter {}
 
-class CommentUsernameEqualLocalBlockRuleHandler extends EqualLocalBlockRuleHandler<GalleryComment> with CommentUsernameAttributeGetter {}
+class CommentUsernameEqualLocalBlockRuleHandler
+    extends EqualLocalBlockRuleHandler<GalleryComment>
+    with CommentUsernameAttributeGetter {}
 
-class CommentUserIdEqualLocalBlockRuleHandler extends EqualLocalBlockRuleHandler<GalleryComment> with CommentUserIdAttributeGetter {}
+class CommentUserIdEqualLocalBlockRuleHandler
+    extends EqualLocalBlockRuleHandler<GalleryComment>
+    with CommentUserIdAttributeGetter {}
 
-class CommentScoreGreaterThanLocalBlockRuleHandler extends GreaterThanLocalBlockRuleHandler<GalleryComment> with CommentScoreAttributeGetter {}
+class CommentScoreGreaterThanLocalBlockRuleHandler
+    extends GreaterThanLocalBlockRuleHandler<GalleryComment>
+    with CommentScoreAttributeGetter {}
 
-class CommentScoreGreaterThanEqualLocalBlockRuleHandler extends GreaterThanEqualLocalBlockRuleHandler<GalleryComment> with CommentScoreAttributeGetter {}
+class CommentScoreGreaterThanEqualLocalBlockRuleHandler
+    extends GreaterThanEqualLocalBlockRuleHandler<GalleryComment>
+    with CommentScoreAttributeGetter {}
 
-class CommentScoreSmallerThanLocalBlockRuleHandler extends SmallerThanLocalBlockRuleHandler<GalleryComment> with CommentScoreAttributeGetter {}
+class CommentScoreSmallerThanLocalBlockRuleHandler
+    extends SmallerThanLocalBlockRuleHandler<GalleryComment>
+    with CommentScoreAttributeGetter {}
 
-class CommentScoreSmallerThanEqualLocalBlockRuleHandler extends SmallerThanEqualLocalBlockRuleHandler<GalleryComment> with CommentScoreAttributeGetter {}
+class CommentScoreSmallerThanEqualLocalBlockRuleHandler
+    extends SmallerThanEqualLocalBlockRuleHandler<GalleryComment>
+    with CommentScoreAttributeGetter {}
 
-class GalleryTitleLikeLocalBlockRuleHandler extends LikeLocalBlockRuleHandler<Gallery> with GalleryTitleAttributeGetter {}
+class GalleryTitleLikeLocalBlockRuleHandler
+    extends LikeLocalBlockRuleHandler<Gallery>
+    with GalleryTitleAttributeGetter {}
 
-class GalleryTagLikeLocalBlockRuleHandler extends LikeLocalBlockRuleHandler<Gallery> with GalleryTagAttributeGetter {}
+class GalleryTagLikeLocalBlockRuleHandler
+    extends LikeLocalBlockRuleHandler<Gallery>
+    with GalleryTagAttributeGetter {}
 
-class GalleryUploaderLikeLocalBlockRuleHandler extends LikeLocalBlockRuleHandler<Gallery> with GalleryUploaderAttributeGetter {}
+class GalleryUploaderLikeLocalBlockRuleHandler
+    extends LikeLocalBlockRuleHandler<Gallery>
+    with GalleryUploaderAttributeGetter {}
 
-class CommentUserNameLikeLocalBlockRuleHandler extends LikeLocalBlockRuleHandler<GalleryComment> with CommentUsernameAttributeGetter {}
+class CommentUserNameLikeLocalBlockRuleHandler
+    extends LikeLocalBlockRuleHandler<GalleryComment>
+    with CommentUsernameAttributeGetter {}
 
-class CommentContentLikeLocalBlockRuleHandler extends LikeLocalBlockRuleHandler<GalleryComment> with CommentContentAttributeGetter {}
+class CommentContentLikeLocalBlockRuleHandler
+    extends LikeLocalBlockRuleHandler<GalleryComment>
+    with CommentContentAttributeGetter {}
 
-class GalleryTitleNotContainLocalBlockRuleHandler extends NotContainLocalBlockRuleHandler<Gallery> with GalleryTitleAttributeGetter {}
+class GalleryTitleNotContainLocalBlockRuleHandler
+    extends NotContainLocalBlockRuleHandler<Gallery>
+    with GalleryTitleAttributeGetter {}
 
-class GalleryTagNotContainLocalBlockRuleHandler extends NotContainLocalBlockRuleHandler<Gallery> with GalleryTagAttributeGetter {}
+class GalleryTagNotContainLocalBlockRuleHandler
+    extends NotContainLocalBlockRuleHandler<Gallery>
+    with GalleryTagAttributeGetter {}
 
-class GalleryUploaderNotContainLocalBlockRuleHandler extends NotContainLocalBlockRuleHandler<Gallery> with GalleryUploaderAttributeGetter {}
+class GalleryUploaderNotContainLocalBlockRuleHandler
+    extends NotContainLocalBlockRuleHandler<Gallery>
+    with GalleryUploaderAttributeGetter {}
 
-class CommentUserNameNotContainLocalBlockRuleHandler extends NotContainLocalBlockRuleHandler<GalleryComment> with CommentUsernameAttributeGetter {}
+class CommentUserNameNotContainLocalBlockRuleHandler
+    extends NotContainLocalBlockRuleHandler<GalleryComment>
+    with CommentUsernameAttributeGetter {}
 
-class GalleryTitleRegexLocalBlockRuleHandler extends RegexLocalBlockRuleHandler<Gallery> with GalleryTitleAttributeGetter {}
+class GalleryTitleRegexLocalBlockRuleHandler
+    extends RegexLocalBlockRuleHandler<Gallery>
+    with GalleryTitleAttributeGetter {}
 
-class GalleryTagRegexLocalBlockRuleHandler extends RegexLocalBlockRuleHandler<Gallery> with GalleryTagAttributeGetter {}
+class GalleryTagRegexLocalBlockRuleHandler
+    extends RegexLocalBlockRuleHandler<Gallery>
+    with GalleryTagAttributeGetter {}
 
-class GalleryUploaderRegexLocalBlockRuleHandler extends RegexLocalBlockRuleHandler<Gallery> with GalleryUploaderAttributeGetter {}
+class GalleryUploaderRegexLocalBlockRuleHandler
+    extends RegexLocalBlockRuleHandler<Gallery>
+    with GalleryUploaderAttributeGetter {}
 
-class CommentUserNameRegexLocalBlockRuleHandler extends RegexLocalBlockRuleHandler<GalleryComment> with CommentUsernameAttributeGetter {}
+class CommentUserNameRegexLocalBlockRuleHandler
+    extends RegexLocalBlockRuleHandler<GalleryComment>
+    with CommentUsernameAttributeGetter {}
 
-class CommentContentRegexLocalBlockRuleHandler extends RegexLocalBlockRuleHandler<GalleryComment> with CommentContentAttributeGetter {}
+class CommentContentRegexLocalBlockRuleHandler
+    extends RegexLocalBlockRuleHandler<GalleryComment>
+    with CommentContentAttributeGetter {}
 
 enum LocalBlockTargetEnum {
   gallery(0, 'gallery', Gallery),
-  comment(1, 'comment', GalleryComment),
-  ;
+  comment(1, 'comment', GalleryComment);
 
   final int code;
   final String desc;
@@ -592,8 +679,7 @@ enum LocalBlockAttributeEnum {
   userName(100, LocalBlockTargetEnum.comment, 'userName'),
   userId(110, LocalBlockTargetEnum.comment, 'userId'),
   score(120, LocalBlockTargetEnum.comment, 'score'),
-  content(130, LocalBlockTargetEnum.comment, 'content'),
-  ;
+  content(130, LocalBlockTargetEnum.comment, 'content');
 
   final int code;
   final LocalBlockTargetEnum target;
@@ -601,7 +687,9 @@ enum LocalBlockAttributeEnum {
 
   const LocalBlockAttributeEnum(this.code, this.target, this.desc);
 
-  static List<LocalBlockAttributeEnum> withTarget(LocalBlockTargetEnum? target) => LocalBlockAttributeEnum.values.where((e) => e.target == target).toList();
+  static List<LocalBlockAttributeEnum> withTarget(
+    LocalBlockTargetEnum? target,
+  ) => LocalBlockAttributeEnum.values.where((e) => e.target == target).toList();
 
   static LocalBlockAttributeEnum fromCode(int code) {
     return LocalBlockAttributeEnum.values.where((e) => e.code == code).first;
@@ -609,54 +697,37 @@ enum LocalBlockAttributeEnum {
 }
 
 enum LocalBlockPatternEnum {
-  equal(
-    0,
-    [
-      LocalBlockAttributeEnum.tag,
-      LocalBlockAttributeEnum.uploader,
-      LocalBlockAttributeEnum.userName,
-      LocalBlockAttributeEnum.userId,
-      LocalBlockAttributeEnum.gid
-    ],
-    '=',
-  ),
+  equal(0, [
+    LocalBlockAttributeEnum.tag,
+    LocalBlockAttributeEnum.uploader,
+    LocalBlockAttributeEnum.userName,
+    LocalBlockAttributeEnum.userId,
+    LocalBlockAttributeEnum.gid,
+  ], '='),
   gt(10, [LocalBlockAttributeEnum.score], '>'),
   gte(20, [LocalBlockAttributeEnum.score], '>='),
   st(30, [LocalBlockAttributeEnum.score], '<'),
   ste(40, [LocalBlockAttributeEnum.score], '<='),
-  like(
-    50,
-    [
-      LocalBlockAttributeEnum.title,
-      LocalBlockAttributeEnum.tag,
-      LocalBlockAttributeEnum.uploader,
-      LocalBlockAttributeEnum.userName,
-      LocalBlockAttributeEnum.content,
-    ],
-    'contain',
-  ),
-  notContain(
-    60,
-    [
-      LocalBlockAttributeEnum.title,
-      LocalBlockAttributeEnum.tag,
-      LocalBlockAttributeEnum.uploader,
-      LocalBlockAttributeEnum.userName,
-    ],
-    'notContain',
-  ),
-  regex(
-    70,
-    [
-      LocalBlockAttributeEnum.title,
-      LocalBlockAttributeEnum.tag,
-      LocalBlockAttributeEnum.uploader,
-      LocalBlockAttributeEnum.userName,
-      LocalBlockAttributeEnum.content,
-    ],
-    'regex',
-  ),
-  ;
+  like(50, [
+    LocalBlockAttributeEnum.title,
+    LocalBlockAttributeEnum.tag,
+    LocalBlockAttributeEnum.uploader,
+    LocalBlockAttributeEnum.userName,
+    LocalBlockAttributeEnum.content,
+  ], 'contain'),
+  notContain(60, [
+    LocalBlockAttributeEnum.title,
+    LocalBlockAttributeEnum.tag,
+    LocalBlockAttributeEnum.uploader,
+    LocalBlockAttributeEnum.userName,
+  ], 'notContain'),
+  regex(70, [
+    LocalBlockAttributeEnum.title,
+    LocalBlockAttributeEnum.tag,
+    LocalBlockAttributeEnum.uploader,
+    LocalBlockAttributeEnum.userName,
+    LocalBlockAttributeEnum.content,
+  ], 'regex');
 
   final int code;
   final List<LocalBlockAttributeEnum> attributes;
@@ -664,8 +735,11 @@ enum LocalBlockPatternEnum {
 
   const LocalBlockPatternEnum(this.code, this.attributes, this.desc);
 
-  static List<LocalBlockPatternEnum> withAttribute(LocalBlockAttributeEnum? attribute) =>
-      LocalBlockPatternEnum.values.where((e) => e.attributes.contains(attribute)).toList();
+  static List<LocalBlockPatternEnum> withAttribute(
+    LocalBlockAttributeEnum? attribute,
+  ) => LocalBlockPatternEnum.values
+      .where((e) => e.attributes.contains(attribute))
+      .toList();
 
   static LocalBlockPatternEnum fromCode(int code) {
     return LocalBlockPatternEnum.values.where((e) => e.code == code).first;
@@ -703,12 +777,12 @@ class LocalBlockRule {
 
   Map<String, dynamic> toJson() {
     return {
-      "id": this.id,
-      "groupId": this.groupId,
-      "target": this.target.code,
-      "attribute": this.attribute.code,
-      "pattern": this.pattern.code,
-      "expression": this.expression,
+      "id": id,
+      "groupId": groupId,
+      "target": target.code,
+      "attribute": attribute.code,
+      "pattern": pattern.code,
+      "expression": expression,
     };
   }
 
@@ -722,5 +796,5 @@ class LocalBlockRule {
       expression: json["expression"],
     );
   }
-//
+  //
 }

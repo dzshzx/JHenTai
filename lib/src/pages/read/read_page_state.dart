@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -39,27 +37,42 @@ class ReadPageState with ScrollStatusListerState {
 
   late Size displayRegionSize;
 
-  final ItemPositionsListener thumbnailPositionsListener = ItemPositionsListener.create();
-  final ItemScrollController thumbnailsScrollController = ItemScrollController();
-  final ScrollOffsetController thumbnailsScrollOffsetController = ScrollOffsetController();
+  final ItemPositionsListener thumbnailPositionsListener =
+      ItemPositionsListener.create();
+  final ItemScrollController thumbnailsScrollController =
+      ItemScrollController();
+  final ScrollOffsetController thumbnailsScrollOffsetController =
+      ScrollOffsetController();
 
   ReadPageState() {
-    thumbnails = List.generate(readPageInfo.pageCount, (_) => null, growable: true);
+    thumbnails = List.generate(
+      readPageInfo.pageCount,
+      (_) => null,
+      growable: true,
+    );
 
     if (readPageInfo.mode == ReadMode.online) {
       images = List.generate(readPageInfo.pageCount, (_) => null);
     }
 
     if (readPageInfo.mode == ReadMode.downloaded) {
-      images = galleryDownloadService.galleryDownloadInfos[readPageInfo.gid]!.images;
+      images =
+          galleryDownloadService.galleryDownloadInfos[readPageInfo.gid]!.images;
     }
 
-    if (readPageInfo.mode == ReadMode.archive || readPageInfo.mode == ReadMode.local) {
+    if (readPageInfo.mode == ReadMode.archive ||
+        readPageInfo.mode == ReadMode.local) {
       images = readPageInfo.images!.cast<GalleryImage?>();
     }
 
-    parseImageHrefsStates = List.generate(readPageInfo.pageCount, (_) => LoadingState.idle);
-    parseImageUrlStates = List.generate(readPageInfo.pageCount, (_) => LoadingState.idle);
+    parseImageHrefsStates = List.generate(
+      readPageInfo.pageCount,
+      (_) => LoadingState.idle,
+    );
+    parseImageUrlStates = List.generate(
+      readPageInfo.pageCount,
+      (_) => LoadingState.idle,
+    );
     imageContainerSizes = List.generate(readPageInfo.pageCount, (_) => null);
     parseImageUrlErrorMsg = List.generate(readPageInfo.pageCount, (_) => null);
     parseImageUrlErrorMsg = List.generate(readPageInfo.pageCount, (_) => null);
