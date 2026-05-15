@@ -19,6 +19,7 @@ This directory contains guidelines for frontend development. Fill in each file w
 | [Hook Guidelines](./hook-guidelines.md) | Custom hooks, data fetching patterns | Filled |
 | [State Management](./state-management.md) | Local state, global state, server state | Filled |
 | [Quality Guidelines](./quality-guidelines.md) | Code standards, forbidden patterns | Filled |
+| [Release Packaging](./release-packaging.md) | Platform release artifacts, CI triggers, and packaging files | Filled |
 | [Type Safety](./type-safety.md) | Type patterns, validation | Filled |
 
 ---
