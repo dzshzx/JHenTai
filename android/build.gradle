@@ -1,7 +1,28 @@
 allprojects {
     repositories {
+        maven {
+            url = uri("https://storage.googleapis.com/download.flutter.io")
+            content { includeGroup "io.flutter" }
+        }
+        maven {
+            url = uri("https://mirrors.nju.edu.cn/flutter/download.flutter.io")
+            content { includeGroup "io.flutter" }
+        }
+        maven {
+            url = uri("https://storage.flutter-io.cn/download.flutter.io")
+            content { includeGroup "io.flutter" }
+        }
         google()
-        mavenCentral()
+        maven {
+            url = uri("https://repo.nju.edu.cn/maven/")
+            content {
+                includeGroupByRegex "org\\.jetbrains(\\..*)?"
+                includeGroupByRegex "com\\.android\\.tools(\\..*)?"
+            }
+        }
+        maven { url = uri("https://maven.aliyun.com/repository/google") }
+        maven { url = uri("https://maven.aliyun.com/repository/central") }
+        maven { url = uri("https://maven.aliyun.com/repository/gradle-plugin") }
     }
 }
 
