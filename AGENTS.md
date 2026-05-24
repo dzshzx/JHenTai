@@ -1,3 +1,11 @@
+@/home/ubuntu/.codex/INSTRUCTION.md
+
+## Included Instruction Files
+
+- Before acting in this repository, read every top-level `@...` instruction reference in this file and treat those referenced files as active instructions.
+- If a referenced instruction file contains additional `@...` references, read those as well before running commands or editing files.
+- If any referenced instruction file cannot be read, stop and report the missing path instead of continuing with assumptions.
+
 <!-- TRELLIS:START -->
 # Trellis Instructions
 
