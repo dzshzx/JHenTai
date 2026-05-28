@@ -116,3 +116,17 @@ Reusable widgets prefixed `eh_` — dialogs, cards, image components, tag displa
 - `extended_image` — image loading with cache
 - `photo_view` / `zoom_view` (custom forks) — reading page image viewer
 - `desktop_webview_window` — desktop webview for cookie login
+
+## Agent skills
+
+### Issue tracker
+
+Issues and PRDs are tracked in GitHub Issues for this repo. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Triage uses the default five-label vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This repo uses a single-context domain docs layout. See `docs/agents/domain.md`.
