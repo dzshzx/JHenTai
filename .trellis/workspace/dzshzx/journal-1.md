@@ -275,3 +275,37 @@ Created upstream-sync/8.0.13-311 in a separate worktree, merged upstream 77cd957
 ### Next Steps
 
 - None - task complete
+
+
+## Session 9: Merge upstream 8.0.13+311 to master
+
+**Date**: 2026-06-04
+**Task**: Merge upstream 8.0.13+311 to master
+**Branch**: `master`
+
+### Summary
+
+Reviewed the upstream integration branch, merged upstream-sync/8.0.13-311 back to stable master, verified pub get and analyzer status, recorded the merge task, and left integration worktrees available for inspection.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `8b1ac790` | (see git log) |
+| `3d96d5cd` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
