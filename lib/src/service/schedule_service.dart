@@ -29,11 +29,9 @@ import 'package:url_launcher/url_launcher_string.dart';
 import '../database/database.dart';
 import '../enum/config_enum.dart';
 import '../model/archive_bot_response/archive_bot_response.dart';
-import '../model/archive_bot_response/check_in_vo.dart';
 import '../model/gallery_metadata.dart';
 import '../network/archive_bot_request.dart';
 import '../setting/advanced_setting.dart';
-import '../utils/archive_bot_response_parser.dart';
 import '../utils/version_util.dart';
 import '../widget/update_dialog.dart';
 import 'jh_service.dart';
@@ -42,7 +40,9 @@ import 'log.dart';
 
 ScheduleService scheduleService = ScheduleService();
 
-class ScheduleService with JHLifeCircleBeanErrorCatch implements JHLifeCircleBean {
+class ScheduleService
+    with JHLifeCircleBeanErrorCatch
+    implements JHLifeCircleBean {
   @override
   Future<void> doInitBean() async {}
 
@@ -71,43 +71,55 @@ class ScheduleService with JHLifeCircleBeanErrorCatch implements JHLifeCircleBea
 
     try {
       latestVersion = (await retry(
-        () => ehRequest.get(url: url, parser: EHSpiderParser.githubReleasePage2LatestVersion),
+        () => ehRequest.get(
+          url: url,
+          parser: EHSpiderParser.githubReleasePage2LatestVersion,
+        ),
         maxAttempts: 3,
-      ))
-          .trim()
-          .split('+')[0];
+      )).trim().split('+')[0];
     } on Exception catch (_) {
       log.info('check update failed');
       return;
     }
 
-    String? dismissVersion = await localConfigService.read(configKey: ConfigEnum.dismissVersion);
+    String? dismissVersion = await localConfigService.read(
+      configKey: ConfigEnum.dismissVersion,
+    );
     if (dismissVersion == latestVersion) {
       return;
     }
 
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     String currentVersion = 'v${packageInfo.version}'.trim();
-    log.info('Latest version:[$latestVersion], current version: [$currentVersion], current build: [${packageInfo.buildNumber}]');
+    log.info(
+      'Latest version:[$latestVersion], current version: [$currentVersion], current build: [${packageInfo.buildNumber}]',
+    );
 
     if (compareVersion(currentVersion, latestVersion) >= 0) {
       return;
     }
 
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      Get.dialog(UpdateDialog(currentVersion: currentVersion, latestVersion: latestVersion));
+      Get.dialog(
+        UpdateDialog(
+          currentVersion: currentVersion,
+          latestVersion: latestVersion,
+        ),
+      );
     });
   }
 
   Future<void> refreshGalleryTags() async {
     int pageNo = 1;
-    List<GalleryDownloadedData> gallerys = await GalleryDao.selectGallerysForTagRefresh(pageNo, 25);
+    List<GalleryDownloadedData> gallerys =
+        await GalleryDao.selectGallerysForTagRefresh(pageNo, 25);
     while (gallerys.isNotEmpty) {
       try {
-        List<GalleryMetadata> metadatas = await ehRequest.requestGalleryMetadatas<List<GalleryMetadata>>(
-          list: gallerys.map((a) => (gid: a.gid, token: a.token)).toList(),
-          parser: EHSpiderParser.galleryMetadataJson2GalleryMetadatas,
-        );
+        List<GalleryMetadata> metadatas = await ehRequest
+            .requestGalleryMetadatas<List<GalleryMetadata>>(
+              list: gallerys.map((a) => (gid: a.gid, token: a.token)).toList(),
+              parser: EHSpiderParser.galleryMetadataJson2GalleryMetadatas,
+            );
 
         await GalleryDao.batchUpdateGallery(
           metadatas
@@ -120,9 +132,15 @@ class ScheduleService with JHLifeCircleBeanErrorCatch implements JHLifeCircleBea
               )
               .toList(),
         );
-        log.trace('refreshGalleryTags success, pageNo: $pageNo, archives: ${gallerys.map((a) => a.gid).toList()}');
+        log.trace(
+          'refreshGalleryTags success, pageNo: $pageNo, archives: ${gallerys.map((a) => a.gid).toList()}',
+        );
       } catch (e) {
-        log.warning('refreshGalleryTags error, gallerys: ${gallerys.map((a) => (gid: a.gid, token: a.token)).toList()}', e, true);
+        log.warning(
+          'refreshGalleryTags error, gallerys: ${gallerys.map((a) => (gid: a.gid, token: a.token)).toList()}',
+          e,
+          true,
+        );
       }
 
       pageNo++;
@@ -132,13 +150,15 @@ class ScheduleService with JHLifeCircleBeanErrorCatch implements JHLifeCircleBea
 
   Future<void> refreshArchiveTags() async {
     int pageNo = 1;
-    List<ArchiveDownloadedData> archives = await ArchiveDao.selectArchivesForTagRefresh(pageNo, 25);
+    List<ArchiveDownloadedData> archives =
+        await ArchiveDao.selectArchivesForTagRefresh(pageNo, 25);
     while (archives.isNotEmpty) {
       try {
-        List<GalleryMetadata> metadatas = await ehRequest.requestGalleryMetadatas<List<GalleryMetadata>>(
-          list: archives.map((a) => (gid: a.gid, token: a.token)).toList(),
-          parser: EHSpiderParser.galleryMetadataJson2GalleryMetadatas,
-        );
+        List<GalleryMetadata> metadatas = await ehRequest
+            .requestGalleryMetadatas<List<GalleryMetadata>>(
+              list: archives.map((a) => (gid: a.gid, token: a.token)).toList(),
+              parser: EHSpiderParser.galleryMetadataJson2GalleryMetadatas,
+            );
 
         await ArchiveDao.batchUpdateArchive(
           metadatas
@@ -151,9 +171,15 @@ class ScheduleService with JHLifeCircleBeanErrorCatch implements JHLifeCircleBea
               )
               .toList(),
         );
-        log.trace('refreshArchiveTags success, pageNo: $pageNo, archives: ${archives.map((a) => a.gid).toList()}');
+        log.trace(
+          'refreshArchiveTags success, pageNo: $pageNo, archives: ${archives.map((a) => a.gid).toList()}',
+        );
       } catch (e) {
-        log.warning('refreshArchiveTags error, archives: ${archives.map((a) => a.gid).toList()}', e, true);
+        log.warning(
+          'refreshArchiveTags error, archives: ${archives.map((a) => a.gid).toList()}',
+          e,
+          true,
+        );
       }
 
       pageNo++;
@@ -162,15 +188,24 @@ class ScheduleService with JHLifeCircleBeanErrorCatch implements JHLifeCircleBea
   }
 
   Future<void> clearOutdatedImageCache() async {
-    Directory cacheImageDirectory = Directory(join((await getTemporaryDirectory()).path, cacheImageFolderName));
+    Directory cacheImageDirectory = Directory(
+      join((await getTemporaryDirectory()).path, cacheImageFolderName),
+    );
 
     int count = 0;
-    cacheImageDirectory.list().forEach((FileSystemEntity entity) {
-      if (entity is File && DateTime.now().difference(entity.lastAccessedSync()) > networkSetting.cacheImageExpireDuration.value) {
-        entity.delete();
-        count++;
-      }
-    }).then((_) => log.info('Clear outdated image cache success, count: $count'));
+    cacheImageDirectory
+        .list()
+        .forEach((FileSystemEntity entity) {
+          if (entity is File &&
+              DateTime.now().difference(entity.lastAccessedSync()) >
+                  networkSetting.cacheImageExpireDuration.value) {
+            entity.delete();
+            count++;
+          }
+        })
+        .then(
+          (_) => log.info('Clear outdated image cache success, count: $count'),
+        );
   }
 
   Future<void> _clearOutdatedGalleryImageHashCache() async {
@@ -178,7 +213,11 @@ class ScheduleService with JHLifeCircleBeanErrorCatch implements JHLifeCircleBea
     String thresholdTimeStr = thresholdTime.toString();
 
     return appDb.managers.localConfig
-        .filter((config) => config.configKey.equals(ConfigEnum.galleryImageHash.key) & config.utime.column.isSmallerThanValue(thresholdTimeStr))
+        .filter(
+          (config) =>
+              config.configKey.equals(ConfigEnum.galleryImageHash.key) &
+              config.utime.column.isSmallerThanValue(thresholdTimeStr),
+        )
         .delete()
         .then((value) => value > 0);
   }
@@ -188,7 +227,8 @@ class ScheduleService with JHLifeCircleBeanErrorCatch implements JHLifeCircleBea
       return;
     }
 
-    if (preferenceSetting.showHVInfo.isFalse && preferenceSetting.showDawnInfo.isFalse) {
+    if (preferenceSetting.showHVInfo.isFalse &&
+        preferenceSetting.showDawnInfo.isFalse) {
       return;
     }
 
@@ -206,11 +246,7 @@ class ScheduleService with JHLifeCircleBeanErrorCatch implements JHLifeCircleBea
 
     if (preferenceSetting.showDawnInfo.isTrue && eventInfo.dawnInfo != null) {
       log.info('Check dawn success: ${eventInfo.dawnInfo}');
-      snack(
-        'dawnOfaNewDay'.tr,
-        eventInfo.dawnInfo!,
-        isShort: false,
-      );
+      snack('dawnOfaNewDay'.tr, eventInfo.dawnInfo!, isShort: false);
     }
 
     if (preferenceSetting.showHVInfo.isTrue && eventInfo.hvUrl != null) {
@@ -218,7 +254,10 @@ class ScheduleService with JHLifeCircleBeanErrorCatch implements JHLifeCircleBea
       snack(
         'encounterMonster'.tr,
         'encounterMonsterHint'.tr,
-        onPressed: () => launchUrlString(eventInfo.hvUrl!, mode: LaunchMode.externalApplication),
+        onPressed: () => launchUrlString(
+          eventInfo.hvUrl!,
+          mode: LaunchMode.externalApplication,
+        ),
         isShort: false,
       );
     }
@@ -231,14 +270,22 @@ class ScheduleService with JHLifeCircleBeanErrorCatch implements JHLifeCircleBea
 
     try {
       ArchiveBotResponse response = await archiveBotRequest.requestCheckIn(
-        apiAddress: archiveBotSetting.apiAddress.value,
+        botType: archiveBotSetting.botType.value,
+        apiAddress: archiveBotSetting.resolvedApiAddress,
         apiKey: archiveBotSetting.apiKey.value!,
-        parser: ArchiveBotResponseParser.commonParse,
       );
       log.debug('Auto Checkin response: $response');
       if (response.isSuccess) {
-        CheckInVO checkInVO = CheckInVO.fromResponse(response.data);
-        snack('checkInSuccess'.tr, 'checkInSuccessHint'.trArgs([checkInVO.getGP.toString(), checkInVO.currentGP.toString()]));
+        final checkInVO = archiveBotSetting.botType.value.parseCheckIn(
+          response.data,
+        );
+        snack(
+          'checkInSuccess'.tr,
+          'checkInSuccessHint'.trArgs([
+            checkInVO.getGP.toString(),
+            checkInVO.currentGP.toString(),
+          ]),
+        );
       }
     } on DioException catch (e) {
       log.error('Failed to auto checkin', e.errorMsg, e.stackTrace);
