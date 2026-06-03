@@ -309,3 +309,36 @@ Reviewed the upstream integration branch, merged upstream-sync/8.0.13-311 back t
 ### Next Steps
 
 - None - task complete
+
+
+## Session 10: Post-upstream integration validation
+
+**Date**: 2026-06-04
+**Task**: Post-upstream integration validation
+**Branch**: `master`
+
+### Summary
+
+Validated the upstream 8.0.13+311 merge with debug Android build, source-reviewed Archive Bot and Archive-at-Home routing, and documented the local proxy and Gradle mirror requirements in the upstream integration PRD.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `1f3a23e5` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
