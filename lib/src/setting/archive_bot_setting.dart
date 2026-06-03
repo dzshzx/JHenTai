@@ -78,10 +78,7 @@ class ArchiveBotSetting
 
   final RxBool useProxyServer = false.obs;
 
-  bool get isReady =>
-      apiKey.value != null &&
-      (apiAddress.value != null ||
-          (botType.value == ArchiveBotType.ehArBot && useProxyServer.isTrue));
+  bool get isReady => apiKey.value != null;
 
   String get resolvedApiAddress {
     if (botType.value == ArchiveBotType.ehArBot && useProxyServer.isTrue) {
