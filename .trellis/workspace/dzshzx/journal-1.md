@@ -174,3 +174,36 @@ Refreshed JHenTai Trellis spec guidance, added planning artifacts for the spec b
 ### Next Steps
 
 - None - task complete
+
+
+## Session 6: Upstream integration operating model
+
+**Date**: 2026-06-04
+**Task**: Upstream integration operating model
+**Branch**: `master`
+
+### Summary
+
+Planned the fork upstream integration operating model, recorded branch and dry-run decisions in task artifacts, glossary, and ADR, and set the next step as a disposable-worktree dry-run against upstream 77cd957e.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `0c66cfa5` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
