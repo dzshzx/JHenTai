@@ -83,3 +83,16 @@
 - The highest-risk integration surfaces identified so far are release packaging, details behavior, download behavior, archive-bot/archive-at-home integration, and local blocking rules.
 - The repository currently also contains a substantial local workflow/tooling overlay that should be treated as fork-local infrastructure, not as part of upstream product integration.
 - The purpose of this PRD is not to minimize all divergence. The purpose is to make divergence intentional, layered, and maintainable over time.
+
+## Post-Merge Android Build Environment Notes
+
+- The `8.0.13+311` upstream integration was validated on the stable fork branch with `flutter build apk --debug -t lib/src/main.dart`.
+- The effective WSL proxy endpoint during validation was `127.0.0.1:7897`, exported through `http_proxy`, `https_proxy`, `HTTP_PROXY`, `HTTPS_PROXY`, `all_proxy`, and `ALL_PROXY`.
+- Gradle dependency resolution also used user-level JVM proxy settings in `~/.gradle/gradle.properties`:
+  - `systemProp.http.proxyHost=127.0.0.1`
+  - `systemProp.http.proxyPort=7897`
+  - `systemProp.https.proxyHost=127.0.0.1`
+  - `systemProp.https.proxyPort=7897`
+- Repository Gradle files and the user-level `~/.gradle/init.d/jhentai-maven-mirrors.gradle` script put Maven mirrors ahead of official Maven repositories for this environment. This matters because older dependency chains can still touch Maven/JCenter-era artifacts.
+- A debug APK is only a validation artifact for dependency and build-chain checks. Release packaging must still follow the repository release workflow and use `lib/src/main.dart` as the entrypoint.
+- Machine-local proxy and user-home Gradle init files are environment prerequisites for this workstation, not product behavior. Future upstream integrations should re-verify the current network path instead of assuming these values are portable.
