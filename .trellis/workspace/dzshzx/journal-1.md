@@ -241,3 +241,37 @@ Committed the pending agent documentation updates, created and ran a disposable-
 ### Next Steps
 
 - None - task complete
+
+
+## Session 8: Integrate upstream 8.0.13+311
+
+**Date**: 2026-06-04
+**Task**: Integrate upstream 8.0.13+311
+**Branch**: `master`
+
+### Summary
+
+Created upstream-sync/8.0.13-311 in a separate worktree, merged upstream 77cd957e, resolved AltSource and archive bot settings conflicts while preserving local proxy behavior, validated pub get/analyze, recorded build network failure, and archived the integration task.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `efca3a3e` | (see git log) |
+| `8e1f3aff` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

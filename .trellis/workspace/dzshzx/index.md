@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 7
+- **Total Sessions**: 8
 - **Last Active**: 2026-06-04
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~243 | Active |
+| `journal-1.md` | ~277 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 8 | 2026-06-04 | Integrate upstream 8.0.13+311 | `efca3a3e`, `8e1f3aff` | `master` |
 | 7 | 2026-06-04 | Upstream dry-run integration | `1d4e3749`, `da46efbd` | `master` |
 | 6 | 2026-06-04 | Upstream integration operating model | `0c66cfa5` | `master` |
 | 5 | 2026-06-04 | Refresh Trellis specs for JHenTai | `506d2fb9`, `8c7cce9b` | `master` |
