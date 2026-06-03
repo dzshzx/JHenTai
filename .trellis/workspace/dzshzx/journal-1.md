@@ -207,3 +207,37 @@ Planned the fork upstream integration operating model, recorded branch and dry-r
 ### Next Steps
 
 - None - task complete
+
+
+## Session 7: Upstream dry-run integration
+
+**Date**: 2026-06-04
+**Task**: Upstream dry-run integration
+**Branch**: `master`
+
+### Summary
+
+Committed the pending agent documentation updates, created and ran a disposable-worktree dry-run merge against upstream 77cd957e, recorded two conflicts and the real integration handling order, and left the dry-run worktree available for inspection.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `1d4e3749` | (see git log) |
+| `da46efbd` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
