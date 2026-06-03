@@ -11,7 +11,7 @@ Frontend code lives mainly under:
 - `lib/src/pages/` for routed screens and page-specific GetX logic/state.
 - `lib/src/widget/` for reusable widgets, dialogs, cards, and app-wide wrappers.
 - `lib/src/routes/` for route names and `EHPage` metadata.
-- `lib/src/config/` for theme, UI constants, Sentry/API config placeholders.
+- `lib/src/config/` for theme, UI constants, API secret config, and other app-level UI/runtime config files.
 - `lib/src/l18n/` for GetX translations.
 - `assets/` and platform asset folders for static resources.
 

@@ -18,7 +18,7 @@ flutter analyze
 flutter test
 ```
 
-`CLAUDE.md` notes that no test directory files are currently present, so `flutter test` is mainly relevant when tests are added. Code generation uses:
+The repository currently has a small regression test at `test/smoke_test.dart`, so `flutter test` is already meaningful even for narrow utility changes. Code generation uses:
 
 ```bash
 dart run build_runner build

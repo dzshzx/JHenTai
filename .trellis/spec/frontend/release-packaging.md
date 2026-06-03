@@ -53,7 +53,7 @@ Required files and inputs:
 - `android/app/build.gradle` owns package id, SDK values, and release signing config.
 - `android/key.properties.sample` documents the release signing properties.
 - CI secrets `ENCODED_KEYSTORE` and `KEY_PROPERTIES` create `android/app/upload-keystore.jks` and `android/key.properties`.
-- `android/settings.gradle`, `android/build.gradle`, and `~/.gradle/init.d/jhentai-maven-mirrors.gradle` must keep repository fallback order in sync.
+- `android/settings.gradle` and `android/build.gradle` must stay compatible with the CI Android build.
 
 Do not publish a universal debug APK. The release artifact policy is split-per-ABI APKs.
 
