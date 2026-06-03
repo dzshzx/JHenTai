@@ -1,0 +1,3 @@
+# Upstream Integration Operating Model
+
+This fork keeps `master` as the stable fork branch and integrates upstream releases through dedicated `upstream-sync/<baseline>` branches created from `master`. The first integration against upstream `77cd957ef9a515ff3e7f1eb83744f0688fea9587` should be a disposable-worktree dry-run, because the fork has broad local workflow, toolchain, packaging, and runtime customizations while the upstream delta is concentrated in archive protocol and release metadata. This keeps normal fork work independent from upstream conflict discovery and prevents a moving upstream head or direct merge from becoming a second source of truth.
