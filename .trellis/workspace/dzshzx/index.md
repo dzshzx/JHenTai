@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 10
+- **Total Sessions**: 11
 - **Last Active**: 2026-06-04
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~344 | Active |
+| `journal-1.md` | ~377 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 11 | 2026-06-04 | Fix archive bot readiness fallback | `ae6162ae` | `master` |
 | 10 | 2026-06-04 | Post-upstream integration validation | `1f3a23e5` | `master` |
 | 9 | 2026-06-04 | Merge upstream 8.0.13+311 to master | `8b1ac790`, `3d96d5cd` | `master` |
 | 8 | 2026-06-04 | Integrate upstream 8.0.13+311 | `efca3a3e`, `8e1f3aff` | `master` |

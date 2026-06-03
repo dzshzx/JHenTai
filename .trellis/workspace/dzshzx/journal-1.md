@@ -342,3 +342,36 @@ Validated the upstream 8.0.13+311 merge with debug Android build, source-reviewe
 ### Next Steps
 
 - None - task complete
+
+
+## Session 11: Fix archive bot readiness fallback
+
+**Date**: 2026-06-04
+**Task**: Fix archive bot readiness fallback
+**Branch**: `master`
+
+### Summary
+
+Fixed ArchiveBotSetting readiness so it aligns with resolvedApiAddress default fallback, added smoke regression coverage for ehArBot proxy routing and Archive-at-Home fallback behavior, and verified tests/build with analyzer findings classified as existing info-level issues.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `ae6162ae` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
