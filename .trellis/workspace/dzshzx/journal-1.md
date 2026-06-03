@@ -140,3 +140,37 @@ Aligned Flutter 3.41.9 maintenance baseline, pinned git dependencies, refreshed 
 ### Next Steps
 
 - None - task complete
+
+
+## Session 5: Refresh Trellis specs for JHenTai
+
+**Date**: 2026-06-04
+**Task**: Refresh Trellis specs for JHenTai
+**Branch**: `master`
+
+### Summary
+
+Refreshed JHenTai Trellis spec guidance, added planning artifacts for the spec bootstrap task, and verified the repo on Flutter 3.41.9 / Dart 3.11.5 with tests passing and analyzer showing pre-existing info-level issues.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `506d2fb9` | (see git log) |
+| `8c7cce9b` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
