@@ -27,10 +27,10 @@ Purpose:
 Proposed commands for the execution task, subject to final decisions:
 
 ```bash
-rtk git fetch --all --tags --prune
-rtk git worktree add ../jhentai-upstream-dry-run-8.0.13-311 -b upstream-sync/dry-run-8.0.13-311 master
+git fetch --all --tags --prune
+git worktree add ../jhentai-upstream-dry-run-8.0.13-311 -b upstream-sync/dry-run-8.0.13-311 master
 cd ../jhentai-upstream-dry-run-8.0.13-311
-rtk git merge --no-commit --no-ff 77cd957ef9a515ff3e7f1eb83744f0688fea9587
+git merge --no-commit --no-ff 77cd957ef9a515ff3e7f1eb83744f0688fea9587
 ```
 
 This branch is a dry-run branch. Do not merge it back to `master`; capture conflict findings and either abort/reset or convert the findings into a separate real integration task.
@@ -50,10 +50,10 @@ This branch is a dry-run branch. Do not merge it back to `master`; capture confl
 Use the project Flutter baseline rather than the older PATH default:
 
 ```bash
-rtk /home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter pub get
-rtk /home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter analyze --no-pub
-rtk /home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter test
-rtk /home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter build apk --debug -t lib/src/main.dart
+/home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter pub get
+/home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter analyze --no-pub
+/home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter test
+/home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter build apk --debug -t lib/src/main.dart
 ```
 
 Packaging smoke checks should be chosen based on the files changed by the integration. If release workflow or platform packaging files change, include a targeted packaging-oriented smoke check or at least script syntax checks for touched shell scripts.

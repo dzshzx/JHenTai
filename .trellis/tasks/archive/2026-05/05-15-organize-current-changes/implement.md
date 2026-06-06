@@ -21,9 +21,9 @@
 ## Validation Commands
 
 ```bash
-rtk trellis update --dry-run
-rtk python3 ./.trellis/scripts/get_context.py --mode phase
-rtk python3 ./.trellis/scripts/task.py current --source
-rtk flutter pub get
-rtk flutter build apk --debug -t lib/src/main.dart
+trellis update --dry-run
+python3 ./.trellis/scripts/get_context.py --mode phase
+python3 ./.trellis/scripts/task.py current --source
+flutter pub get
+flutter build apk --debug -t lib/src/main.dart
 ```

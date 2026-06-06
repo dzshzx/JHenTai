@@ -42,9 +42,9 @@ Expected shape:
 Run from integration worktree:
 
 ```bash
-rtk /home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter pub get
-rtk /home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter analyze --no-pub
-rtk /home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter test
+/home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter pub get
+/home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter analyze --no-pub
+/home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter test
 ```
 
 If analyzer/test output exposes pre-existing noise, record exact failures and decide whether they block this integration.

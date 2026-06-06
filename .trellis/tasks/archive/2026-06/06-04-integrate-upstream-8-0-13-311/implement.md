@@ -16,9 +16,9 @@
 ## Commands
 
 ```bash
-rtk git worktree add ../jhentai-upstream-8.0.13-311 -b upstream-sync/8.0.13-311 master
+git worktree add ../jhentai-upstream-8.0.13-311 -b upstream-sync/8.0.13-311 master
 cd ../jhentai-upstream-8.0.13-311
-rtk git merge --no-ff 77cd957ef9a515ff3e7f1eb83744f0688fea9587
+git merge --no-ff 77cd957ef9a515ff3e7f1eb83744f0688fea9587
 ```
 
 If conflicts occur, resolve them in the integration worktree and commit the merge there.

@@ -14,12 +14,12 @@
 ## Commands
 
 ```bash
-rtk git status --short
-rtk git fetch --all --tags --prune
-rtk git worktree add ../jhentai-upstream-dry-run-8.0.13-311 -b upstream-sync/dry-run-8.0.13-311 master
+git status --short
+git fetch --all --tags --prune
+git worktree add ../jhentai-upstream-dry-run-8.0.13-311 -b upstream-sync/dry-run-8.0.13-311 master
 cd ../jhentai-upstream-dry-run-8.0.13-311
-rtk git merge --no-commit --no-ff 77cd957ef9a515ff3e7f1eb83744f0688fea9587
-rtk git status --short
+git merge --no-commit --no-ff 77cd957ef9a515ff3e7f1eb83744f0688fea9587
+git status --short
 ```
 
 ## Stop Conditions

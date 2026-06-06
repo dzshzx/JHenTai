@@ -27,25 +27,25 @@ Additional local integration work:
 Ran from `/home/ubuntu/workspace/jhentai-upstream-8.0.13-311`:
 
 ```bash
-rtk /home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter pub get
+/home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter pub get
 ```
 
 Result: passed.
 
 ```bash
-rtk /home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter analyze --no-pub
+/home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter analyze --no-pub
 ```
 
 Result: no analyzer errors or warnings. The command returned non-zero because it reported 125 info-level findings, matching the repo's existing style/deprecation noise pattern.
 
 ```bash
-rtk /home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter test
+/home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter test
 ```
 
 Result: not runnable; Flutter reported `Test directory "test" not found.`
 
 ```bash
-rtk /home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter build apk --debug -t lib/src/main.dart
+/home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter build apk --debug -t lib/src/main.dart
 ```
 
 Result: failed during Gradle dependency download, not Dart compilation. The first attempt failed downloading Maven Central artifacts with TLS handshake termination. Flutter retried automatically; the second attempt failed while resolving old `http_proxy` plugin classpath artifacts from `jcenter.bintray.com` / `repo1.maven.org`, again with remote handshake termination.

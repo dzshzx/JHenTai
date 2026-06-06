@@ -21,12 +21,12 @@ The current checkout at `/home/ubuntu/workspace/JHenTai` stayed on `master`; the
 ## Commands Run
 
 ```bash
-rtk git fetch --all --tags --prune
-rtk git worktree add ../jhentai-upstream-dry-run-8.0.13-311 -b upstream-sync/dry-run-8.0.13-311 master
-rtk git merge --no-commit --no-ff 77cd957ef9a515ff3e7f1eb83744f0688fea9587
-rtk git status --short
-rtk git diff --name-only --diff-filter=U
-rtk git ls-files -u
+git fetch --all --tags --prune
+git worktree add ../jhentai-upstream-dry-run-8.0.13-311 -b upstream-sync/dry-run-8.0.13-311 master
+git merge --no-commit --no-ff 77cd957ef9a515ff3e7f1eb83744f0688fea9587
+git status --short
+git diff --name-only --diff-filter=U
+git ls-files -u
 ```
 
 ## Merge Output
@@ -104,9 +104,9 @@ pubspec.yaml
 7. Run at least:
 
 ```bash
-rtk /home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter pub get
-rtk /home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter analyze --no-pub
-rtk /home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter test
+/home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter pub get
+/home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter analyze --no-pub
+/home/ubuntu/upgrade-sandbox/jhentai/flutter/bin/flutter test
 ```
 
 If release or platform metadata remains changed, also run targeted packaging/script checks selected from touched files.
@@ -119,8 +119,8 @@ If cleanup is requested later, first abort the merge in the disposable worktree,
 
 ```bash
 cd /home/ubuntu/workspace/jhentai-upstream-dry-run-8.0.13-311
-rtk git merge --abort
+git merge --abort
 cd /home/ubuntu/workspace/JHenTai
-rtk git worktree remove ../jhentai-upstream-dry-run-8.0.13-311
-rtk git branch -D upstream-sync/dry-run-8.0.13-311
+git worktree remove ../jhentai-upstream-dry-run-8.0.13-311
+git branch -D upstream-sync/dry-run-8.0.13-311
 ```

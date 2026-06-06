@@ -12,7 +12,7 @@
 ## Command
 
 ```bash
-rtk git merge --no-ff upstream-sync/8.0.13-311 -m "Merge upstream 8.0.13+311 into master"
+git merge --no-ff upstream-sync/8.0.13-311 -m "Merge upstream 8.0.13+311 into master"
 ```
 
 ## Result
