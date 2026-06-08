@@ -7,13 +7,6 @@
 # Session/window scoped runtime state
 .runtime/
 
-# Template/update management state
-.template-hashes.json
-
-# Local caches and worktrees
-.cache/
-worktrees/
-
 # Ralph Loop state file
 .ralph-state.json
 

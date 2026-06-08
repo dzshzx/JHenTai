@@ -2,7 +2,7 @@
 name: implement
 description: |
   Code implementation expert for the Trellis channel runtime. Understands specs and task artifacts, then implements features. No git commit allowed.
-provider: codex
+provider: claude
 labels: [trellis, implement]
 ---
 
