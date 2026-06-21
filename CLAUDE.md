@@ -121,12 +121,12 @@ Reusable widgets prefixed `eh_` — dialogs, cards, image components, tag displa
 
 ### Issue tracker
 
-Issues and PRDs are tracked in GitHub Issues for this repo. See `docs/agents/issue-tracker.md`.
+Issues and PRDs are tracked as local markdown files under `.scratch/<feature-slug>/`; external PRs are not a triage surface. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
-Triage uses the default five-label vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. See `docs/agents/triage-labels.md`.
+The canonical triage labels are `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. See `docs/agents/triage-labels.md`.
 
 ### Domain docs
 
-This repo uses a single-context domain docs layout. See `docs/agents/domain.md`.
+This is a single-context repo: read `CONTEXT.md` when present, then `docs/adr/index.md` when present before opening individual ADRs. See `docs/agents/domain.md`.
