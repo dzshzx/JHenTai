@@ -30,7 +30,7 @@ flutter test
 
 `test/` holds unit tests; run them with `flutter test`.
 
-Fork Android builds run in GitHub Actions (`.github/workflows/android-fork.yml`, on pushes to `master` and `upstream-sync/**`). CI signs with a throwaway key; the phone re-signs the downloaded APK with the fork's key, which never leaves the phone (`~/.config/jhentai-fork/`). The upstream `build_publish.yml` needs upstream's signing and API secrets and is disabled in this fork.
+Fork Android builds run in GitHub Actions (`.github/workflows/android-fork.yml`, on pushes to `master` and `upstream-sync/**`) and are signed with the fork's key from the repo secrets `ENCODED_KEYSTORE` and `KEY_PROPERTIES`; the original keystore and its password are in the owner's Bitwarden item 「JHenTai 签名密钥」. The upstream `build_publish.yml` needs upstream's API secret and release setup and is disabled in this fork.
 
 ## Architecture
 
