@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-JHenTai is a Flutter app for browsing E-Hentai / EXHentai, targeting Android, iOS, Windows, macOS, and Linux. Version `8.0.14+328` (from pubspec.yaml).
+JHenTai is a Flutter app for browsing E-Hentai / EXHentai, targeting Android, iOS, Windows, macOS, and Linux. The version is in `pubspec.yaml`.
 
 ## Build & dev commands
 
@@ -29,6 +29,8 @@ flutter test
 ```
 
 `test/` holds unit tests; run them with `flutter test`.
+
+Fork Android builds run in GitHub Actions (`.github/workflows/android-fork.yml`, on pushes to `master` and `upstream-sync/**`). CI signs with a throwaway key; the phone re-signs the downloaded APK with the fork's key, which never leaves the phone (`~/.config/jhentai-fork/`). The upstream `build_publish.yml` needs upstream's signing and API secrets and is disabled in this fork.
 
 ## Architecture
 
