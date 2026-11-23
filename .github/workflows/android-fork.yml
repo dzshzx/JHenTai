@@ -20,6 +20,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Runner hardware
+        run: echo "cpu=$(nproc) mem=$(free -h | awk '/^Mem:/{print $2}')"
+
       - name: Read Flutter version from .fvmrc
         id: fvm
         run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
