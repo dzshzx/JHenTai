@@ -5,11 +5,7 @@ class ArchiveBotResponse {
   final String message;
   final Map<String, dynamic> data;
 
-  const ArchiveBotResponse({
-    required this.code,
-    required this.message,
-    required this.data,
-  });
+  const ArchiveBotResponse({required this.code, required this.message, required this.data});
 
   factory ArchiveBotResponse.fromJson(Map<String, dynamic> json) {
     return ArchiveBotResponse(
@@ -21,8 +17,7 @@ class ArchiveBotResponse {
 
   bool get isSuccess => code == 0;
 
-  String get errorMessage =>
-      ArchiveBotResponseCodeEnum.fromCode(code)?.name.tr ?? 'internalError'.tr;
+  String get errorMessage => ArchiveBotResponseCodeEnum.fromCode(code)?.name.tr ?? 'internalError'.tr;
 
   @override
   String toString() {
@@ -38,15 +33,14 @@ enum ArchiveBotResponseCodeEnum {
   insufficientGP(5),
   parseFailed(6),
   checkedIn(7),
-  serverError(99);
+  serverError(99),
+  ;
 
   final int code;
 
   const ArchiveBotResponseCodeEnum(this.code);
 
   static ArchiveBotResponseCodeEnum? fromCode(int code) {
-    return ArchiveBotResponseCodeEnum.values.firstWhereOrNull(
-      (e) => e.code == code,
-    );
+    return ArchiveBotResponseCodeEnum.values.firstWhereOrNull((e) => e.code == code);
   }
 }

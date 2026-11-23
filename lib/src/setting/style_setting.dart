@@ -12,9 +12,7 @@ import '../model/jh_layout.dart';
 
 StyleSetting styleSetting = StyleSetting();
 
-class StyleSetting
-    with JHLifeCircleBeanWithConfigStorage
-    implements JHLifeCircleBean {
+class StyleSetting with JHLifeCircleBeanWithConfigStorage implements JHLifeCircleBean {
   Rx<ThemeMode> themeMode = ThemeMode.system.obs;
   Rx<Color> lightThemeColor = UIConfig.defaultLightThemeColor.obs;
   Rx<Color> darkThemeColor = UIConfig.defaultDarkThemeColor.obs;
@@ -25,50 +23,67 @@ class StyleSetting
   RxnInt crossAxisCountInDetailPage = RxnInt(null);
   RxMap<String, ListMode> pageListMode = <String, ListMode>{}.obs;
   RxBool moveCover2RightSide = false.obs;
-  Rx<LayoutMode> layout =
-      PlatformDispatcher.instance.views.first.physicalSize.width /
-              PlatformDispatcher.instance.views.first.devicePixelRatio <
-          600
+  Rx<LayoutMode> layout = PlatformDispatcher.instance.views.first.physicalSize.width / PlatformDispatcher.instance.views.first.devicePixelRatio < 600
       ? LayoutMode.mobileV2.obs
       : GetPlatform.isDesktop
-      ? LayoutMode.desktop.obs
-      : LayoutMode.tabletV2.obs;
+          ? LayoutMode.desktop.obs
+          : LayoutMode.tabletV2.obs;
+
+  /// Whether to apply [portraitLayout] or [landscapeLayout] by the current window orientation instead of [layout].
+  RxBool layoutFollowOrientation = false.obs;
+  Rx<LayoutMode> portraitLayout = LayoutMode.mobileV2.obs;
+  Rx<LayoutMode> landscapeLayout = GetPlatform.isDesktop ? LayoutMode.desktop.obs : LayoutMode.tabletV2.obs;
 
   bool get isInWaterFlowListMode =>
-      listMode.value == ListMode.waterfallFlowBig ||
-      listMode.value == ListMode.waterfallFlowSmall ||
-      listMode.value == ListMode.waterfallFlowMedium;
+      listMode.value == ListMode.waterfallFlowBig || listMode.value == ListMode.waterfallFlowSmall || listMode.value == ListMode.waterfallFlowMedium;
 
   Brightness currentBrightness() => themeMode.value == ThemeMode.system
       ? PlatformDispatcher.instance.platformBrightness
       : themeMode.value == ThemeMode.light
-      ? Brightness.light
-      : Brightness.dark;
+          ? Brightness.light
+          : Brightness.dark;
 
   /// If the current window width is too small, App will degrade to mobile mode. Use [actualLayout] to indicate actual layout.
-  LayoutMode actualLayout =
-      PlatformDispatcher.instance.views.first.physicalSize.width /
-              PlatformDispatcher.instance.views.first.devicePixelRatio <
-          600
+  LayoutMode actualLayout = PlatformDispatcher.instance.views.first.physicalSize.width / PlatformDispatcher.instance.views.first.devicePixelRatio < 600
       ? LayoutMode.mobileV2
       : GetPlatform.isDesktop
-      ? LayoutMode.desktop
-      : LayoutMode.tabletV2;
+          ? LayoutMode.desktop
+          : LayoutMode.tabletV2;
 
-  bool get isInMobileLayout =>
-      actualLayout == LayoutMode.mobileV2 || actualLayout == LayoutMode.mobile;
+  bool get isInMobileLayout => actualLayout == LayoutMode.mobileV2 || actualLayout == LayoutMode.mobile;
 
-  bool get isInTabletLayout =>
-      actualLayout == LayoutMode.tabletV2 || actualLayout == LayoutMode.tablet;
+  bool get isInTabletLayout => actualLayout == LayoutMode.tabletV2 || actualLayout == LayoutMode.tablet;
 
-  bool get isInV1Layout =>
-      actualLayout == LayoutMode.mobile || actualLayout == LayoutMode.tablet;
+  bool get isInV1Layout => actualLayout == LayoutMode.mobile || actualLayout == LayoutMode.tablet;
 
-  bool get isInV2Layout =>
-      actualLayout == LayoutMode.mobileV2 ||
-      actualLayout == LayoutMode.tabletV2;
+  bool get isInV2Layout => actualLayout == LayoutMode.mobileV2 || actualLayout == LayoutMode.tabletV2;
 
   bool get isInDesktopLayout => actualLayout == LayoutMode.desktop;
+
+  /// Whether the current window is wider than it is high.
+  bool get isLandscape {
+    Size size = PlatformDispatcher.instance.views.first.physicalSize;
+    return size.width > size.height;
+  }
+
+  /// The layout chosen by user for the current window orientation, may be degraded by [resolveActualLayout].
+  LayoutMode get preferredLayout {
+    if (layoutFollowOrientation.isFalse) {
+      return layout.value;
+    }
+    return isLandscape ? landscapeLayout.value : portraitLayout.value;
+  }
+
+  /// The layout actually applied for [layoutMode], degrade to mobile layout if the window width is under 600.
+  LayoutMode resolveActualLayout(LayoutMode layoutMode) {
+    if (layoutMode == LayoutMode.mobileV2 || layoutMode == LayoutMode.mobile || Get.width < 600) {
+      return LayoutMode.mobileV2;
+    }
+    if (layoutMode == LayoutMode.tabletV2 || layoutMode == LayoutMode.tablet) {
+      return LayoutMode.tabletV2;
+    }
+    return LayoutMode.desktop;
+  }
 
   @override
   ConfigEnum get configEnum => ConfigEnum.styleSetting;
@@ -78,62 +93,58 @@ class StyleSetting
     Map map = jsonDecode(configString);
 
     themeMode.value = ThemeMode.values[map['themeMode']];
-    lightThemeColor.value = Color(
-      map['lightThemeColor'] ?? lightThemeColor.value.value,
-    );
-    darkThemeColor.value = Color(
-      map['darkThemeColor'] ?? darkThemeColor.value.value,
-    );
+    lightThemeColor.value = Color(map['lightThemeColor'] ?? lightThemeColor.value.toARGB32());
+    darkThemeColor.value = Color(map['darkThemeColor'] ?? darkThemeColor.value.toARGB32());
     listMode.value = ListMode.values[map['listMode']];
     crossAxisCountInWaterFallFlow.value = map['crossAxisCountInWaterFallFlow'];
-    crossAxisCountInGridDownloadPageForGroup.value =
-        map['crossAxisCountInGridDownloadPageForGroup'];
-    crossAxisCountInGridDownloadPageForGallery.value =
-        map['crossAxisCountInGridDownloadPageForGallery'];
+    crossAxisCountInGridDownloadPageForGroup.value = map['crossAxisCountInGridDownloadPageForGroup'];
+    crossAxisCountInGridDownloadPageForGallery.value = map['crossAxisCountInGridDownloadPageForGallery'];
     crossAxisCountInDetailPage.value = map['crossAxisCountInDetailPage'];
-    pageListMode.value = Map.from(
-      map['pageListMode']?.map(
-            (route, listModeIndex) =>
-                MapEntry(route, ListMode.values[listModeIndex]),
-          ) ??
-          {},
-    );
-    moveCover2RightSide.value =
-        map['moveCover2RightSide'] ?? moveCover2RightSide.value;
+    pageListMode.value = Map.from(map['pageListMode']?.map((route, listModeIndex) => MapEntry(route, ListMode.values[listModeIndex])) ?? {});
+    moveCover2RightSide.value = map['moveCover2RightSide'] ?? moveCover2RightSide.value;
     layout.value = LayoutMode.values[map['layout'] ?? layout.value.index];
+    layoutFollowOrientation.value = map['layoutFollowOrientation'] ?? layoutFollowOrientation.value;
+    portraitLayout.value = _migrateV1Layout(LayoutMode.values[map['portraitLayout'] ?? portraitLayout.value.index]);
+    landscapeLayout.value = _migrateV1Layout(LayoutMode.values[map['landscapeLayout'] ?? landscapeLayout.value.index]);
 
     /// old layout has been removed in v5.0.0
     if (isInV1Layout) {
-      layout =
-          PlatformDispatcher.instance.views.first.physicalSize.width /
-                  PlatformDispatcher.instance.views.first.devicePixelRatio <
-              600
+      layout = PlatformDispatcher.instance.views.first.physicalSize.width / PlatformDispatcher.instance.views.first.devicePixelRatio < 600
           ? LayoutMode.mobileV2.obs
           : GetPlatform.isDesktop
-          ? LayoutMode.desktop.obs
-          : LayoutMode.tabletV2.obs;
+              ? LayoutMode.desktop.obs
+              : LayoutMode.tabletV2.obs;
     }
-    actualLayout = layout.value;
+    actualLayout = preferredLayout;
+  }
+
+  LayoutMode _migrateV1Layout(LayoutMode layoutMode) {
+    if (layoutMode == LayoutMode.mobile) {
+      return LayoutMode.mobileV2;
+    }
+    if (layoutMode == LayoutMode.tablet) {
+      return LayoutMode.tabletV2;
+    }
+    return layoutMode;
   }
 
   @override
   String toConfigString() {
     return jsonEncode({
       'themeMode': themeMode.value.index,
-      'lightThemeColor': lightThemeColor.value.value,
-      'darkThemeColor': darkThemeColor.value.value,
+      'lightThemeColor': lightThemeColor.value.toARGB32(),
+      'darkThemeColor': darkThemeColor.value.toARGB32(),
       'listMode': listMode.value.index,
       'crossAxisCountInWaterFallFlow': crossAxisCountInWaterFallFlow.value,
-      'crossAxisCountInGridDownloadPageForGroup':
-          crossAxisCountInGridDownloadPageForGroup.value,
-      'crossAxisCountInGridDownloadPageForGallery':
-          crossAxisCountInGridDownloadPageForGallery.value,
+      'crossAxisCountInGridDownloadPageForGroup': crossAxisCountInGridDownloadPageForGroup.value,
+      'crossAxisCountInGridDownloadPageForGallery': crossAxisCountInGridDownloadPageForGallery.value,
       'crossAxisCountInDetailPage': crossAxisCountInDetailPage.value,
-      'pageListMode': pageListMode.map(
-        (route, listMode) => MapEntry(route, listMode.index),
-      ),
+      'pageListMode': pageListMode.map((route, listMode) => MapEntry(route, listMode.index)),
       'moveCover2RightSide': moveCover2RightSide.value,
       'layout': layout.value.index,
+      'layoutFollowOrientation': layoutFollowOrientation.value,
+      'portraitLayout': portraitLayout.value.index,
+      'landscapeLayout': landscapeLayout.value.index,
     });
   }
 
@@ -155,13 +166,13 @@ class StyleSetting
 
   Future<void> saveLightThemeColor(Color color) async {
     log.debug('saveLightThemeColor:$color');
-    lightThemeColor.value = color;
+    this.lightThemeColor.value = color;
     await saveBeanConfig();
   }
 
   Future<void> saveDarkThemeColor(Color color) async {
     log.debug('saveDarkThemeColor:$color');
-    darkThemeColor.value = color;
+    this.darkThemeColor.value = color;
     await saveBeanConfig();
   }
 
@@ -171,41 +182,25 @@ class StyleSetting
     await saveBeanConfig();
   }
 
-  Future<void> saveCrossAxisCountInWaterFallFlow(
-    int? crossAxisCountInWaterFallFlow,
-  ) async {
-    log.debug(
-      'saveCrossAxisCountInWaterFallFlow:$crossAxisCountInWaterFallFlow',
-    );
+  Future<void> saveCrossAxisCountInWaterFallFlow(int? crossAxisCountInWaterFallFlow) async {
+    log.debug('saveCrossAxisCountInWaterFallFlow:$crossAxisCountInWaterFallFlow');
     this.crossAxisCountInWaterFallFlow.value = crossAxisCountInWaterFallFlow;
     await saveBeanConfig();
   }
 
-  Future<void> saveCrossAxisCountInGridDownloadPageForGroup(
-    int? crossAxisCountInGridDownloadPageForGroup,
-  ) async {
-    log.debug(
-      'saveCrossAxisCountInGridDownloadPageForGroup:$crossAxisCountInGridDownloadPageForGroup',
-    );
-    this.crossAxisCountInGridDownloadPageForGroup.value =
-        crossAxisCountInGridDownloadPageForGroup;
+  Future<void> saveCrossAxisCountInGridDownloadPageForGroup(int? crossAxisCountInGridDownloadPageForGroup) async {
+    log.debug('saveCrossAxisCountInGridDownloadPageForGroup:$crossAxisCountInGridDownloadPageForGroup');
+    this.crossAxisCountInGridDownloadPageForGroup.value = crossAxisCountInGridDownloadPageForGroup;
     await saveBeanConfig();
   }
 
-  Future<void> saveCrossAxisCountInGridDownloadPageForGallery(
-    int? crossAxisCountInGridDownloadPageForGallery,
-  ) async {
-    log.debug(
-      'saveCrossAxisCountInGridDownloadPageForGallery:$crossAxisCountInGridDownloadPageForGallery',
-    );
-    this.crossAxisCountInGridDownloadPageForGallery.value =
-        crossAxisCountInGridDownloadPageForGallery;
+  Future<void> saveCrossAxisCountInGridDownloadPageForGallery(int? crossAxisCountInGridDownloadPageForGallery) async {
+    log.debug('saveCrossAxisCountInGridDownloadPageForGallery:$crossAxisCountInGridDownloadPageForGallery');
+    this.crossAxisCountInGridDownloadPageForGallery.value = crossAxisCountInGridDownloadPageForGallery;
     await saveBeanConfig();
   }
 
-  Future<void> saveCrossAxisCountInDetailPage(
-    int? crossAxisCountInDetailPage,
-  ) async {
+  Future<void> saveCrossAxisCountInDetailPage(int? crossAxisCountInDetailPage) async {
     log.debug('saveCrossAxisCountInDetailPage:$crossAxisCountInDetailPage');
     this.crossAxisCountInDetailPage.value = crossAxisCountInDetailPage;
     await saveBeanConfig();
@@ -214,9 +209,9 @@ class StyleSetting
   Future<void> savePageListMode(String routeName, ListMode? listMode) async {
     log.debug('savePageListMode:$routeName, $listMode');
     if (listMode == null) {
-      pageListMode.remove(routeName);
+      this.pageListMode.remove(routeName);
     } else {
-      pageListMode[routeName] = listMode;
+      this.pageListMode[routeName] = listMode;
     }
     await saveBeanConfig();
   }
@@ -229,7 +224,25 @@ class StyleSetting
 
   Future<void> saveLayoutMode(LayoutMode layoutMode) async {
     log.debug('saveLayoutMode:${layoutMode.name}');
-    layout.value = layoutMode;
+    this.layout.value = layoutMode;
+    await saveBeanConfig();
+  }
+
+  Future<void> saveLayoutFollowOrientation(bool layoutFollowOrientation) async {
+    log.debug('saveLayoutFollowOrientation:$layoutFollowOrientation');
+    this.layoutFollowOrientation.value = layoutFollowOrientation;
+    await saveBeanConfig();
+  }
+
+  Future<void> savePortraitLayout(LayoutMode layoutMode) async {
+    log.debug('savePortraitLayout:${layoutMode.name}');
+    this.portraitLayout.value = layoutMode;
+    await saveBeanConfig();
+  }
+
+  Future<void> saveLandscapeLayout(LayoutMode layoutMode) async {
+    log.debug('saveLandscapeLayout:${layoutMode.name}');
+    this.landscapeLayout.value = layoutMode;
     await saveBeanConfig();
   }
 }

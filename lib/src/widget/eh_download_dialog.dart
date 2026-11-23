@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jhentai/src/config/ui_config.dart';
+import 'package:jhentai/src/setting/download_setting.dart';
 import 'package:jhentai/src/utils/route_util.dart';
 import 'package:jhentai/src/utils/toast_util.dart';
 
@@ -12,6 +13,7 @@ class EHDownloadDialog extends StatefulWidget {
   final List<String> candidates;
   final bool showDownloadOriginalImageCheckBox;
   final bool downloadOriginalImage;
+  final List<String> preferredGroups;
 
   const EHDownloadDialog({
     Key? key,
@@ -20,6 +22,7 @@ class EHDownloadDialog extends StatefulWidget {
     required this.candidates,
     this.showDownloadOriginalImageCheckBox = false,
     this.downloadOriginalImage = false,
+    this.preferredGroups = const [],
   }) : super(key: key);
 
   @override
@@ -35,11 +38,9 @@ class _EHDownloadDialogState extends State<EHDownloadDialog> {
   void initState() {
     super.initState();
 
-    group =
-        widget.currentGroup ?? widget.candidates.firstOrNull ?? 'default'.tr;
-    candidates = List.of(widget.candidates);
-    candidates.remove(group);
-    candidates.insert(0, group);
+    group = widget.currentGroup ?? widget.candidates.firstOrNull ?? 'default'.tr;
+    final validGroups = widget.candidates.toSet();
+    candidates = <String>{...widget.preferredGroups.where(validGroups.contains), group, ...widget.candidates}.toList();
     downloadOriginalImage = widget.downloadOriginalImage;
   }
 
@@ -47,12 +48,7 @@ class _EHDownloadDialogState extends State<EHDownloadDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(widget.title),
-      contentPadding: const EdgeInsets.only(
-        left: 24,
-        right: 24,
-        bottom: 12,
-        top: 24,
-      ),
+      contentPadding: const EdgeInsets.only(left: 24, right: 24, bottom: 12, top: 24),
       actionsPadding: const EdgeInsets.only(left: 24, right: 20, bottom: 12),
       content: _buildBody(),
       actions: [
@@ -65,10 +61,7 @@ class _EHDownloadDialogState extends State<EHDownloadDialog> {
               return;
             }
             backRoute(
-              result: (
-                group: group,
-                downloadOriginalImage: downloadOriginalImage,
-              ),
+              result: (group: group, downloadOriginalImage: downloadOriginalImage),
             );
           },
           child: Text('OK'.tr),
@@ -88,8 +81,7 @@ class _EHDownloadDialogState extends State<EHDownloadDialog> {
             candidates: candidates,
             listener: (g) => group = g,
           ),
-          if (widget.showDownloadOriginalImageCheckBox)
-            _buildDownloadOriginalImageCheckBox().marginOnly(top: 16),
+          if (widget.showDownloadOriginalImageCheckBox) _buildDownloadOriginalImageCheckBox().marginOnly(top: 16),
         ],
       ),
     );
@@ -104,17 +96,11 @@ class _EHDownloadDialogState extends State<EHDownloadDialog> {
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            'downloadOriginalImage'.tr + ' ?',
-            style: const TextStyle(
-              fontSize: UIConfig.groupDialogCheckBoxTextSize,
-            ),
-          ),
+          Text('downloadOriginalImage'.tr + ' ?', style: const TextStyle(fontSize: UIConfig.groupDialogCheckBoxTextSize)),
           Checkbox(
             value: downloadOriginalImage,
             activeColor: UIConfig.groupDialogCheckBoxColor(context),
-            onChanged: (bool? value) =>
-                setState(() => downloadOriginalImage = (value ?? true)),
+            onChanged: (bool? value) => setState(() => downloadOriginalImage = (value ?? true)),
           ),
         ],
       ),

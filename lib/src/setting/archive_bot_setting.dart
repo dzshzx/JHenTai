@@ -14,11 +14,17 @@ ArchiveBotSetting archiveBotSetting = ArchiveBotSetting();
 
 enum ArchiveBotType {
   ehArBot(0),
-  archiveAtHome(1);
+  archiveAtHome(1),
+  ;
 
   final int code;
 
   const ArchiveBotType(this.code);
+
+  bool get supportsCheckIn => switch (this) {
+        ehArBot => true,
+        _ => false,
+      };
 
   String get defaultServerAddress {
     switch (this) {
@@ -64,17 +70,16 @@ enum ArchiveBotType {
   }
 }
 
-class ArchiveBotSetting
-    with JHLifeCircleBeanWithConfigStorage
-    implements JHLifeCircleBean {
+class ArchiveBotSetting with JHLifeCircleBeanWithConfigStorage implements JHLifeCircleBean {
   final Rx<ArchiveBotType> botType = ArchiveBotType.ehArBot.obs;
 
   /// Only used when botType == ehArBot
-  final RxnString apiAddress = RxnString(
-    ArchiveBotConsts.defaultEhArBotServerAddress,
-  );
+  final RxnString apiAddress = RxnString(ArchiveBotConsts.defaultEhArBotServerAddress);
 
   final RxnString apiKey = RxnString(null);
+
+  /// Last source (official / bot) the user picked in the archive download dialog
+  final RxBool preferBotSource = false.obs;
 
   final RxBool useProxyServer = false.obs;
 
@@ -101,6 +106,10 @@ class ArchiveBotSetting
 
     apiAddress.value = map['apiAddress'] ?? apiAddress.value;
     useProxyServer.value = map['useProxyServer'] ?? true;
+
+    if (map['preferBotSource'] != null) {
+      preferBotSource.value = map['preferBotSource'] as bool;
+    }
   }
 
   @override
@@ -109,6 +118,7 @@ class ArchiveBotSetting
       'botType': botType.value.code,
       'apiAddress': apiAddress.value,
       'apiKey': apiKey.value,
+      'preferBotSource': preferBotSource.value,
       'useProxyServer': useProxyServer.value,
     });
   }
@@ -125,9 +135,7 @@ class ArchiveBotSetting
     String? key,
     bool useProxy = false,
   }) async {
-    log.debug(
-      'saveConfig: type=$type, address=$address, key=$key, useProxy=$useProxy',
-    );
+    log.debug('saveConfig: type=$type, address=$address, key=$key, useProxy=$useProxy');
     botType.value = type;
     apiAddress.value = address;
     apiKey.value = key;
@@ -150,6 +158,12 @@ class ArchiveBotSetting
   Future<void> saveUseProxyServer(bool value) async {
     log.debug('saveUseProxyServer: $value');
     useProxyServer.value = value;
+    await saveBeanConfig();
+  }
+
+  Future<void> savePreferBotSource(bool value) async {
+    log.debug('savePreferBotSource: $value');
+    preferBotSource.value = value;
     await saveBeanConfig();
   }
 }

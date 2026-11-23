@@ -61,6 +61,14 @@ Install for MacOS(No maintenance): download .dmg.
 Install for Linux(No maintenance): download Linux-amd64.deb or Linux-x86_64.AppImage due to your platform, then install
 or execute it (You may need to install webkit2gtk-4.1).
 
+Fedora-based dnf linux distro:
+
+```bash
+sudo rpm --import https://meeks233.github.io/Jhentai-rpm/fedora/RPM-GPG-KEY-jhentai
+sudo curl -fsSL -o /etc/yum.repos.d/jhentai.repo https://meeks233.github.io/Jhentai-rpm/fedora/jhentai.repo
+sudo dnf install -y jhentai
+```
+
 
 - If you use a proxy server, set proxy address at network setting page.
 
@@ -199,6 +207,32 @@ Now you can submit your PR, I'll do the remaining things. Or you can go on with:
 1. You need to manage your Android signing by yourself,
    check https://docs.flutter.dev/deployment/android#signing-the-app
 2. Just run this project via IDEA or VSCode simply.
+
+## About code contribution
+
+1. There is no fixed requirement for branch names. You can make changes on your local master branch and submit a PR.
+2. For changes that are large in scope or involve interactions between multiple modules, code submitted via Vibe Coding by developers without code review capability will not be accepted. Such code often fails to follow the project's existing coding conventions, is harmful to code extensibility, and its correctness cannot be guaranteed.
+3. A single PR should focus on the minimal feature scope. If multiple features are involved, please submit separate PRs.
+
+## Developer Documentation
+
+On desktop platforms(Windows/MacOS/Linux), you can pass a gallery url via command line argument, so that external
+software can use JHenTai as a reader and open a gallery directly:
+
+```bash
+# open a gallery on launch
+JHenTai.exe -g "https://e-hentai.org/g/1234567/abcdef1234/"
+JHenTai.exe --gallery="https://exhentai.org/g/1234567/abcdef1234/"
+
+# single image page url is also supported
+JHenTai.exe -g "https://e-hentai.org/s/abcdef1234/123456-0"
+```
+
+- `-g` / `--gallery <url>`: open the gallery (or image page) on launch, other arguments are ignored. If no valid url is
+  provided, the app starts normally.
+- If a password/biometric lock is enabled, the gallery opens after unlocking.
+- On MacOS, launch the executable inside the app bundle to pass arguments, e.g.
+  `/Applications/JHenTai.app/Contents/MacOS/JHenTai -g <url>` (double-clicking in Finder doesn't pass arguments).
 
 ## Main Dart Dependencies
 

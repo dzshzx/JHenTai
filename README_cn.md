@@ -62,6 +62,14 @@ MacOS安装（不维护）： 下载dmg后安装即可。
 
 Linux安装（不维护）：根据你的系统选择 Linux-amd64.deb 或 Linux-x86_64.AppImage，下载后安装运行即可。(视需要你可能需要安装webkit2gtk-4.1)
 
+基于 Fedora 的 dnf Linux 发行版：
+
+```bash
+sudo rpm --import https://meeks233.github.io/Jhentai-rpm/fedora/RPM-GPG-KEY-jhentai
+sudo curl -fsSL -o /etc/yum.repos.d/jhentai.repo https://meeks233.github.io/Jhentai-rpm/fedora/jhentai.repo
+sudo dnf install -y jhentai
+```
+
 - 如果你使用了代理服务器，在网络设置里配置代理地址。
 
 ## 更新
@@ -183,6 +191,31 @@ App翻译：
 
 1. 你需要自己管理安卓签名文件，见https://docs.flutter.dev/deployment/android#signing-the-app
 2. 使用IDEA或者VSCode直接运行即可
+
+## 关于代码贡献
+
+1. 对分支名无固定要求，可以在本地master分支上修改并提交pr。
+2. 如果改动功能点较大且且涉及多模块间的交互，不接受没有代码审查能力的开发者使用Vibe Coding提交的代码，该类代码常常不遵守项目现有编码规范，同时对代码拓展性有较大危害，代码正确性也没有保障。
+3. 单个pr需要聚焦于最小功能点，涉及多个功能点请提交多个pr。
+
+## 开发者文档
+
+在桌面平台（Windows/MacOS/Linux）上，可以通过命令行参数传入画廊链接，方便外部软件把 JHenTai 当作阅读器直接打开
+某个画廊：
+
+```bash
+# 启动时打开画廊
+JHenTai.exe -g "https://e-hentai.org/g/1234567/abcdef1234/"
+JHenTai.exe --gallery="https://exhentai.org/g/1234567/abcdef1234/"
+
+# 也支持单图页链接
+JHenTai.exe -g "https://e-hentai.org/s/abcdef1234/123456-0"
+```
+
+- `-g` / `--gallery <url>`：启动时打开对应画廊（或单图页），其他参数会被忽略；未提供有效链接时正常启动。
+- 如果开启了密码锁/生物识别锁，解锁后会再打开画廊。
+- MacOS 下需要直接执行 app bundle 内的可执行文件来传参，例如
+  `/Applications/JHenTai.app/Contents/MacOS/JHenTai -g <url>`（Finder 双击启动不会传递参数）。
 
 ## 主要dart依赖
 

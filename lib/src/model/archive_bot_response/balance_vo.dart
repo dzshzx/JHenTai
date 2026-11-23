@@ -4,10 +4,14 @@ class BalanceVO {
   BalanceVO({required this.gp});
 
   factory BalanceVO.fromEhArBotResponse(Map<String, dynamic> json) {
-    return BalanceVO(gp: json["current_GP"]);
+    return BalanceVO(
+      gp: json["current_GP"],
+    );
   }
 
   factory BalanceVO.fromArchiveAtHomeResponse(Map<String, dynamic> json) {
-    return BalanceVO(gp: json["balance"]);
+    return BalanceVO(
+      gp: json["balance"],
+    );
   }
 }

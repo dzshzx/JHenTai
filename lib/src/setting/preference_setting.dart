@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:get/get.dart';
 import 'package:jhentai/src/enum/config_enum.dart';
 import 'package:jhentai/src/model/tab_bar_icon.dart';
+import 'package:jhentai/src/pages/download/download_base_page.dart';
 
 import '../service/jh_service.dart';
 import '../utils/locale_util.dart';
@@ -11,19 +12,14 @@ import '../service/log.dart';
 
 PreferenceSetting preferenceSetting = PreferenceSetting();
 
-class PreferenceSetting
-    with JHLifeCircleBeanWithConfigStorage
-    implements JHLifeCircleBean {
-  Rx<Locale> locale = computeDefaultLocale(
-    PlatformDispatcher.instance.locale,
-  ).obs;
+class PreferenceSetting with JHLifeCircleBeanWithConfigStorage implements JHLifeCircleBean {
+  Rx<Locale> locale = computeDefaultLocale(PlatformDispatcher.instance.locale).obs;
   RxBool enableTagZHTranslation = false.obs;
   RxBool enableTagZHSearchOrderOptimization = false.obs;
   Rx<TabBarIconNameEnum> defaultTab = TabBarIconNameEnum.home.obs;
   RxBool simpleDashboardMode = false.obs;
   RxBool hideBottomBar = false.obs;
-  Rx<Scroll2TopButtonModeEnum> hideScroll2TopButton =
-      Scroll2TopButtonModeEnum.scrollDown.obs;
+  Rx<Scroll2TopButtonModeEnum> hideScroll2TopButton = Scroll2TopButtonModeEnum.scrollDown.obs;
   RxBool preloadGalleryCover = false.obs;
   RxBool enableSwipeBackGesture = true.obs;
   RxBool enableLeftMenuDrawerGesture = true.obs;
@@ -42,6 +38,8 @@ class PreferenceSetting
   RxBool showDawnInfo = false.obs;
   RxBool showHVInfo = false.obs;
   RxBool useBuiltInBlockedUsers = true.obs;
+  Rx<DownloadPageGalleryType> defaultDownloadTab = DownloadPageGalleryType.download.obs;
+  RxBool confirmDestructiveActions = false.obs;
 
   @override
   ConfigEnum get configEnum => ConfigEnum.preferenceSetting;
@@ -53,51 +51,32 @@ class PreferenceSetting
     if ((map['locale'] != null)) {
       locale.value = localeCode2Locale(map['locale']);
     }
-    showR18GImageDirectly.value =
-        map['showR18GImageDirectly'] ?? showR18GImageDirectly.value;
-    enableSwipeBackGesture.value =
-        map['enableSwipeBackGesture'] ?? enableSwipeBackGesture.value;
-    enableTagZHTranslation.value =
-        map['enableTagZHTranslation'] ?? enableTagZHTranslation.value;
-    enableTagZHSearchOrderOptimization.value =
-        map['enableTagZHSearchOrderOptimization'] ??
-        enableTagZHSearchOrderOptimization.value;
-    defaultTab.value = TabBarIconNameEnum
-        .values[map['defaultTab'] ?? TabBarIconNameEnum.home.index];
-    preloadGalleryCover.value =
-        map['preloadGalleryCover'] ?? preloadGalleryCover.value;
-    enableLeftMenuDrawerGesture.value =
-        map['enableLeftMenuDrawerGesture'] ?? enableLeftMenuDrawerGesture.value;
-    enableQuickSearchDrawerGesture.value =
-        map['enableQuickSearchDrawerGesture'] ??
-        enableQuickSearchDrawerGesture.value;
-    drawerGestureEdgeWidth.value =
-        map['drawerGestureEdgeWidth'] ?? drawerGestureEdgeWidth.value;
-    simpleDashboardMode.value =
-        map['simpleDashboardMode'] ?? simpleDashboardMode.value;
+    showR18GImageDirectly.value = map['showR18GImageDirectly'] ?? showR18GImageDirectly.value;
+    enableSwipeBackGesture.value = map['enableSwipeBackGesture'] ?? enableSwipeBackGesture.value;
+    enableTagZHTranslation.value = map['enableTagZHTranslation'] ?? enableTagZHTranslation.value;
+    enableTagZHSearchOrderOptimization.value = map['enableTagZHSearchOrderOptimization'] ?? enableTagZHSearchOrderOptimization.value;
+    defaultTab.value = TabBarIconNameEnum.values[map['defaultTab'] ?? TabBarIconNameEnum.home.index];
+    preloadGalleryCover.value = map['preloadGalleryCover'] ?? preloadGalleryCover.value;
+    enableLeftMenuDrawerGesture.value = map['enableLeftMenuDrawerGesture'] ?? enableLeftMenuDrawerGesture.value;
+    enableQuickSearchDrawerGesture.value = map['enableQuickSearchDrawerGesture'] ?? enableQuickSearchDrawerGesture.value;
+    drawerGestureEdgeWidth.value = map['drawerGestureEdgeWidth'] ?? drawerGestureEdgeWidth.value;
+    simpleDashboardMode.value = map['simpleDashboardMode'] ?? simpleDashboardMode.value;
     hideBottomBar.value = map['hideBottomBar'] ?? hideBottomBar.value;
-    hideScroll2TopButton.value =
-        Scroll2TopButtonModeEnum.values[map['hideScroll2TopButton'] ??
-            Scroll2TopButtonModeEnum.scrollDown.index];
-    showAllGalleryTitles.value =
-        map['showAllGalleryTitles'] ?? showAllGalleryTitles.value;
-    showGalleryTagVoteStatus.value =
-        map['showGalleryTagVoteStatus'] ?? showGalleryTagVoteStatus.value;
+    hideScroll2TopButton.value = Scroll2TopButtonModeEnum.values[map['hideScroll2TopButton'] ?? Scroll2TopButtonModeEnum.scrollDown.index];
+    showAllGalleryTitles.value = map['showAllGalleryTitles'] ?? showAllGalleryTitles.value;
+    showGalleryTagVoteStatus.value = map['showGalleryTagVoteStatus'] ?? showGalleryTagVoteStatus.value;
     showComments.value = map['showComments'] ?? showComments.value;
     showAllComments.value = map['showAllComments'] ?? showAllComments.value;
-    searchBehaviour.value = SearchBehaviour
-        .values[map['tagSearchConfig'] ?? SearchBehaviour.inheritAll.index];
-    enableDefaultFavorite.value =
-        map['enableDefaultFavorite'] ?? enableDefaultFavorite.value;
-    enableDefaultTagSet.value =
-        map['enableDefaultTagSet'] ?? enableDefaultTagSet.value;
-    launchInFullScreen.value =
-        map['launchInFullScreen'] ?? launchInFullScreen.value;
+    searchBehaviour.value = SearchBehaviour.values[map['tagSearchConfig'] ?? SearchBehaviour.inheritAll.index];
+    enableDefaultFavorite.value = map['enableDefaultFavorite'] ?? enableDefaultFavorite.value;
+    enableDefaultTagSet.value = map['enableDefaultTagSet'] ?? enableDefaultTagSet.value;
+    launchInFullScreen.value = map['launchInFullScreen'] ?? launchInFullScreen.value;
     showUtcTime.value = map['showUtcTime'] ?? showUtcTime.value;
     showDawnInfo.value = map['showDawnInfo'] ?? showDawnInfo.value;
     showHVInfo.value = map['showHVInfo'] ?? showHVInfo.value;
-    useBuiltInBlockedUsers.value =
-        map['useBuiltInBlockedUsers'] ?? useBuiltInBlockedUsers.value;
+    useBuiltInBlockedUsers.value = map['useBuiltInBlockedUsers'] ?? useBuiltInBlockedUsers.value;
+    defaultDownloadTab.value = DownloadPageGalleryType.values[map['defaultDownloadTab'] ?? DownloadPageGalleryType.download.index];
+    confirmDestructiveActions.value = map['confirmDestructiveActions'] ?? confirmDestructiveActions.value;
   }
 
   @override
@@ -106,8 +85,7 @@ class PreferenceSetting
       'locale': locale.value.toString(),
       'showR18GImageDirectly': showR18GImageDirectly.value,
       'enableTagZHTranslation': enableTagZHTranslation.value,
-      'enableTagZHSearchOrderOptimization':
-          enableTagZHSearchOrderOptimization.value,
+      'enableTagZHSearchOrderOptimization': enableTagZHSearchOrderOptimization.value,
       'defaultTab': defaultTab.value.index,
       'preloadGalleryCover': preloadGalleryCover.value,
       'enableSwipeBackGesture': enableSwipeBackGesture.value,
@@ -129,6 +107,8 @@ class PreferenceSetting
       'showDawnInfo': showDawnInfo.value,
       'showHVInfo': showHVInfo.value,
       'useBuiltInBlockedUsers': useBuiltInBlockedUsers.value,
+      'defaultDownloadTab': defaultDownloadTab.value.index,
+      'confirmDestructiveActions': confirmDestructiveActions.value,
     });
   }
 
@@ -157,14 +137,9 @@ class PreferenceSetting
     await saveBeanConfig();
   }
 
-  Future<void> saveEnableTagZHSearchOrderOptimization(
-    bool enableTagZHSearchOrderOptimization,
-  ) async {
-    log.debug(
-      'saveEnableTagZHSearchOrderOptimization:$enableTagZHSearchOrderOptimization',
-    );
-    this.enableTagZHSearchOrderOptimization.value =
-        enableTagZHSearchOrderOptimization;
+  Future<void> saveEnableTagZHSearchOrderOptimization(bool enableTagZHSearchOrderOptimization) async {
+    log.debug('saveEnableTagZHSearchOrderOptimization:$enableTagZHSearchOrderOptimization');
+    this.enableTagZHSearchOrderOptimization.value = enableTagZHSearchOrderOptimization;
     await saveBeanConfig();
   }
 
@@ -192,20 +167,14 @@ class PreferenceSetting
     await saveBeanConfig();
   }
 
-  Future<void> saveEnableLeftMenuDrawerGesture(
-    bool enableLeftMenuDrawerGesture,
-  ) async {
+  Future<void> saveEnableLeftMenuDrawerGesture(bool enableLeftMenuDrawerGesture) async {
     log.debug('saveEnableLeftMenuDrawerGesture:$enableLeftMenuDrawerGesture');
     this.enableLeftMenuDrawerGesture.value = enableLeftMenuDrawerGesture;
     await saveBeanConfig();
   }
 
-  Future<void> saveEnableQuickSearchDrawerGesture(
-    bool enableQuickSearchDrawerGesture,
-  ) async {
-    log.debug(
-      'saveEnableQuickSearchDrawerGesture:$enableQuickSearchDrawerGesture',
-    );
+  Future<void> saveEnableQuickSearchDrawerGesture(bool enableQuickSearchDrawerGesture) async {
+    log.debug('saveEnableQuickSearchDrawerGesture:$enableQuickSearchDrawerGesture');
     this.enableQuickSearchDrawerGesture.value = enableQuickSearchDrawerGesture;
     await saveBeanConfig();
   }
@@ -216,9 +185,7 @@ class PreferenceSetting
     await saveBeanConfig();
   }
 
-  Future<void> saveHideScroll2TopButton(
-    Scroll2TopButtonModeEnum hideScroll2TopButton,
-  ) async {
+  Future<void> saveHideScroll2TopButton(Scroll2TopButtonModeEnum hideScroll2TopButton) async {
     log.debug('saveHideScroll2TopButton:$hideScroll2TopButton');
     this.hideScroll2TopButton.value = hideScroll2TopButton;
     await saveBeanConfig();
@@ -230,9 +197,7 @@ class PreferenceSetting
     await saveBeanConfig();
   }
 
-  Future<void> saveShowGalleryTagVoteStatus(
-    bool showGalleryTagVoteStatus,
-  ) async {
+  Future<void> saveShowGalleryTagVoteStatus(bool showGalleryTagVoteStatus) async {
     log.debug('saveShowGalleryTagVoteStatus:$showGalleryTagVoteStatus');
     this.showGalleryTagVoteStatus.value = showGalleryTagVoteStatus;
     await saveBeanConfig();
@@ -270,7 +235,7 @@ class PreferenceSetting
 
   Future<void> saveTagSearchConfig(SearchBehaviour tagSearchConfig) async {
     log.debug('saveTagSearchConfig:$tagSearchConfig');
-    searchBehaviour.value = tagSearchConfig;
+    this.searchBehaviour.value = tagSearchConfig;
     await saveBeanConfig();
   }
 
@@ -285,22 +250,34 @@ class PreferenceSetting
     this.showUtcTime.value = showUtcTime;
     await saveBeanConfig();
   }
-
+  
   Future<void> saveShowDawnInfo(bool showDawnInfo) async {
     log.debug('saveShowDawnInfo:$showDawnInfo');
     this.showDawnInfo.value = showDawnInfo;
     await saveBeanConfig();
   }
-
+  
   Future<void> saveShowHVInfo(bool showHVInfo) async {
     log.debug('saveShowHVInfo:$showHVInfo');
     this.showHVInfo.value = showHVInfo;
     await saveBeanConfig();
   }
-
+  
   Future<void> saveUseBuiltInBlockedUsers(bool useBuiltInBlockedUsers) async {
     log.debug('saveUseBuiltInBlockedUsers:$useBuiltInBlockedUsers');
     this.useBuiltInBlockedUsers.value = useBuiltInBlockedUsers;
+    await saveBeanConfig();
+  }
+
+  Future<void> saveDefaultDownloadTab(DownloadPageGalleryType defaultDownloadTab) async {
+    log.debug('saveDefaultDownloadTab:$defaultDownloadTab');
+    this.defaultDownloadTab.value = defaultDownloadTab;
+    await saveBeanConfig();
+  }
+
+  Future<void> saveConfirmDestructiveActions(bool confirmDestructiveActions) async {
+    log.debug('saveConfirmDestructiveActions:$confirmDestructiveActions');
+    this.confirmDestructiveActions.value = confirmDestructiveActions;
     await saveBeanConfig();
   }
 }

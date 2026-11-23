@@ -10,27 +10,18 @@ import '../setting/network_setting.dart';
 
 ArchiveBotRequest archiveBotRequest = ArchiveBotRequest();
 
-class ArchiveBotRequest
-    with JHLifeCircleBeanErrorCatch
-    implements JHLifeCircleBean {
+class ArchiveBotRequest with JHLifeCircleBeanErrorCatch implements JHLifeCircleBean {
   late final Dio _dio;
 
   @override
-  List<JHLifeCircleBean> get initDependencies =>
-      super.initDependencies..addAll([ehRequest, archiveBotSetting]);
+  List<JHLifeCircleBean> get initDependencies => super.initDependencies..addAll([ehRequest, archiveBotSetting]);
 
   @override
   Future<void> doInitBean() async {
-    _dio = Dio(
-      BaseOptions(
-        connectTimeout: Duration(
-          milliseconds: networkSetting.connectTimeout.value,
-        ),
-        receiveTimeout: Duration(
-          milliseconds: networkSetting.receiveTimeout.value,
-        ),
-      ),
-    );
+    _dio = Dio(BaseOptions(
+      connectTimeout: Duration(milliseconds: networkSetting.connectTimeout.value),
+      receiveTimeout: Duration(milliseconds: networkSetting.receiveTimeout.value),
+    ));
 
     ever(networkSetting.connectTimeout, (_) {
       setConnectTimeout(networkSetting.connectTimeout.value);
@@ -65,9 +56,7 @@ class ArchiveBotRequest
     required String apiAddress,
     required String apiKey,
   }) {
-    return _mappingProtocol(
-      botType,
-    ).requestBalance(apiAddress: apiAddress, apiKey: apiKey);
+    return _mappingProtocol(botType).requestBalance(apiAddress: apiAddress, apiKey: apiKey);
   }
 
   Future<ArchiveBotResponse> requestCheckIn({
@@ -75,9 +64,7 @@ class ArchiveBotRequest
     required String apiAddress,
     required String apiKey,
   }) {
-    return _mappingProtocol(
-      botType,
-    ).requestCheckIn(apiAddress: apiAddress, apiKey: apiKey);
+    return _mappingProtocol(botType).requestCheckIn(apiAddress: apiAddress, apiKey: apiKey);
   }
 
   Future<ArchiveBotResponse> requestResolve({
@@ -221,10 +208,7 @@ class ArchiveAtHomeProtocol extends ArchiveBotProtocol {
   }) async {
     Response response = await dio.get(
       '$apiAddress/api/v1/me/balance',
-      options: _authOptions(
-        apiKey,
-        extraHeaders: {'X-Client': ArchiveBotConsts.archiveAtHomeXClient},
-      ),
+      options: _authOptions(apiKey, extraHeaders: {'X-Client': ArchiveBotConsts.archiveAtHomeXClient}),
     );
     return normalizeResponse(response);
   }
@@ -236,10 +220,7 @@ class ArchiveAtHomeProtocol extends ArchiveBotProtocol {
   }) async {
     Response response = await dio.post(
       '$apiAddress/api/v1/me/checkin',
-      options: _authOptions(
-        apiKey,
-        extraHeaders: {'X-Client': ArchiveBotConsts.archiveAtHomeXClient},
-      ),
+      options: _authOptions(apiKey, extraHeaders: {'X-Client': ArchiveBotConsts.archiveAtHomeXClient}),
     );
     return normalizeResponse(response);
   }
@@ -255,10 +236,7 @@ class ArchiveAtHomeProtocol extends ArchiveBotProtocol {
   }) async {
     Response response = await dio.post(
       '$apiAddress/api/v1/parse',
-      options: _authOptions(
-        apiKey,
-        extraHeaders: {'X-Client': ArchiveBotConsts.archiveAtHomeXClient},
-      ),
+      options: _authOptions(apiKey, extraHeaders: {'X-Client': ArchiveBotConsts.archiveAtHomeXClient}),
       data: {
         'gallery_id': gid.toString(),
         'gallery_key': token,

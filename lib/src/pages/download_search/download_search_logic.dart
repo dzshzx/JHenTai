@@ -4,9 +4,9 @@ import 'package:get/get.dart';
 import 'package:jhentai/src/enum/config_enum.dart';
 import 'package:jhentai/src/extension/get_logic_extension.dart';
 import 'package:jhentai/src/service/local_config_service.dart';
+import 'package:jhentai/src/service/log.dart';
 import 'package:jhentai/src/service/tag_translation_service.dart';
 import 'package:jhentai/src/utils/convert_util.dart';
-import 'package:jhentai/src/service/log.dart';
 import 'package:jhentai/src/utils/string_uril.dart';
 import 'package:jhentai/src/widget/loading_state_indicator.dart';
 import 'package:throttling/throttling.dart';
@@ -18,20 +18,22 @@ import '../../model/gallery_image.dart';
 import '../../model/read_page_info.dart';
 import '../../routes/routes.dart';
 import '../../service/archive_download_service.dart';
-import '../../service/gallery_download_service.dart';
+import '../../service/gallery_download/download_path_resolver.dart';
+import '../../service/gallery_download/gallery_download_service.dart';
 import '../../service/super_resolution_service.dart';
 import '../../setting/preference_setting.dart';
 import '../../setting/read_setting.dart';
 import '../../utils/date_util.dart';
 import '../../utils/process_util.dart';
+import '../../utils/read_page_info_util.dart';
 import '../../utils/route_util.dart';
 import '../../utils/table.dart' as t;
 import '../../widget/eh_alert_dialog.dart';
+import '../../widget/eh_context_menu.dart';
 import '../../widget/eh_download_dialog.dart';
 import 'download_search_state.dart';
 
-class DownloadSearchLogic extends GetxController
-    with UpdateGlobalGalleryStatusLogicMixin {
+class DownloadSearchLogic extends GetxController with UpdateGlobalGalleryStatusLogicMixin {
   final DownloadSearchState state = DownloadSearchState();
 
   final String loadingStateId = 'loadingStateId';
@@ -54,13 +56,9 @@ class DownloadSearchLogic extends GetxController
     searchDebouncing = Debouncing(duration: const Duration(milliseconds: 300));
     scrollController = ScrollController();
 
-    String? code = await localConfigService.read(
-      configKey: ConfigEnum.downloadSearchPageType,
-    );
+    String? code = await localConfigService.read(configKey: ConfigEnum.downloadSearchPageType);
     if (code != null) {
-      state.searchType = DownloadSearchConfigTypeEnum.fromCode(
-        int.tryParse(code) ?? 1,
-      );
+      state.searchType = DownloadSearchConfigTypeEnum.fromCode(int.tryParse(code) ?? 1);
     }
     state.searchTypeCompleter.complete();
   }
@@ -93,27 +91,20 @@ class DownloadSearchLogic extends GetxController
     }
 
     loadingState = LoadingState.loading;
-    state.gallerys.clear();
+    state.galleries.clear();
     state.archives.clear();
     updateSafely([loadingStateId]);
 
-    List<TagData> allGalleryTags = galleryDownloadService.gallerys
-        .map((g) => g.tags)
-        .mapMany(tagDataString2TagDataList)
-        .toList();
-    List<TagData> allArchiveTags = archiveDownloadService.archives
-        .map((a) => a.tags)
-        .mapMany(tagDataString2TagDataList)
-        .toList();
+    List<TagData> allGalleryTags = galleryDownloadService.galleries.map((g) => g.tags).mapMany(tagDataString2TagDataList).toList();
+    List<TagData> allArchiveTags = archiveDownloadService.archives.map((a) => a.tags).mapMany(tagDataString2TagDataList).toList();
     List<TagData> allTags = {...allGalleryTags, ...allArchiveTags}.toList();
-    List<TagData> translatedTags = await tagTranslationService
-        .translateTagDatasIfNeeded(allTags);
+    List<TagData> translatedTags = await tagTranslationService.translateTagDatasIfNeeded(allTags);
     t.Table<String, String, TagData> translatedTagDataTable = t.Table();
     for (TagData tag in translatedTags) {
       translatedTagDataTable.put(tag.namespace, tag.key, tag);
     }
 
-    List<GallerySearchVO> gallerys = galleryDownloadService.gallerys
+    List<GallerySearchVO> galleries = galleryDownloadService.galleries
         .map(
           (g) => GallerySearchVO(
             gid: g.gid,
@@ -124,24 +115,13 @@ class DownloadSearchLogic extends GetxController
             galleryUrl: g.galleryUrl,
             oldVersionGalleryUrl: g.oldVersionGalleryUrl,
             uploader: g.uploader,
-            publishTime: preferenceSetting.showUtcTime.isTrue
-                ? g.publishTime
-                : DateUtil.transformUtc2LocalTimeString(g.publishTime),
+            publishTime: preferenceSetting.showUtcTime.isTrue ? g.publishTime : DateUtil.transformUtc2LocalTimeString(g.publishTime),
             insertTime: g.insertTime,
             downloadOriginalImage: g.downloadOriginalImage,
             priority: g.priority,
             sortOrder: g.sortOrder,
-            groupName: g.groupName,
-            tags: tagDataString2TagDataList(g.tags)
-                .map(
-                  (tagData) =>
-                      translatedTagDataTable.get(
-                        tagData.namespace,
-                        tagData.key,
-                      ) ??
-                      tagData,
-                )
-                .toList(),
+            groupName: g.group,
+            tags: tagDataString2TagDataList(g.tags).map((tagData) => translatedTagDataTable.get(tagData.namespace, tagData.key) ?? tagData).toList(),
             tagRefreshTime: g.tagRefreshTime,
           ),
         )
@@ -157,9 +137,7 @@ class DownloadSearchLogic extends GetxController
         coverUrl: a.coverUrl,
         uploader: a.uploader,
         size: a.size,
-        publishTime: preferenceSetting.showUtcTime.isTrue
-            ? a.publishTime
-            : DateUtil.transformUtc2LocalTimeString(a.publishTime),
+        publishTime: preferenceSetting.showUtcTime.isTrue ? a.publishTime : DateUtil.transformUtc2LocalTimeString(a.publishTime),
         archivePageUrl: a.archivePageUrl,
         downloadPageUrl: a.downloadPageUrl,
         downloadUrl: a.downloadUrl,
@@ -167,13 +145,7 @@ class DownloadSearchLogic extends GetxController
         insertTime: a.insertTime,
         sortOrder: a.sortOrder,
         groupName: a.groupName,
-        tags: tagDataString2TagDataList(a.tags)
-            .map(
-              (tagData) =>
-                  translatedTagDataTable.get(tagData.namespace, tagData.key) ??
-                  tagData,
-            )
-            .toList(),
+        tags: tagDataString2TagDataList(a.tags).map((tagData) => translatedTagDataTable.get(tagData.namespace, tagData.key) ?? tagData).toList(),
         tagRefreshTime: a.tagRefreshTime,
       );
     }).toList();
@@ -189,7 +161,7 @@ class DownloadSearchLogic extends GetxController
         return;
       }
 
-      state.gallerys = gallerys.where((g) {
+      state.galleries = galleries.where((g) {
         if (regExp!.hasMatch(g.title)) {
           return true;
         }
@@ -200,11 +172,7 @@ class DownloadSearchLogic extends GetxController
           if (regExp.hasMatch('${tagData.namespace}:${tagData.key}')) {
             return true;
           }
-          if (tagData.translatedNamespace != null &&
-              tagData.tagName != null &&
-              regExp.hasMatch(
-                '${tagData.translatedNamespace}:${tagData.tagName}',
-              )) {
+          if (tagData.translatedNamespace != null && tagData.tagName != null && regExp.hasMatch('${tagData.translatedNamespace}:${tagData.tagName}')) {
             return true;
           }
         }
@@ -221,18 +189,14 @@ class DownloadSearchLogic extends GetxController
           if (regExp.hasMatch('${tagData.namespace}:${tagData.key}')) {
             return true;
           }
-          if (tagData.translatedNamespace != null &&
-              tagData.tagName != null &&
-              regExp.hasMatch(
-                '${tagData.translatedNamespace}:${tagData.tagName}',
-              )) {
+          if (tagData.translatedNamespace != null && tagData.tagName != null && regExp.hasMatch('${tagData.translatedNamespace}:${tagData.tagName}')) {
             return true;
           }
         }
         return false;
       }).toList();
     } else {
-      state.gallerys = gallerys.where((g) {
+      state.galleries = galleries.where((g) {
         if (g.title.contains(value)) {
           return true;
         }
@@ -243,11 +207,7 @@ class DownloadSearchLogic extends GetxController
           if ('${tagData.namespace}:${tagData.key}'.contains(value)) {
             return true;
           }
-          if (tagData.translatedNamespace != null &&
-              tagData.tagName != null &&
-              '${tagData.translatedNamespace}:${tagData.tagName}'.contains(
-                value,
-              )) {
+          if (tagData.translatedNamespace != null && tagData.tagName != null && '${tagData.translatedNamespace}:${tagData.tagName}'.contains(value)) {
             return true;
           }
         }
@@ -264,11 +224,7 @@ class DownloadSearchLogic extends GetxController
           if ('${tagData.namespace}:${tagData.key}'.contains(value)) {
             return true;
           }
-          if (tagData.translatedNamespace != null &&
-              tagData.tagName != null &&
-              '${tagData.translatedNamespace}:${tagData.tagName}'.contains(
-                value,
-              )) {
+          if (tagData.translatedNamespace != null && tagData.tagName != null && '${tagData.translatedNamespace}:${tagData.tagName}'.contains(value)) {
             return true;
           }
         }
@@ -283,15 +239,10 @@ class DownloadSearchLogic extends GetxController
   Future<void> toggleSearchType() async {
     await state.searchTypeCompleter.future;
 
-    state.searchType = state.searchType == DownloadSearchConfigTypeEnum.simple
-        ? DownloadSearchConfigTypeEnum.regex
-        : DownloadSearchConfigTypeEnum.simple;
+    state.searchType = state.searchType == DownloadSearchConfigTypeEnum.simple ? DownloadSearchConfigTypeEnum.regex : DownloadSearchConfigTypeEnum.simple;
     updateSafely([searchFieldId]);
     handleSearchFieldChanged(textEditingController.text);
-    await localConfigService.write(
-      configKey: ConfigEnum.downloadSearchPageType,
-      value: state.searchType.code.toString(),
-    );
+    await localConfigService.write(configKey: ConfigEnum.downloadSearchPageType, value: state.searchType.code.toString());
   }
 
   Future<void> goToGalleryReadPage(GallerySearchVO gallery) async {
@@ -299,20 +250,17 @@ class DownloadSearchLogic extends GetxController
       return;
     }
 
-    if (readSetting.useThirdPartyViewer.isTrue &&
-        readSetting.thirdPartyViewerPath.value != null) {
-      openThirdPartyViewer(
-        galleryDownloadService.computeGalleryDownloadAbsolutePath(
-          gallery.title,
-          gallery.gid,
-        ),
-      );
+    if (readSetting.useThirdPartyViewer.isTrue && readSetting.thirdPartyViewerPath.value != null) {
+      GalleryDownloadInfo galleryData = galleryDownloadService.galleryDownloadInfos[gallery.gid]!;
+      openThirdPartyViewer(DownloadPathResolver.computeGalleryDownloadAbsolutePath(galleryData.toGalleryDownloadedData()));
     } else {
-      String? string = await localConfigService.read(
-        configKey: ConfigEnum.readIndexRecord,
-        subConfigKey: gallery.gid.toString(),
-      );
+      String? string = await localConfigService.read(configKey: ConfigEnum.readIndexRecord, subConfigKey: gallery.gid.toString());
       int readIndexRecord = (string == null ? 0 : (int.tryParse(string) ?? 0));
+
+      /// Ensure image list is resident before entering read page.
+      await galleryDownloadService.galleryDownloadInfos[gallery.gid]!.ensureImagesLoaded();
+
+      ReadDirection? readDirection = isWebtoonGalleryFromTagDataList(gallery.tags) ? ReadDirection.top2bottomList : null;
 
       toRoute(
         Routes.read,
@@ -325,42 +273,29 @@ class DownloadSearchLogic extends GetxController
           initialIndex: readIndexRecord,
           readProgressRecordStorageKey: gallery.gid.toString(),
           pageCount: gallery.pageCount,
-          useSuperResolution:
-              superResolutionService.get(
-                gallery.gid,
-                SuperResolutionType.gallery,
-              ) !=
-              null,
+          useSuperResolution: superResolutionService.get(gallery.gid, SuperResolutionType.gallery) != null,
+          readDirection: readDirection,
+          adjacentGalleryFinder: (bool next) => findAdjacentDownloadedGallery(gallery.gid, next),
         ),
       );
     }
   }
 
   Future<void> goToArchiveReadPage(ArchiveSearchVO archive) async {
-    if (archiveDownloadService
-            .archiveDownloadInfos[archive.gid]
-            ?.archiveStatus !=
-        ArchiveStatus.completed) {
+    if (archiveDownloadService.archiveDownloadInfos[archive.gid]?.archiveStatus != ArchiveStatus.completed) {
       return;
     }
 
-    if (readSetting.useThirdPartyViewer.isTrue &&
-        readSetting.thirdPartyViewerPath.value != null) {
-      openThirdPartyViewer(
-        archiveDownloadService.computeArchiveUnpackingPath(
-          archive.title,
-          archive.gid,
-        ),
-      );
+    if (readSetting.useThirdPartyViewer.isTrue && readSetting.thirdPartyViewerPath.value != null) {
+      ArchiveDownloadedData archiveData = archiveDownloadService.archives.firstWhere((a) => a.gid == archive.gid);
+      openThirdPartyViewer(archiveDownloadService.computeArchiveUnpackingPath(archiveData));
     } else {
-      String? string = await localConfigService.read(
-        configKey: ConfigEnum.readIndexRecord,
-        subConfigKey: archive.gid.toString(),
-      );
+      String? string = await localConfigService.read(configKey: ConfigEnum.readIndexRecord, subConfigKey: archive.gid.toString());
       int readIndexRecord = (string == null ? 0 : (int.tryParse(string) ?? 0));
 
-      List<GalleryImage> images = await archiveDownloadService
-          .getUnpackedImages(archive.gid);
+      List<GalleryImage> images = await archiveDownloadService.getUnpackedImages(archive.gid);
+
+      ReadDirection? readDirection = isWebtoonGalleryFromTagDataList(archive.tags) ? ReadDirection.top2bottomList : null;
 
       toRoute(
         Routes.read,
@@ -374,82 +309,52 @@ class DownloadSearchLogic extends GetxController
           isOriginal: archive.isOriginal,
           readProgressRecordStorageKey: archive.gid.toString(),
           images: images,
-          useSuperResolution:
-              superResolutionService.get(
-                archive.gid,
-                SuperResolutionType.archive,
-              ) !=
-              null,
+          useSuperResolution: superResolutionService.get(archive.gid, SuperResolutionType.archive) != null,
+          readDirection: readDirection,
+          adjacentGalleryFinder: (bool next) => findAdjacentArchive(archive.gid, next),
         ),
       );
     }
   }
 
-  void onLongPressGallery(BuildContext context, GallerySearchVO gallery) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        actions: <CupertinoActionSheetAction>[
-          CupertinoActionSheetAction(
-            child: Text('changeGroup'.tr),
-            onPressed: () {
-              backRoute();
-              handleChangeGalleryGroup(gallery);
-            },
-          ),
-          CupertinoActionSheetAction(
-            child: Text(
-              'deleteTaskAndImages'.tr,
-              style: TextStyle(color: UIConfig.alertColor(context)),
-            ),
-            onPressed: () {
-              backRoute();
-              handleRemoveGallery(gallery, context);
-            },
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          child: Text('cancel'.tr),
-          onPressed: backRoute,
+  void onLongPressGallery(BuildContext context, GallerySearchVO gallery, {Offset? position}) {
+    showEHContextMenu(
+      context,
+      position: position,
+      actions: [
+        EHContextMenuAction(
+          text: 'changeGroup'.tr,
+          onTap: () => handleChangeGalleryGroup(gallery),
         ),
-      ),
+        EHContextMenuAction(
+          text: 'deleteTaskAndImages'.tr,
+          color: UIConfig.alertColor(context),
+          onTap: () => handleRemoveGallery(gallery, context),
+        ),
+      ],
     );
   }
 
-  void onLongPressArchive(BuildContext context, ArchiveSearchVO archive) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        actions: <CupertinoActionSheetAction>[
-          CupertinoActionSheetAction(
-            child: Text('changeGroup'.tr),
-            onPressed: () {
-              backRoute();
-              handleChangeArchiveGroup(archive);
-            },
-          ),
-          CupertinoActionSheetAction(
-            child: Text(
-              'delete'.tr,
-              style: TextStyle(color: UIConfig.alertColor(context)),
-            ),
-            onPressed: () {
-              handleRemoveArchive(archive);
-              backRoute();
-            },
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          child: Text('cancel'.tr),
-          onPressed: backRoute,
+  void onLongPressArchive(BuildContext context, ArchiveSearchVO archive, {Offset? position}) {
+    showEHContextMenu(
+      context,
+      position: position,
+      actions: [
+        EHContextMenuAction(
+          text: 'changeGroup'.tr,
+          onTap: () => handleChangeArchiveGroup(archive),
         ),
-      ),
+        EHContextMenuAction(
+          text: 'delete'.tr,
+          color: UIConfig.alertColor(context),
+          onTap: () => handleRemoveArchive(archive),
+        ),
+      ],
     );
   }
 
   Future<void> handleChangeGalleryGroup(GallerySearchVO gallery) async {
-    String oldGroup =
-        galleryDownloadService.galleryDownloadInfos[gallery.gid]!.group;
+    String oldGroup = galleryDownloadService.galleryDownloadInfos[gallery.gid]!.group;
 
     ({String group, bool downloadOriginalImage})? result = await Get.dialog(
       EHDownloadDialog(
@@ -473,13 +378,8 @@ class DownloadSearchLogic extends GetxController
     update([bodyId]);
   }
 
-  void handleRemoveGallery(
-    GallerySearchVO gallery,
-    BuildContext context,
-  ) async {
-    bool isUpdatingDependent = galleryDownloadService.isUpdatingDependent(
-      gallery.gid,
-    );
+  void handleRemoveGallery(GallerySearchVO gallery, BuildContext context) async {
+    bool isUpdatingDependent = galleryDownloadService.isUpdatingDependent(gallery.gid);
 
     if (isUpdatingDependent) {
       bool? result = await showDialog(
@@ -492,17 +392,21 @@ class DownloadSearchLogic extends GetxController
       if (result == null || !result) {
         return;
       }
+    } else if (preferenceSetting.confirmDestructiveActions.isTrue) {
+      bool? result = await Get.dialog(EHDialog(title: 'delete'.tr + '?'));
+      if (result == null || !result) {
+        return;
+      }
     }
 
-    state.gallerys.remove(gallery);
+    state.galleries.remove(gallery);
     await galleryDownloadService.deleteGalleryByGid(gallery.gid);
     update([bodyId]);
     updateGlobalGalleryStatus();
   }
 
   Future<void> handleChangeArchiveGroup(ArchiveSearchVO archive) async {
-    String oldGroup =
-        archiveDownloadService.archiveDownloadInfos[archive.gid]!.group;
+    String oldGroup = archiveDownloadService.archiveDownloadInfos[archive.gid]!.group;
 
     ({String group, bool downloadOriginalImage})? result = await Get.dialog(
       EHDownloadDialog(
@@ -526,6 +430,12 @@ class DownloadSearchLogic extends GetxController
   }
 
   Future<void> handleRemoveArchive(ArchiveSearchVO archive) async {
+    if (preferenceSetting.confirmDestructiveActions.isTrue) {
+      bool? result = await Get.dialog(EHDialog(title: 'delete'.tr + '?'));
+      if (result == null || !result) {
+        return;
+      }
+    }
     state.archives.remove(archive);
     await archiveDownloadService.deleteArchive(archive.gid);
     update([bodyId]);

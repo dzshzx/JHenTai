@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 import 'package:get/get_utils/get_utils.dart';
+import 'package:jhentai/src/extension/dio_exception_extension.dart';
 import 'package:jhentai/src/extension/get_logic_extension.dart';
 import 'package:jhentai/src/model/gallery_page.dart';
 import 'package:jhentai/src/network/eh_request.dart';
@@ -11,6 +12,7 @@ import 'package:jhentai/src/widget/eh_favorite_sort_order_dialog.dart';
 
 import '../../enum/config_enum.dart';
 import '../../exception/eh_site_exception.dart';
+import '../../model/gallery.dart';
 import '../../model/search_config.dart';
 import '../../service/local_config_service.dart';
 import '../../utils/eh_spider_parser.dart';
@@ -35,9 +37,7 @@ class FavoritePageLogic extends BasePageLogic {
       return;
     }
 
-    FavoriteSortOrder? result = await Get.dialog(
-      EHFavoriteSortOrderDialog(init: state.favoriteSortOrder),
-    );
+    FavoriteSortOrder? result = await Get.dialog(EHFavoriteSortOrderDialog(init: state.favoriteSortOrder));
     if (result == null) {
       return;
     }
@@ -48,7 +48,7 @@ class FavoritePageLogic extends BasePageLogic {
 
     state.loadingState = LoadingState.loading;
 
-    state.gallerys.clear();
+    state.galleries.clear();
     state.prevGid = null;
     state.nextGid = null;
     state.seek = DateTime.now();
@@ -60,18 +60,15 @@ class FavoritePageLogic extends BasePageLogic {
     updateSafely();
 
     try {
-      await ehRequest.requestChangeFavoriteSortOrder(
-        result,
-        parser: EHSpiderParser.galleryPage2GalleryPageInfo,
-      );
+      await ehRequest.requestChangeFavoriteSortOrder(result, parser: EHSpiderParser.galleryPage2GalleryPageInfo);
     } on DioException catch (e) {
       /// handle with domain fronting, manually load more
       if (e.response?.statusCode == 403 && e.response!.redirects.isNotEmpty) {
         return loadMore(checkLoadingState: false);
       }
 
-      log.error('change favorite sort order fail', e.message);
-      snack('failed'.tr, e.message ?? '');
+      log.error('change favorite sort order fail', e.errorMsg);
+      snack('failed'.tr, e.errorMsg ?? '');
       state.loadingState = LoadingState.error;
       updateSafely([loadingStateId]);
       return;

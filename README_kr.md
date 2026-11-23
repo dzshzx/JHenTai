@@ -53,6 +53,14 @@ MacOS 설치(지원 중지): .dmg 파일을 다운로드합니다. 만약 프록
 
 Linux 설치(지원 중지): Linux_xxx.zip 파일을 다운로드하고 압축 해제를 하세요. 만약 프록시 서버를 이용한다면 네트워크 설정에서 프록시 주소를 설정해 주세요.
 
+Fedora 기반 dnf Linux 배포판:
+
+```bash
+sudo rpm --import https://meeks233.github.io/Jhentai-rpm/fedora/RPM-GPG-KEY-jhentai
+sudo curl -fsSL -o /etc/yum.repos.d/jhentai.repo https://meeks233.github.io/Jhentai-rpm/fedora/jhentai.repo
+sudo dnf install -y jhentai
+```
+
 ## 개발 동기
 
 저의 첫 Flutter 프로젝트입니다. 저는 개발 중에 Flutter에 익숙해지는 것을 목표로 합니다. 제가 사용하는 기기는 Android 폰, iPad, Windows 컴퓨터입니다. 기존 E-hentai 앱들은
@@ -159,6 +167,32 @@ Tag order optimization:
 ## 컴파일 정보
 
 1. Android 서명을 직접 관리하려면 다음 사이트를 확인하세요: https://docs.flutter.dev/deployment/android#signing-the-app
+
+## 코드 기여 안내
+
+1. 브랜치 이름에 대한 고정된 요구 사항은 없습니다. 로컬 master 브랜치에서 수정한 후 PR을 제출하시면 됩니다.
+2. 변경 규모가 크거나 여러 모듈 간의 상호작용이 포함되는 경우, 코드 리뷰 능력이 없는 개발자가 Vibe Coding으로 작성한 코드는 받아들이지 않습니다. 이러한 코드는 프로젝트의 기존 코딩 규칙을 따르지 않는 경우가 많고, 코드 확장성에 큰 해를 끼치며, 정확성도 보장되지 않습니다.
+3. 하나의 PR은 최소한의 기능 단위에 집중해야 합니다. 여러 기능이 포함된 경우에는 별도의 PR을 나누어 제출해 주세요.
+
+## 개발자 문서
+
+데스크톱 플랫폼(Windows/MacOS/Linux)에서는 명령줄 인수로 갤러리 URL을 전달할 수 있어, 외부 소프트웨어가 JHenTai를
+리더로 사용하여 특정 갤러리를 바로 열 수 있습니다:
+
+```bash
+# 실행 시 갤러리 열기
+JHenTai.exe -g "https://e-hentai.org/g/1234567/abcdef1234/"
+JHenTai.exe --gallery="https://exhentai.org/g/1234567/abcdef1234/"
+
+# 단일 이미지 페이지 URL도 지원
+JHenTai.exe -g "https://e-hentai.org/s/abcdef1234/123456-0"
+```
+
+- `-g` / `--gallery <url>`: 실행 시 해당 갤러리(또는 이미지 페이지)를 열며, 다른 인수는 무시됩니다. 유효한 URL이
+  없으면 평소처럼 실행됩니다.
+- 비밀번호/생체 인증 잠금이 활성화된 경우, 잠금 해제 후 갤러리가 열립니다.
+- MacOS에서는 인수를 전달하려면 app bundle 내부의 실행 파일을 직접 실행해야 합니다, 예:
+  `/Applications/JHenTai.app/Contents/MacOS/JHenTai -g <url>` (Finder에서 더블클릭 시에는 인수가 전달되지 않습니다).
 
 ## Dart 주요 종속성
 

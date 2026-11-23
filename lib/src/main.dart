@@ -1,25 +1,33 @@
+import 'dart:io';
+
 import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
+import 'package:jhentai/src/l18n/locale_text.dart';
 import 'package:jhentai/src/network/eh_request.dart';
 import 'package:jhentai/src/network/jh_request.dart';
+import 'package:jhentai/src/routes/getx_router_observer.dart';
+import 'package:jhentai/src/routes/routes.dart';
+import 'package:jhentai/src/utils/route_util.dart';
+import 'package:jhentai/src/pages/home_page.dart';
 import 'package:jhentai/src/service/app_update_service.dart';
 import 'package:jhentai/src/service/archive_download_service.dart';
 import 'package:jhentai/src/service/built_in_blocked_user_service.dart';
 import 'package:jhentai/src/service/cloud_service.dart';
 import 'package:jhentai/src/service/frame_rate_service.dart';
-import 'package:jhentai/src/service/gallery_download_service.dart';
+import 'package:jhentai/src/service/gallery_download/gallery_download_service.dart';
 import 'package:jhentai/src/service/history_service.dart';
 import 'package:jhentai/src/service/isolate_service.dart';
 import 'package:jhentai/src/service/jh_service.dart';
 import 'package:jhentai/src/service/local_block_rule_service.dart';
 import 'package:jhentai/src/service/local_config_service.dart';
 import 'package:jhentai/src/service/local_gallery_service.dart';
+import 'package:jhentai/src/service/log.dart';
 import 'package:jhentai/src/service/path_service.dart';
-import 'package:jhentai/src/service/read_progress_service.dart';
 import 'package:jhentai/src/service/quick_search_service.dart';
+import 'package:jhentai/src/service/read_progress_service.dart';
 import 'package:jhentai/src/service/schedule_service.dart';
 import 'package:jhentai/src/service/search_history_service.dart';
 import 'package:jhentai/src/service/storage_service.dart';
@@ -33,22 +41,19 @@ import 'package:jhentai/src/setting/archive_bot_setting.dart';
 import 'package:jhentai/src/setting/download_setting.dart';
 import 'package:jhentai/src/setting/eh_setting.dart';
 import 'package:jhentai/src/setting/favorite_setting.dart';
+import 'package:jhentai/src/setting/keyboard_shortcut_setting.dart';
 import 'package:jhentai/src/setting/mouse_setting.dart';
 import 'package:jhentai/src/setting/my_tags_setting.dart';
 import 'package:jhentai/src/setting/network_setting.dart';
 import 'package:jhentai/src/setting/performance_setting.dart';
 import 'package:jhentai/src/setting/preference_setting.dart';
 import 'package:jhentai/src/setting/read_setting.dart';
+import 'package:jhentai/src/setting/security_setting.dart';
 import 'package:jhentai/src/setting/site_setting.dart';
+import 'package:jhentai/src/setting/style_setting.dart';
 import 'package:jhentai/src/setting/super_resolution_setting.dart';
 import 'package:jhentai/src/setting/user_setting.dart';
 import 'package:jhentai/src/widget/app_manager.dart';
-import 'package:jhentai/src/l18n/locale_text.dart';
-import 'package:jhentai/src/routes/getx_router_observer.dart';
-import 'package:jhentai/src/routes/routes.dart';
-import 'package:jhentai/src/setting/security_setting.dart';
-import 'package:jhentai/src/setting/style_setting.dart';
-import 'package:jhentai/src/service/log.dart';
 
 import 'config/theme_config.dart';
 import 'network/archive_bot_request.dart';
@@ -95,23 +100,28 @@ List<JHLifeCircleBean> lifeCircleBeans = [
   styleSetting,
   superResolutionSetting,
   userSetting,
+  keyboardShortcutSetting,
   builtInBlockedUserService,
 ];
 
 void main(List<String> args) async {
+  launchArguments = args;
+
   if (GetPlatform.isDesktop && runWebViewTitleBarWidget(args)) {
     return;
   }
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      systemNavigationBarColor: Colors.transparent,
-      systemNavigationBarDividerColor: Colors.transparent,
-      statusBarColor: Colors.transparent,
-    ),
-  );
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    systemNavigationBarColor: Colors.transparent,
+    systemNavigationBarDividerColor: Colors.transparent,
+
+    /// Otherwise the system (and many OEM ROMs even with gesture navigation) draws a translucent scrim behind the navigation bar,
+    /// which doesn't match the color of our bottom navigation bar.
+    systemNavigationBarContrastEnforced: false,
+    statusBarColor: Colors.transparent,
+  ));
 
   lifeCircleBeans = topologicalSort(lifeCircleBeans);
   for (JHLifeCircleBean bean in lifeCircleBeans) {
@@ -126,17 +136,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    Widget app = GetMaterialApp(
       title: 'JHenTai',
       themeMode: styleSetting.themeMode.value,
-      theme: ThemeConfig.theme(
-        styleSetting.lightThemeColor.value,
-        Brightness.light,
-      ),
-      darkTheme: ThemeConfig.theme(
-        styleSetting.darkThemeColor.value,
-        Brightness.dark,
-      ),
+      theme: ThemeConfig.theme(styleSetting.lightThemeColor.value, Brightness.light),
+      darkTheme: ThemeConfig.theme(styleSetting.darkThemeColor.value, Brightness.dark),
 
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
@@ -155,13 +159,19 @@ class MyApp extends StatelessWidget {
       translations: LocaleText(),
 
       getPages: Routes.pages,
-      initialRoute:
-          securitySetting.enablePasswordAuth.isTrue ||
-              securitySetting.enableBiometricAuth.isTrue
-          ? Routes.lock
-          : Routes.home,
-      navigatorObservers: [GetXRouterObserver()],
-      builder: (context, child) => AppManager(child: child!),
+      initialRoute: securitySetting.enablePasswordAuth.isTrue || securitySetting.enableBiometricAuth.isTrue ? Routes.lock : Routes.home,
+      navigatorObservers: [GetXRouterObserver(), FullScreenPageObserver()],
+
+      /// Without the contrast scrim, navigation bar icons must follow the app theme to stay visible. Pages like the read page override it.
+      builder: (context, child) =>
+          AnnotatedRegion<SystemUiOverlayStyle>(
+            value: SystemUiOverlayStyle(
+              systemNavigationBarIconBrightness: Theme
+                  .of(context)
+                  .brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+            ),
+            child: AppManager(child: child!),
+          ),
 
       /// enable swipe back feature
       popGesture: preferenceSetting.enableSwipeBackGesture.isTrue,
@@ -171,6 +181,12 @@ class MyApp extends StatelessWidget {
         }
       },
     );
+
+    /// https://github.com/flutter/flutter/issues/182444
+    if (Platform.isWindows) {
+      app = ExcludeSemantics(child: app);
+    }
+    return app;
   }
 }
 

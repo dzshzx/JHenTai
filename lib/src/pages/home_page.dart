@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:args/args.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -23,7 +24,6 @@ import '../model/jh_layout.dart';
 import '../routes/routes.dart';
 import '../setting/advanced_setting.dart';
 import '../utils/route_util.dart';
-import '../utils/screen_size_util.dart';
 import '../utils/snack_util.dart';
 
 const int left = 1;
@@ -35,6 +35,13 @@ const int rightV2 = 5;
 Routing leftRouting = Routing();
 Routing rightRouting = Routing();
 
+/// Command line arguments passed to the app when launched from outside, e.g.
+/// `JHenTai.exe -g "https://e-hentai.org/g/1234567/abcdef1234/"`.
+///
+/// Assigned in main() before runApp, consumed in [_HomePageState._initLaunchArguments],
+/// only meaningful on desktop platforms.
+List<String> launchArguments = [];
+
 /// Core widget to decide which layout to be applied
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -43,8 +50,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with LoginRequiredMixin, WindowListener, WindowWidgetMixin {
+class _HomePageState extends State<HomePage> with LoginRequiredMixin, WindowListener, WindowWidgetMixin, WidgetsBindingObserver {
   StreamSubscription? _intentDataStreamSubscription;
   String? _lastDetectedText;
 
@@ -56,12 +62,21 @@ class _HomePageState extends State<HomePage>
     initToast(context);
     _initSharingIntent();
     _handleUrlInClipBoard();
+    _initLaunchArguments();
 
     _listener = AppLifecycleListener(onResume: _handleUrlInClipBoard);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  /// Window resized or rotated, which may change the layout to apply. Called before rebuilding, when the old layout is still alive.
+  @override
+  void didChangeMetrics() {
+    relayout();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
     _intentDataStreamSubscription?.cancel();
     _listener.dispose();
@@ -71,29 +86,22 @@ class _HomePageState extends State<HomePage>
   Widget build(BuildContext context) {
     return buildWindow(
       child: LayoutBuilder(
-        builder: (_, __) => Obx(() {
-          if (styleSetting.layout.value == LayoutMode.mobileV2 ||
-              styleSetting.layout.value == LayoutMode.mobile) {
-            styleSetting.actualLayout = LayoutMode.mobileV2;
-            return MobileLayoutPageV2();
-          }
+        builder: (_, __) => Obx(
+          () {
+            /// Opened pages have been moved by [relayout] when the layout changes, this only keeps [StyleSetting.actualLayout] in sync.
+            styleSetting.actualLayout = resolveLayoutToApply();
 
-          /// Device width is under 600, degrade to mobileV2 layout.
-          if (fullScreenWidth < 600) {
-            styleSetting.actualLayout = LayoutMode.mobileV2;
-            untilRoute2BlankPage();
-            return MobileLayoutPageV2();
-          }
+            if (styleSetting.actualLayout == LayoutMode.mobileV2) {
+              return MobileLayoutPageV2();
+            }
 
-          if (styleSetting.layout.value == LayoutMode.tabletV2 ||
-              styleSetting.layout.value == LayoutMode.tablet) {
-            styleSetting.actualLayout = LayoutMode.tabletV2;
-            return const TabletLayoutPageV2();
-          }
+            if (styleSetting.actualLayout == LayoutMode.tabletV2) {
+              return TabletLayoutPageV2();
+            }
 
-          styleSetting.actualLayout = LayoutMode.desktop;
-          return DesktopLayoutPage();
-        }),
+            return DesktopLayoutPage();
+          },
+        ),
       ),
     );
   }
@@ -104,100 +112,160 @@ class _HomePageState extends State<HomePage>
       return;
     }
 
-    ReceiveSharingIntent.instance
-        .getInitialMedia()
-        .then((List<SharedMediaFile> files) {
-          if (files.isEmpty) {
-            return;
-          }
+    ReceiveSharingIntent.instance.getInitialMedia().then(
+      (List<SharedMediaFile> files) {
+        if (files.isEmpty) {
+          return;
+        }
 
-          SharedMediaFile file = files.first;
-          if (file.type != SharedMediaType.url &&
-              file.type != SharedMediaType.text) {
-            return;
-          }
+        SharedMediaFile file = files.first;
+        if (file.type != SharedMediaType.url && file.type != SharedMediaType.text) {
+          return;
+        }
 
-          GalleryUrl? galleryUrl = GalleryUrl.tryParse(file.path);
-          if (galleryUrl != null) {
-            toRoute(
-              Routes.details,
-              arguments: DetailsPageArgument(galleryUrl: galleryUrl),
-              offAllBefore: false,
-              preventDuplicates: false,
-            );
-            return;
-          }
+        GalleryUrl? galleryUrl = GalleryUrl.tryParse(file.path);
+        if (galleryUrl != null) {
+          toRoute(
+            Routes.details,
+            arguments: DetailsPageArgument(galleryUrl: galleryUrl),
+            offAllBefore: false,
+            preventDuplicates: false,
+          );
+          return;
+        }
 
-          GalleryImagePageUrl? galleryImagePageUrl =
-              GalleryImagePageUrl.tryParse(file.path);
-          if (galleryImagePageUrl != null) {
-            toRoute(
-              Routes.imagePage,
-              arguments: GalleryImagePageArgument(
-                galleryImagePageUrl: galleryImagePageUrl,
-              ),
-              offAllBefore: false,
-            );
-            return;
-          }
+        GalleryImagePageUrl? galleryImagePageUrl = GalleryImagePageUrl.tryParse(file.path);
+        if (galleryImagePageUrl != null) {
+          toRoute(
+            Routes.imagePage,
+            arguments: GalleryImagePageArgument(galleryImagePageUrl: galleryImagePageUrl),
+            offAllBefore: false,
+          );
+          return;
+        }
 
-          toast('Invalid jump link', isShort: false);
-        })
-        .whenComplete(() {
-          ReceiveSharingIntent.instance.reset();
-        });
+        toast('Invalid jump link', isShort: false);
+      },
+    ).whenComplete(() {
+      ReceiveSharingIntent.instance.reset();
+    });
 
-    _intentDataStreamSubscription = ReceiveSharingIntent.instance
-        .getMediaStream()
-        .listen(
-          (List<SharedMediaFile> files) {
-            if (files.isEmpty) {
-              return;
-            }
+    _intentDataStreamSubscription = ReceiveSharingIntent.instance.getMediaStream().listen(
+      (List<SharedMediaFile> files) {
+        if (files.isEmpty) {
+          return;
+        }
 
-            SharedMediaFile file = files.first;
-            if (file.type != SharedMediaType.url &&
-                file.type != SharedMediaType.text) {
-              return;
-            }
+        SharedMediaFile file = files.first;
+        if (file.type != SharedMediaType.url && file.type != SharedMediaType.text) {
+          return;
+        }
 
-            GalleryUrl? galleryUrl = GalleryUrl.tryParse(file.path);
-            if (galleryUrl != null) {
-              untilRoute(
-                currentRoute: Routes.details,
-                predicate: (route) => route.settings.name != Routes.read,
-              );
-              toRoute(
-                Routes.details,
-                arguments: DetailsPageArgument(galleryUrl: galleryUrl),
-                offAllBefore: false,
-                preventDuplicates: false,
-              );
-              return;
-            }
+        GalleryUrl? galleryUrl = GalleryUrl.tryParse(file.path);
+        if (galleryUrl != null) {
+          untilRoute(currentRoute: Routes.details, predicate: (route) => route.settings.name != Routes.read);
+          toRoute(
+            Routes.details,
+            arguments: DetailsPageArgument(galleryUrl: galleryUrl),
+            offAllBefore: false,
+            preventDuplicates: false,
+          );
+          return;
+        }
 
-            GalleryImagePageUrl? galleryImagePageUrl =
-                GalleryImagePageUrl.tryParse(file.path);
-            if (galleryImagePageUrl != null) {
-              untilRoute(
-                currentRoute: Routes.details,
-                predicate: (route) => route.settings.name != Routes.read,
-              );
-              toRoute(
-                Routes.imagePage,
-                arguments: GalleryImagePageArgument(
-                  galleryImagePageUrl: galleryImagePageUrl,
-                ),
-                offAllBefore: false,
-              );
-              return;
-            }
-          },
-          onError: (e) {
-            log.error('ReceiveSharingIntent Error!', e);
-            log.uploadError(e);
-          },
+        GalleryImagePageUrl? galleryImagePageUrl = GalleryImagePageUrl.tryParse(file.path);
+        if (galleryImagePageUrl != null) {
+          untilRoute(currentRoute: Routes.details, predicate: (route) => route.settings.name != Routes.read);
+          toRoute(
+            Routes.imagePage,
+            arguments: GalleryImagePageArgument(galleryImagePageUrl: galleryImagePageUrl),
+            offAllBefore: false,
+          );
+          return;
+        }
+      },
+      onError: (e) {
+        log.error('ReceiveSharingIntent Error!', e);
+        log.uploadError(e);
+      },
+    );
+  }
+
+  /// Handle command line arguments passed to the app on launch, e.g.
+  /// `JHenTai.exe -g "https://e-hentai.org/g/1234567/abcdef1234/"`, so that
+  /// external software can open a gallery directly (desktop only).
+  void _initLaunchArguments() {
+    if (!GetPlatform.isDesktop || launchArguments.isEmpty) {
+      return;
+    }
+
+    log.info('Launch arguments: $launchArguments');
+
+    /// Defer to after the first frame so that the navigator is ready.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      String? url = _parseGalleryUrlArgument();
+      if (url == null) {
+        return;
+      }
+
+      GalleryUrl? galleryUrl = GalleryUrl.tryParse(url);
+      if (galleryUrl != null) {
+        if (!galleryUrl.isEH && !userSetting.hasLoggedIn()) {
+          showLoginToast();
+          return;
+        }
+        toRoute(
+          Routes.details,
+          arguments: DetailsPageArgument(galleryUrl: galleryUrl),
+          offAllBefore: false,
+          preventDuplicates: false,
         );
+        return;
+      }
+
+      GalleryImagePageUrl? galleryImagePageUrl = GalleryImagePageUrl.tryParse(url);
+      if (galleryImagePageUrl != null) {
+        toRoute(
+          Routes.imagePage,
+          arguments: GalleryImagePageArgument(galleryImagePageUrl: galleryImagePageUrl),
+          offAllBefore: false,
+        );
+        return;
+      }
+
+      toast('Invalid jump link', isShort: false);
+    });
+  }
+
+  /// Extract the url following `-g`/`--gallery` from launch arguments. Returns
+  /// null when the argument is absent or malformed.
+  String? _parseGalleryUrlArgument() {
+    ArgParser parser = ArgParser()..addOption('gallery', abbr: 'g');
+    String? url;
+    try {
+      url = parser.parse(launchArguments)['gallery'];
+    } on ArgParserException catch (e) {
+      /// Flutter injects engine flags (e.g. `--enable-dart-profiling`) into the
+      /// argument list in debug mode, which ArgParser rejects. Tolerate unknown
+      /// options by falling back to a manual scan.
+      log.warning('Failed to parse launch arguments, fallback to manual scan', e);
+      for (int i = 0; i < launchArguments.length; i++) {
+        String arg = launchArguments[i];
+        if ((arg == '-g' || arg == '--gallery') && i + 1 < launchArguments.length) {
+          url = launchArguments[i + 1];
+          break;
+        }
+        if (arg.startsWith('--gallery=')) {
+          url = arg.substring('--gallery='.length);
+          break;
+        }
+      }
+    }
+
+    if (url == null || url.trim().isEmpty) {
+      return null;
+    }
+    return url.trim();
   }
 
   /// a gallery url exists in clipboard, show dialog to check whether enter detail page
@@ -208,9 +276,7 @@ class _HomePageState extends State<HomePage>
 
     String rawText = await FlutterClipboard.paste();
     GalleryUrl? galleryUrl = GalleryUrl.tryParse(rawText);
-    GalleryImagePageUrl? galleryImagePageUrl = GalleryImagePageUrl.tryParse(
-      rawText,
-    );
+    GalleryImagePageUrl? galleryImagePageUrl = GalleryImagePageUrl.tryParse(rawText);
 
     if (galleryUrl == null && galleryImagePageUrl == null) {
       return;
@@ -251,9 +317,7 @@ class _HomePageState extends State<HomePage>
           }
           toRoute(
             Routes.imagePage,
-            arguments: GalleryImagePageArgument(
-              galleryImagePageUrl: galleryImagePageUrl,
-            ),
+            arguments: GalleryImagePageArgument(galleryImagePageUrl: galleryImagePageUrl),
             offAllBefore: false,
           );
         },

@@ -11,13 +11,19 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../../../setting/read_setting.dart';
 import '../../../../utils/screen_size_util.dart';
 import '../base/base_layout_logic.dart';
+import '../base/list_layout_logic_mixin.dart';
 
-class VerticalListLayoutLogic extends BaseLayoutLogic {
+class VerticalListLayoutLogic extends BaseLayoutLogic with ListLayoutLogicMixin {
   final String verticalLayoutId = 'verticalLayoutId';
 
   VerticalListLayoutState state = VerticalListLayoutState();
 
+  @override
+  ScrollOffsetController get scrollOffsetController => state.scrollOffsetController;
+
   late Worker imageRegionWidthRatioListener;
+  late Worker portraitImageRegionWidthRatioListener;
+  late Worker landscapeImageRegionWidthRatioListener;
 
   @override
   void onInit() {
@@ -27,14 +33,18 @@ class VerticalListLayoutLogic extends BaseLayoutLogic {
     state.itemPositionsListener.itemPositions.addListener(_readProgressListener);
   }
 
+  void _onImageRegionWidthRatioChanged(int value) {
+    readPageLogic.clearImageContainerSized();
+    updateSafely([verticalLayoutId]);
+  }
+
   @override
   void onReady() {
     super.onReady();
 
-    imageRegionWidthRatioListener = ever(readSetting.imageRegionWidthRatio, (int value) {
-      readPageLogic.clearImageContainerSized();
-      updateSafely([verticalLayoutId]);
-    });
+    imageRegionWidthRatioListener = ever(readSetting.imageRegionWidthRatio, _onImageRegionWidthRatioChanged);
+    portraitImageRegionWidthRatioListener = ever(readSetting.portraitImageRegionWidthRatio, _onImageRegionWidthRatioChanged);
+    landscapeImageRegionWidthRatioListener = ever(readSetting.landscapeImageRegionWidthRatio, _onImageRegionWidthRatioChanged);
   }
 
   @override
@@ -42,6 +52,8 @@ class VerticalListLayoutLogic extends BaseLayoutLogic {
     super.onClose();
 
     imageRegionWidthRatioListener.dispose();
+    portraitImageRegionWidthRatioListener.dispose();
+    landscapeImageRegionWidthRatioListener.dispose();
   }
 
   @override
@@ -57,6 +69,10 @@ class VerticalListLayoutLogic extends BaseLayoutLogic {
   /// to prev image or screen
   @override
   void toPrev() {
+    if (isAtBoundary(false)) {
+      return readPageLogic.handleTurnPageBeyondBoundary(false);
+    }
+
     switch (readSetting.turnPageMode.value) {
       case TurnPageMode.image:
         return _toPrevImage();
@@ -74,6 +90,10 @@ class VerticalListLayoutLogic extends BaseLayoutLogic {
   /// to next image or screen
   @override
   void toNext() {
+    if (isAtBoundary(true)) {
+      return readPageLogic.handleTurnPageBeyondBoundary(true);
+    }
+
     switch (readSetting.turnPageMode.value) {
       case TurnPageMode.image:
         return _toNextImage();
@@ -185,7 +205,7 @@ class VerticalListLayoutLogic extends BaseLayoutLogic {
       Duration(milliseconds: (readSetting.autoModeInterval.value * 1000).toInt()),
       (_) {
         /// changed read direction
-        if (readSetting.readDirection.value != ReadDirection.top2bottomList) {
+        if (readPageLogic.effectiveReadDirection != ReadDirection.top2bottomList) {
           Get.engine.addPostFrameCallback((_) {
             readPageLogic.closeAutoMode();
           });
@@ -218,6 +238,7 @@ class VerticalListLayoutLogic extends BaseLayoutLogic {
     );
   }
 
+  @override
   List<ItemPosition> getCurrentVisibleItems() {
     return readPageLogic.filterAndSortItems(state.itemPositionsListener.itemPositions.value);
   }
@@ -243,7 +264,7 @@ class VerticalListLayoutLogic extends BaseLayoutLogic {
     if (readPageState.imageContainerSizes[imageIndex] != null) {
       return readPageState.imageContainerSizes[imageIndex]!;
     }
-    return Size(readPageState.displayRegionSize.width * readSetting.imageRegionWidthRatio.value / 100, readPageState.displayRegionSize.height / 2);
+    return Size(readPageState.displayRegionSize.width * readPageLogic.effectiveImageRegionWidthRatio / 100, readPageState.displayRegionSize.height / 2);
   }
 
   /// Compute image container size
@@ -252,7 +273,7 @@ class VerticalListLayoutLogic extends BaseLayoutLogic {
     return applyBoxFit(
       BoxFit.contain,
       Size(imageSize.width, imageSize.height),
-      Size(readPageState.displayRegionSize.width * readSetting.imageRegionWidthRatio.value / 100, double.infinity),
+      Size(readPageState.displayRegionSize.width * readPageLogic.effectiveImageRegionWidthRatio / 100, double.infinity),
     );
   }
 }

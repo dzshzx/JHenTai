@@ -8,9 +8,7 @@ import '../service/jh_service.dart';
 
 UserSetting userSetting = UserSetting();
 
-class UserSetting
-    with JHLifeCircleBeanWithConfigStorage
-    implements JHLifeCircleBean {
+class UserSetting with JHLifeCircleBeanWithConfigStorage implements JHLifeCircleBean {
   RxnString userName = RxnString();
   RxnInt ipbMemberId = RxnInt();
   RxnString ipbPassHash = RxnString();
@@ -63,9 +61,7 @@ class UserSetting
     String? avatarImgUrl,
     String? nickName,
   }) async {
-    log.debug(
-      'saveUserInfo: $userName, $ipbMemberId, $ipbPassHash, $avatarImgUrl, $nickName',
-    );
+    log.debug('saveUserInfo: $userName, $ipbMemberId, $ipbPassHash, $avatarImgUrl, $nickName');
     this.userName.value = userName;
     this.ipbPassHash.value = ipbPassHash;
     this.ipbMemberId.value = ipbMemberId;
@@ -88,13 +84,13 @@ class UserSetting
 
   Future<void> saveDefaultFavoriteIndex(int? index) async {
     log.debug('saveDefaultFavoriteIndex: $index');
-    defaultFavoriteIndex.value = index;
+    this.defaultFavoriteIndex.value = index;
     await saveBeanConfig();
   }
 
   Future<void> saveDefaultTagSetNo(int? number) async {
     log.debug('saveDefaultTagSet: $number');
-    defaultTagSetNo.value = number;
+    this.defaultTagSetNo.value = number;
     await saveBeanConfig();
   }
 

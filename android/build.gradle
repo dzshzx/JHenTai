@@ -33,22 +33,19 @@ subprojects {
     afterEvaluate { project ->
         if (project.extensions.findByName("android") != null) {
             Integer pluginCompileSdk = project.android.compileSdk
-            int requiredCompileSdk = 36
-            if (pluginCompileSdk != null && pluginCompileSdk < requiredCompileSdk) {
+            if (pluginCompileSdk != null && pluginCompileSdk < 31) {
                 project.logger.error(
                         "Warning: Overriding compileSdk version in Flutter plugin: "
                                 + project.name
                                 + " from "
                                 + pluginCompileSdk
-                                + " to "
-                                + requiredCompileSdk
-                                + " (to work around https://issuetracker.google.com/issues/199180389 and AndroidX metadata requirements)."
+                                + " to 31 (to work around https://issuetracker.google.com/issues/199180389)."
                                 + "\nIf there is not a new version of " + project.name + ", consider filing an issue against "
                                 + project.name
                                 + " to increase their compileSdk to the latest (otherwise try updating to the latest version)."
                 )
                 project.android {
-                    compileSdk requiredCompileSdk
+                    compileSdk 31
                 }
             }
         }

@@ -1,4 +1,5 @@
-import '../service/gallery_download_service.dart';
+import '../database/database.dart';
+import '../service/gallery_download/gallery_download_service.dart';
 
 class GalleryImage {
   String url;
@@ -59,6 +60,18 @@ class GalleryImage {
     );
   }
 
+  /// Construct from a Drift [ImageData] row. Used at startup to load covers
+  /// and on first gallery access to lazy-load the full image list.
+  factory GalleryImage.fromImageData(ImageData d) {
+    return GalleryImage(
+      url: d.url,
+      originalImageUrl: d.originalImageUrl,
+      path: d.path,
+      imageHash: d.imageHash.isEmpty ? null : d.imageHash,
+      downloadStatus: DownloadStatus.values[d.downloadStatusIndex],
+    );
+  }
+
   GalleryImage copyWith({
     String? url,
     double? height,
@@ -77,7 +90,7 @@ class GalleryImage {
       originalImageUrl: originalImageUrl ?? this.originalImageUrl,
       originalImageHeight: originalImageHeight ?? this.originalImageHeight,
       originalImageWidth: originalImageWidth ?? this.originalImageWidth,
-      reloadKey: reloadKey ?? reloadKey,
+      reloadKey: reloadKey ?? this.reloadKey,
       imageHash: imageHash ?? this.imageHash,
       path: path ?? this.path,
       downloadStatus: downloadStatus ?? this.downloadStatus,

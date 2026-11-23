@@ -16,29 +16,26 @@ void openThirdPartyViewer(String dirPath) {
     [dirPath],
     workingDirectory: dirname(viewerPath),
     runInShell: true,
-  ).then(
-    (result) {
-      if (!isEmptyOrNull(result.stderr)) {
-        toast('internalError'.tr + result.stderr);
-        log.error(result.stderr);
-        log.uploadError(
-          Exception('Process Error'),
-          extraInfos: {
-            'viewerPath': viewerPath,
-            'dirPath': dirPath,
-            'exitCode': result.exitCode,
-            'stderr': result.stderr,
-          },
-        );
-      }
-    },
-    onError: (e) {
-      toast('internalError'.tr + e.toString());
-      log.error(e);
+  ).catchError((e) {
+    toast('internalError'.tr + e.toString());
+    log.error(e);
+    log.uploadError(
+      e,
+      extraInfos: {'viewerPath': viewerPath, 'dirPath': dirPath},
+    );
+  }).then((result) {
+    if (!isEmptyOrNull(result.stderr)) {
+      toast('internalError'.tr + result.stderr);
+      log.error(result.stderr);
       log.uploadError(
-        e,
-        extraInfos: {'viewerPath': viewerPath, 'dirPath': dirPath},
+        Exception('Process Error'),
+        extraInfos: {
+          'viewerPath': viewerPath,
+          'dirPath': dirPath,
+          'exitCode': result.exitCode,
+          'stderr': result.stderr,
+        },
       );
-    },
-  );
+    }
+  });
 }

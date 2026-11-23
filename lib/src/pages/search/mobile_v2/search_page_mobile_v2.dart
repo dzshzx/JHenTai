@@ -8,19 +8,17 @@ import 'package:jhentai/src/setting/preference_setting.dart';
 import 'package:jhentai/src/utils/route_util.dart';
 import 'package:jhentai/src/utils/uuid_util.dart';
 
+import '../../../service/quick_search_service.dart';
 import '../../base/base_page.dart';
 import '../mixin/search_page_mixin.dart';
 import '../mixin/search_page_state_mixin.dart';
 import '../quick_search/quick_search_page.dart';
 
-class SearchPageMobileV2
-    extends BasePage<SearchPageMobileV2Logic, SearchPageMobileV2State>
+class SearchPageMobileV2 extends BasePage<SearchPageMobileV2Logic, SearchPageMobileV2State>
     with SearchPageMixin<SearchPageMobileV2Logic, SearchPageMobileV2State> {
   final String tag = newUUID();
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
-
-  SearchPageMobileV2({Key? key})
-    : super(key: key, showJumpButton: true, showScroll2TopButton: true) {
+  SearchPageMobileV2({Key? key}) : super(key: key, showJumpButton: true, showScroll2TopButton: true) {
     logic = Get.put(SearchPageMobileV2Logic(), tag: tag);
     state = logic.state;
   }
@@ -40,11 +38,9 @@ class SearchPageMobileV2
         () => Scaffold(
           key: scaffoldKey,
           appBar: buildAppBar(context),
-          drawerEdgeDragWidth: preferenceSetting.drawerGestureEdgeWidth.value
-              .toDouble(),
-          endDrawer: const Drawer(width: 278, child: QuickSearchPage()),
-          endDrawerEnableOpenDragGesture:
-              preferenceSetting.enableQuickSearchDrawerGesture.isTrue,
+          drawerEdgeDragWidth: preferenceSetting.drawerGestureEdgeWidth.value.toDouble(),
+          endDrawer: Drawer(width: 278, child: QuickSearchPage(scrollController: quickSearchService.drawerScrollController)),
+          endDrawerEnableOpenDragGesture: preferenceSetting.enableQuickSearchDrawerGesture.isTrue,
           body: SafeArea(child: buildBody(context)),
           floatingActionButton: buildFloatingActionButton(),
           resizeToAvoidBottomInset: false,
@@ -61,28 +57,13 @@ class SearchPageMobileV2
           icon: const Icon(Icons.arrow_back),
           onPressed: () => backRoute(currentRoute: Routes.mobileV2Search),
         ),
-        onLongPress: () => untilRoute(
-          currentRoute: Routes.mobileV2Search,
-          predicate: (route) => route.isFirst,
-        ),
+        onLongPress: () => untilRoute(currentRoute: Routes.mobileV2Search, predicate: (route) => route.isFirst),
       ),
-      title: state.totalCount == null
-          ? null
-          : Text(state.totalCount!.toPrintString()),
+      title: state.totalCount == null ? null : Text(state.totalCount!.toPrintString()),
       titleSpacing: 0,
-      titleTextStyle: Theme.of(
-        context,
-      ).textTheme.titleLarge?.copyWith(fontSize: 16),
-      bottom: PreferredSize(
-        child: buildSearchField(),
-        preferredSize: const Size(
-          double.infinity,
-          UIConfig.mobileV2SearchBarHeight,
-        ),
-      ),
-      actions: buildActionButtons(
-        visualDensity: const VisualDensity(horizontal: -4),
-      ),
+      titleTextStyle: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 16),
+      bottom: PreferredSize(child: buildSearchField(), preferredSize: const Size(double.infinity, UIConfig.mobileV2SearchBarHeight)),
+      actions: buildActionButtons(visualDensity: const VisualDensity(horizontal: -4)),
     );
   }
 
@@ -95,9 +76,7 @@ class SearchPageMobileV2
             id: logic.suggestionBodyId,
             global: false,
             init: logic,
-            builder: (_) =>
-                state.inputGalleryUrl == null &&
-                    state.inputGalleryImagePageUrl == null
+            builder: (_) => state.inputGalleryUrl == null && state.inputGalleryImagePageUrl == null
                 ? Expanded(child: buildSuggestionAndHistoryBody(context))
                 : buildOpenGalleryArea(),
           )

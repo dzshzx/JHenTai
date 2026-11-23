@@ -18,6 +18,7 @@ class pt_BR {
       'operationFailed': 'Falha na opreção',
       'needLoginToOperate': 'Precisa de login para operar',
       'hasCopiedToClipboard': "Copiado para aréa de transferência",
+      'platformNotSupported': "Plataforma atual não suportada",
       'networkError': "Erro na conexão com a rede",
       'systemError': "Erro no sistema",
       'invalid': "Inválido",
@@ -27,11 +28,14 @@ class pt_BR {
       'stop': 'Stop',
       'attention': 'Attention',
       'jump': 'Jump',
+      'resetReadProgress': 'Reset Read Progress',
       'deleteAll': 'Delete All',
       'connectionTimeoutHint': 'Network connect timeout',
       'receiveDataTimeoutHint': 'Network receive data timeout',
       'archiveError': 'Download Archive Error',
       'edit': 'Edit',
+      'confirmDestructiveActions': 'Confirmar ações destrutivas',
+      'confirmDestructiveActionsHint': 'Mostrar um diálogo de confirmação antes de ações destrutivas, como excluir tarefas ou baixar novamente na página de downloads',
 
       'home': "Home",
       'gallery': "Galeria",
@@ -64,8 +68,22 @@ class pt_BR {
       'logout': 'Logout',
       'passwordLogin': 'Senha de login',
       'cookieLogin': 'Cookie de login',
-      'useWebview': 'Use Webview',
-      'skipCookieVerification': 'Skip Verification',
+      'passwordTab': 'Conta',
+      'cookieTab': 'Cookie',
+      'webTab': 'Web',
+      'webTabHint': 'Clique no botão abaixo para abrir o navegador. Após fazer login, você retornará automaticamente.',
+      'launchWebLogin': 'Abrir Navegador para Login',
+      'onlineVerification': 'Verificação Online',
+      'webviewVerification': 'Verificação WebView',
+      'skipVerification': 'Pular Verificação',
+      'assist': 'Assistida',
+      'onlineVerificationHint': 'Validar via requisição HTTP',
+      'webviewVerificationHint': 'Validar via WebView (use quando a verificação online falhar)',
+      'skipVerificationHint': 'Salvar diretamente sem verificação',
+      'igneousFieldHint': 'Apenas necessário para o site EX; site EH pode deixar vazio',
+      'clipboardCookieDetected': 'Cookie detectado na área de transferência e preenchido',
+      'verifyAndLogin': 'Verificar e Entrar',
+      'recommended': 'Recomendado',
       'youHaveLoggedInAs': 'Olá:   ',
       'cookieIsBlack': 'Cookie está preto/vazio',
       'cookieFormatError': 'Error no formato do cookie',
@@ -74,8 +92,7 @@ class pt_BR {
       'userName': 'Nome de usuário',
       'EHUser': 'Usuário EH',
       'password': 'Senha',
-      'needCaptcha':
-          'Precisa do captcha, por favor fassa login via cookie ou pela web de novo.',
+      'needCaptcha': 'Precisa do captcha, por favor fassa login via cookie ou pela web de novo.',
       'userNameOrPasswordMismatch': 'Nome de usuáriio e/ou senha incorreto(s)',
       'copyCookies': 'Copiar cookies',
       'tap2Copy': 'Toque para copiar',
@@ -88,23 +105,20 @@ class pt_BR {
       'refreshIgneousFailed': 'Refresh Igneous Failed',
 
       /// request
-      'sadPanda':
-          'Sad Panda(no data). Refer: https://github.com/jiangtian616/JHenTai/wiki/Common-Questions',
-      'sadPandaReferLink':
-          'https://github.com/jiangtian616/JHenTai/wiki/Common-Questions',
+      'sadPanda': 'Sad Panda(no data). Refer: https://github.com/jiangtian616/JHenTai/wiki/Common-Questions',
+      'sadPandaReferLink': 'https://github.com/jiangtian616/JHenTai/wiki/Common-Questions',
 
       /// gallery card
       'filtered': 'Filtered',
 
       /// gallery page
-      'getGallerysFailed': "Falha ao obter galerias",
+      'getGalleriesFailed': "Falha ao obter galerias",
       'refreshGalleryFailed': 'Falha ao Atualizar galerias',
       'tabBarSetting': 'Opções da barra de abas',
       'jumpPageTo': 'Pular para à página',
       'range': 'Alcance',
       'current': 'Atual',
-      'galleryUrlDetected':
-          'URL de galeria encontrada na área de transferência',
+      'galleryUrlDetected': 'URL de galeria encontrada na área de transferência',
       'galleryUrlDetectedHint': 'Toque para entrar na página de detalhes',
 
       /// details page
@@ -131,12 +145,10 @@ class pt_BR {
       'noComments': 'Sem comentários',
       'lastEditedOn': 'Última edição em',
       'getGalleryDetailFailed': 'Falha ao obter detalhes da galeria',
-      'cloudflare403':
-          'You have been restricted by Cloudflare from making network requests. Please try switching networks or using another login method.',
+      'cloudflare403': 'You have been restricted by Cloudflare from making network requests. Please try switching networks or using another login method.',
       'invisible2User': 'Esta Galeria é invisível para você',
       'invisibleHints': 'Esta galeria está indisponível ou foi removida.',
-      'copyRightHints':
-          'Esta galeria está indisponível devido a uma reivindicação de direitos autorais por ',
+      'copyRightHints': 'Esta galeria está indisponível devido a uma reivindicação de direitos autorais por ',
       'refreshGalleryDetailsFailed': 'Falha ao atualizar detalhes da galeria',
       'failToGetThumbnails': "Falha ao obter miniaturas",
       'favoriteGallerySuccess': "Favorite Gallery Success",
@@ -144,8 +156,7 @@ class pt_BR {
       'removeFavoriteSuccess': "Remove Favorite Success",
       'removeFavoriteFailed': "Remove Favorite Failed",
       'getGalleryFavoriteInfoFailed': 'Get gallery favorite info failed',
-      'favoriteNoteSlotFullHint':
-          'Favorite note slot is full, please delete some notes first',
+      'favoriteNoteSlotFullHint': 'Favorite note slot is full, please delete some notes first',
       'ratingSuccess': 'Rating Success',
       'ratingFailed': 'Falha na avaliação',
       'voteTagFailed': 'Falha na tag de votação',
@@ -153,16 +164,12 @@ class pt_BR {
       'resumeDownload': 'Retomar',
       'pauseDownload': 'Pausar',
       'addNewTagSetSuccess': 'Novo conjunto de tags adicionado com sucesso',
-      'addNewWatchedTagSetSuccess':
-          'Novo conjunto de tags adicionado com sucesso',
-      'addNewHiddenTagSetSuccess':
-          'Novo conjunto de tags ocultas adicionado com sucesso',
-      'addNewTagSetSuccessHint':
-          'Você pode verificar suas tags em Configurações->EH->My Tags',
+      'addNewWatchedTagSetSuccess': 'Novo conjunto de tags adicionado com sucesso',
+      'addNewHiddenTagSetSuccess': 'Novo conjunto de tags ocultas adicionado com sucesso',
+      'addNewTagSetSuccessHint': 'Você pode verificar suas tags em Configurações->EH->My Tags',
       'addNewTagSetFailed': 'Falha ao adicionar novo conjunto de tags',
       'VisitorStatistics': 'Estatísticas do visitante',
-      'invisible2UserWithoutDonation':
-          'As estatísticas desta galeria são invisíveis para os usuários sem doação',
+      'invisible2UserWithoutDonation': 'As estatísticas desta galeria são invisíveis para os usuários sem doação',
       'getGalleryStatisticsFailed': 'Falha ao obter estatísticas da galeria',
       'totalVisits': 'Total de visitas',
       'visits': 'Visitas',
@@ -172,35 +179,32 @@ class pt_BR {
       'score': 'Pontuação',
       'NotOnTheList': 'Não está na lista',
       'getGalleryArchiveFailed': 'Falha ao obter arquivo da galeria',
-      'parseGalleryArchiveFailed':
-          'Falha na análise, certifique-se de que seu [Archiver Settings] em e-hentai é [Manual Select, Manual Start (Default)]',
+      'parseGalleryArchiveFailed': 'Falha na análise, certifique-se de que seu [Archiver Settings] em e-hentai é [Manual Select, Manual Start (Default)]',
       'original': 'Original',
       'resample': 'Redimensionamento',
       'beginToDownloadArchive': 'Começar a baixar o arquivo',
-      'beginToDownloadArchiveHint':
-          'Você pode verificar o progresso em Baixar -> Arquivo',
+      'beginToDownloadArchiveHint': 'Você pode verificar o progresso em Baixar -> Arquivo',
       'updateGalleryError': 'Erro ao atualizar galeria',
       'thisGalleryHasANewVersion': 'Nova versão desta galeria disponível',
       'hasUpdated': 'Atualizado',
       'unpackingArchiveError': 'Unpacking archive error',
       'failedToDealWith': 'Falha ao lidar com',
       'hasDownloaded': 'Baixado',
-      '410Hints':
-          'Você registrou muitos bytes baixados neste arquivo e precisa desbloquear novamente este arquivo para continuar.',
-      '429Hints':
-          'Too many download requests! You\'d better decrease your archive download concurrency.',
-      'getUnpackedImagesFailedMsg':
-          'JHenTai não pode carregar imagens deste arquivo, por favor verifique seu arquivo local.',
+      '410Hints': 'Você registrou muitos bytes baixados neste arquivo e precisa desbloquear novamente este arquivo para continuar.',
+      '429Hints': 'Too many download requests! You\'d better decrease your archive download concurrency.',
+      'getUnpackedImagesFailedMsg': 'JHenTai não pode carregar imagens deste arquivo, por favor verifique seu arquivo local.',
       'getGalleryTorrentsFailed': 'Falha ao obter torrents',
       'chooseArchive': 'Escolher Arquivo',
-      'tagSetExceedLimit':
-          'No more tags can be added because you have reach the limit',
+      'tagSetExceedLimit': 'No more tags can be added because you have reach the limit',
       'useTranslation': 'Use Translation',
       'addTagSuccess': 'Add Tag Success',
       'addTagFailed': 'Add Tag Failed',
       'parentGallery': 'Parent',
       'blockUploaderLocally': 'Block user locally',
-      'block': 'Block',
+      'blockTitleLocally': 'Bloquear título selecionado localmente',
+      'blockRuleAlreadyExists': 'Esta regra já existe',
+      'blockThisGallery': 'Block this gallery',
+      'blockGallerySuccess': 'Gallery blocked. You can modify it in Preference - Block Rules',
 
       /// detail dialog
       'galleryUrl': 'Gallery Url',
@@ -218,8 +222,7 @@ class pt_BR {
       'commentTooShort': 'O comentário é muito curto',
       'sendCommentFailed': 'Falha ao enviar comentário',
       'voteCommentFailed': 'Falha ao votar cometário',
-      'voteCommentFailedHint':
-          'Tente puxar para baixo para atualizar a página de detalhes primeiro',
+      'voteCommentFailedHint': 'Tente puxar para baixo para atualizar a página de detalhes primeiro',
       'unknownUser': 'Usuário desconhecido',
       'atLeast3Characters': 'Pelo menos 3 caracteres',
       'noJHenTaiHints': 'Please don\'t mention JHenTai, thanks',
@@ -236,16 +239,16 @@ class pt_BR {
       'loading': "Caregando",
       'paused': 'Pausar',
       'exceedImageLimits': "Limite de imagens excedido",
-      'ehServerError':
-          'An error occurred due to EH\'s server, please try again later',
-      'unsupportedImagePageStyle':
-          "JHenTai não suporta Multi-Page Viewer (MPV), por favor mude para o estilo padrão em e-hentai.org",
+      'ehServerError': 'An error occurred due to EH\'s server, please try again later',
+      'unsupportedImagePageStyle': "JHenTai não suporta Multi-Page Viewer (MPV), por favor mude para o estilo padrão em e-hentai.org",
       'toNext': 'Para o próximo',
       'toPrev': 'Para anterior',
       'back': 'Voltar',
       'toggleMenu': 'Alternar menu',
       'share': 'Compartilhar',
+      'copyImage': 'Copiar imagem',
       'save': 'Salvar em imagens',
+      'copyEHPageUrl': 'Copiar URL da página E-hentai',
 
       /// setting page
       'account': 'Conta',
@@ -262,6 +265,10 @@ class pt_BR {
       'accountSetting': 'Configurações da conta',
       'styleSetting': 'Configurações de estilo',
       'advancedSetting': 'Configurações avançadas',
+      'refreshRate': 'Taxa de atualização',
+      'refreshRateCurrent': 'Atual',
+      'refreshRateHint': 'Aplica-se imediatamente. Pode não surtir efeito devido a limitações do sistema.',
+      'refreshRateSecurityHint': 'Não altere se não houver problemas. Se ocorrerem problemas, redefina os dados do aplicativo.',
       'securitySetting': 'Configurções de segurança',
       'ehSetting': 'Configuração do site EH',
       'readSetting': 'Configurações de leitura',
@@ -274,11 +281,9 @@ class pt_BR {
       /// eh setting page
       'site': 'Site',
       'redirect2Eh': 'Redirecionar para EH, se disponível',
-      'redirect2EhHint':
-          'Try to load gallery detail page from EH site first to get better network performance',
+      'redirect2EhHint': 'Try to load gallery detail page from EH site first to get better network performance',
       'redirectAllGallery': 'Redirect all gallery to EH',
-      'imDonorHint':
-          'If you are a donor, you can turn this on to help you access gallerys in EX site',
+      'imDonorHint': 'If you are a donor, you can turn this on to help you access galleries in EX site',
       'profileSetting': 'Profile Setting',
       'chooseProfileHint': 'Choose profile used in JHenTai',
       'siteSetting': 'Configuração do site',
@@ -298,10 +303,14 @@ class pt_BR {
       'myTagsHint': 'gerenciar tags assistidas e ocultas',
       'localTags': 'Local Tags',
       'localTagsHint': 'Extra filter tags',
-      'localTagsHint2': 'Gallerys with these tags will be hidden',
+      'localTagsHint2': 'Galleries with these tags will be hidden',
       'addLocalTags': 'Add Tags',
       'hidden': 'Escondido',
       'nope': 'Nope(Não)',
+      'status': 'Status',
+      'tagSetDefaultColor': 'Cor padrão do conjunto de tags',
+      'weight': 'Peso',
+      'color': 'Cor',
       'getTagSetFailed': 'Falha ao obter conjunto de tags',
       'updateTagSetFailed': 'Falha na atualização do conjunto de tags',
       'updateTagFailed': 'Falha na atualização do conjunto de tags',
@@ -318,6 +327,10 @@ class pt_BR {
 
       /// Layout
       'layoutMode': 'Modo de layout',
+      'layoutFollowOrientation': 'Layout segue a orientação',
+      'layoutFollowOrientationHint': 'Usar layouts diferentes em retrato e paisagem',
+      'portraitLayout': 'Layout em retrato',
+      'landscapeLayout': 'Layout em paisagem',
       'mobileLayoutV2Name': 'Celular',
       'mobileLayoutV2Desc': 'Uma coluna',
       'mobileLayoutName': 'Celular(antigo)',
@@ -327,17 +340,14 @@ class pt_BR {
       'tabletLayoutName': 'Tablet(antigo)',
       'tabletLayoutDesc': 'Manutenção interrompida',
       'desktopLayoutName': 'Desktop',
-      'desktopLayoutDesc':
-          'Duas colunas com barra de abas na esquerda, suporte a teclado',
+      'desktopLayoutDesc': 'Duas colunas com barra de abas na esquerda, suporte a teclado',
 
       /// style setting page
       'enableTagZHTranslation': 'Traduzir nome da tag para Chinês',
       'version': 'Versão',
       'downloadTagTranslationHint': 'Baixando dados..., baixado: ',
-      'zhTagSearchOrderOptimization':
-          'Chinese Tag Auto-Completion Ordering Rule',
-      'zhTagSearchOrderOptimizationHint':
-          'Intelligent sorting by default and sort by frequency if enabled',
+      'zhTagSearchOrderOptimization': 'Chinese Tag Auto-Completion Ordering Rule',
+      'zhTagSearchOrderOptimizationHint': 'Intelligent sorting by default and sort by frequency if enabled',
       'themeMode': 'Tema',
       'dark': 'Escuro',
       'light': 'Claro',
@@ -353,10 +363,8 @@ class pt_BR {
       'waterfallFlowBig': 'Waterfall Flow (Big)',
       'crossAxisCountInWaterFallFlow': 'Waterfall Flow Column count',
       'pageListStyle': 'Gallery List Style (Page)',
-      'crossAxisCountInGridDownloadPageForGroup':
-          'Download Page Grid Column Count(Group)',
-      'crossAxisCountInGridDownloadPageForGallery':
-          'Download Page Grid Column Count(Gallery)',
+      'crossAxisCountInGridDownloadPageForGroup': 'Download Page Grid Column Count(Group)',
+      'crossAxisCountInGridDownloadPageForGallery': 'Download Page Grid Column Count(Gallery)',
       'crossAxisCountInDetailPage': 'Detail Page Thumbnail Column Count',
       'global': 'Global',
       'auto': 'Auto',
@@ -371,19 +379,16 @@ class pt_BR {
       'whenScrollUp': 'When Scroll Up',
       'whenScrollDown': 'When Scroll Down',
       'preloadGalleryCover': 'Preload gallery cover',
-      'preloadGalleryCoverHint':
-          'Preload the covers of galleries that are not yet displayed on the page',
+      'preloadGalleryCoverHint': 'Preload the covers of galleries that are not yet displayed on the page',
       'enableSwipeBackGesture': 'Enable Swipe Back Gesture',
       'enableLeftMenuDrawerGesture': 'Enable Left Menu Drawer Gesture',
-      'enableQuickSearchDrawerGesture':
-          'Ativar pesquisa rápida com gesto de gaveta',
+      'enableQuickSearchDrawerGesture': 'Ativar pesquisa rápida com gesto de gaveta',
       'drawerGestureEdgeWidth': 'Drawer Gesture Edge Width',
-      'alwaysShowScroll2TopButton':
-          'Sempre mostrar o botão de rolagem para cima',
+      'alwaysShowScroll2TopButton': 'Sempre mostrar o botão de rolagem para cima',
       'enableDefaultFavorite': 'Enable Default Favorite',
       'enableDefaultFavoriteHint': 'Long press to re-select',
       'enableDefaultTagSet': 'Enable Default Tag Set',
-      'enableDefaultTagSetHint': 'Long press to re-select',
+      'enableDefaultTagSetHint': 'Add to your default tag set directly',
       'disableDefaultTagSetHint': 'Select manually',
       'launchInFullScreen': 'Launch In Full Screen',
       'launchInFullScreenHint': 'Switch manually by F11',
@@ -392,35 +397,29 @@ class pt_BR {
       'inheritAll': 'Inherit All',
       'inheritAllHint': 'Use last search options for next search',
       'inheritPartially': 'Inherit Partially',
-      'inheritPartiallyHint':
-          'Use last search options for next search(except language and category)',
+      'inheritPartiallyHint': 'Use last search options for next search(except language and category)',
       'none': 'None',
       'noneHint': 'Use default search options for next search',
       'showAllGalleryTitles': 'Show All Gallery Titles',
-      'showAllGalleryTitlesHint':
-          'Show both original and japanese titles if available',
+      'showAllGalleryTitlesHint': 'Show both original and japanese titles if available',
       'showGalleryTagVoteStatus': 'Show Gallery Tag Vote Status',
-      'showGalleryTagVoteStatusHint':
-          'Include confidence, skepticism and incorrect',
+      'showGalleryTagVoteStatusHint': 'Include confidence, skepticism and incorrect',
       'showComments': 'Show Comments',
+      'showCommentsHint': 'When disabled, comments are hidden in details page, but you can still tap All Comments to view them',
       'showAllComments': 'Show All Comments',
-      'showAllCommentsHint':
-          'By default only the 45 highest scoring and 5 most recent comments will be shown',
+      'showAllCommentsHint': 'By default only the 45 highest scoring and 5 most recent comments will be shown',
       'addTag': 'Add Tag',
       'addTagHint': 'Enter new tags, separated with comma',
 
       /// theme color setting page
-      'themeColorSettingHint':
-          'Assign different color for light and dark theme',
+      'themeColorSettingHint': 'Assign different color for light and dark theme',
       'preview': 'Preview',
       'preset': 'Preset',
       'custom': 'Custom',
 
       /// performance setting page
-      'maxGalleryNum4Animation':
-          'Max Gallery Num For List Animation in Download page',
-      'maxGalleryNum4AnimationHint':
-          'Disable animation for groups which have more gallerys than this value(for list style)',
+      'maxGalleryNum4Animation': 'Max Gallery Num For List Animation in Download page',
+      'maxGalleryNum4AnimationHint': 'Disable animation for groups which have more galleries than this value(for list style)',
 
       /// mouse wheel setting page
       'wheelScrollSpeed': 'Velocidade de rolagem',
@@ -432,8 +431,7 @@ class pt_BR {
       'hostMapping': 'Mapeamento de host',
       'hostMappingHint': 'Usado para frente de domínio',
       'proxyAddress': 'Endereço de proxy',
-      'proxyAddressHint':
-          'Se você usa servidor proxy, certifique-se de configurá-lo corretamente',
+      'proxyAddressHint': 'Se você usa servidor proxy, certifique-se de configurá-lo corretamente',
       'saveSuccess': 'Salvo com sucesso',
       'saveFailed': 'Save failed',
       'updateSuccess': 'Atualizado com sucesso',
@@ -442,8 +440,7 @@ class pt_BR {
       'pageCacheMaxAge': 'Idade máxima do cache de página',
       'pageCacheMaxAgeHint': 'Você pode atualizar o cache atualizando a página',
       'cacheImageExpireDuration': 'Image Cache Expiration Time',
-      'cacheImageExpireDurationHint':
-          'Remove image cache automatically after launching app',
+      'cacheImageExpireDurationHint': 'Remove image cache automatically after launching app',
       'oneMinute': '1 Minuto',
       'tenMinute': '10 Minutos',
       'oneHour': '1 Hora',
@@ -456,29 +453,24 @@ class pt_BR {
       'clearImagesCache': 'Limpar cache de imagens',
       'longPress2Clear': 'Pressione e segure para limpar',
       'checkUpdateAfterLaunchingApp': 'Buscar atualizações após abrir o app',
-      'checkClipboard':
-          'Verificar se há URL de Galeria na área de transferência',
+      'checkClipboard': 'Verificar se há URL de Galeria na área de transferência',
       'clearPageCache': 'Limpar cache de página',
       'clearSuccess': 'Limpado com Sucesso',
       'superResolution': 'Image Super Resolution',
       'stopSuperResolution': 'Stop Super Resolution',
       'deleteSuperResolvedImage': 'Delete Super Resolved Image',
-      'superResolveOriginalImageHint':
-          'Process original image cost more time, space and performance, are you sure to continue?',
+      'superResolveOriginalImageHint': 'Process original image cost more time, space and performance, are you sure to continue?',
       'verityAppLinks4Android12': 'Verity App Links(Android 12+)',
-      'verityAppLinks4Android12Hint':
-          'For Android 12+, you need to manually add link to verified links in order to open JHenTai in 3-rd apps',
+      'verityAppLinks4Android12Hint': 'For Android 12+, you need to manually add link to verified links in order to open JHenTai in 3-rd apps',
       'noImageMode': 'No Image Mode',
       'exportData': 'Export Data',
       'exportDataHint': 'Export configs, block rules and history',
       'selectExportItems': 'Select Export Items',
       'importData': 'Import Data',
-      'importDataHint':
-          'App will shutdown automatically after importing to apply the latest configuration',
+      'importDataHint': 'App will shutdown automatically after importing to apply the latest configuration',
 
       /// host mapping page
-      'hostDataSource':
-          'Não há necessidade de alterar por padrão.\nFonte de dados: https://dns.google/',
+      'hostDataSource': 'Não há necessidade de alterar por padrão.\nFonte de dados: https://dns.google/',
 
       /// proxy page
       'proxySetting': 'Proxy Setting',
@@ -495,11 +487,9 @@ class pt_BR {
       'enableBiometricAuth': 'Ativar autenticação biométrica',
       'enableAuthOnResume': 'Enable Auth on Resume',
       'enableAuthOnResumeHints': '3 segundos de atraso',
-      'enableBlurBackgroundApp':
-          'Ative a página de desfoque ao alternar para o plano de fundo',
+      'enableBlurBackgroundApp': 'Ative a página de desfoque ao alternar para o plano de fundo',
       'hideImagesInAlbum': 'Hide Images in Album',
-      'hideImagesInAlbumHints':
-          'If you changed default download path, you need to create .nomedia manually',
+      'hideImagesInAlbumHints': 'If you changed default download path, you need to create .nomedia manually',
 
       /// read setting page
       'enableImmersiveMode': 'Habilitar modo imersivo',
@@ -512,14 +502,41 @@ class pt_BR {
       'landscape': 'Landscape',
       'portrait': 'Portrait',
       'readDirection': 'Direção da leitura',
+      'enableOrientationSpecificReadDirection': 'Direção de leitura por orientação',
+      'enableOrientationSpecificReadDirectionHint': 'Definir direções de leitura diferentes para orientações retrato e paisagem',
+      'autoDetectWebtoon': 'Detectar webtoon automaticamente',
+      'autoDetectWebtoonHint': 'Usar automaticamente o modo de leitura contínua de cima para baixo para galerias com a tag webtoon',
+      'portraitReadDirection': 'Direção de leitura (retrato)',
+      'landscapeReadDirection': 'Direção de leitura (paisagem)',
+      'autoSwitchedReadDirection': 'Direção de leitura alterada automaticamente',
       'notchOptimization': 'Notch Optimization',
-      'notchOptimizationHint':
-          'Add padding before the first image to avoid the notch and status bar',
+      'notchOptimizationHint': 'Add padding before the first image to avoid the notch and status bar',
       'imageRegionWidthRatio': 'Image Region Width Ratio',
-      'gestureRegionWidthRatio': 'Gesture Region Width Ratio',
+      'portraitImageRegionWidthRatio': 'Portrait Image Width Ratio',
+      'landscapeImageRegionWidthRatio': 'Landscape Image Width Ratio',
+      'tapZoneStyle': 'Tap Zone Style',
+      'tapZoneStyleHint': 'Customize the tap zones on the reading page',
+      'tapZonePreset': 'Preset',
+      'tapZonePresetClassic': 'Classic',
+      'tapZonePresetVertical': 'Vertical',
+      'tapZoneRatio': 'Zone Size',
+      'tapZoneAction': 'Tap Zone Action',
+      'tapZoneActionNone': 'None',
+      'tapZoneActionPrevPage': 'Previous Page',
+      'tapZoneActionNextPage': 'Next Page',
+      'tapZoneActionToggleMenu': 'Toggle Menu',
+      'tapZoneActionFlipLeft': 'Virar à esquerda',
+      'tapZoneActionFlipRight': 'Virar à direita',
+      'tapZoneLeftColumnRatio': 'Left Column Width',
+      'tapZoneMiddleColumnRatio': 'Middle Column Width',
+      'tapZoneRightColumnRatio': 'Right Column Width',
+      'tapZoneTopRowRatio': 'Top Row Height',
+      'tapZoneMiddleRowRatio': 'Middle Row Height',
+      'tapZoneBottomRowRatio': 'Bottom Row Height',
+      'tapZonePreview': 'Preview',
+      'tapZoneGuideHint': 'Tap anywhere to dismiss. Zones can be configured in Settings - Read.',
       'useThirdPartyViewer': 'Usar visualizador personaliado',
-      'thirdPartyViewerPath':
-          'Localização do visualizador personalizado(Arquivo executável)',
+      'thirdPartyViewerPath': 'Localização do visualizador personalizado(Arquivo executável)',
       'showThumbnails': 'Mostrar miniaturas',
       'showScrollBar': 'Show Scroll Bar',
       'showStatusInfo': 'Mostrar status na parte inferior',
@@ -537,19 +554,26 @@ class pt_BR {
       'left2rightList': 'Left to Right (Continuous)',
       'right2leftList': 'Right to Left (Continuous)',
       'enablePageTurnByVolumeKeys': 'Use volume key to turn page',
+      'enablePageTurnByVolumeKeysHint': 'No iOS, se o volume estiver em 0 ou 100%, ele será ajustado automaticamente ao entrar no leitor para suportar a virada de página e restaurado ao sair',
       'enablePageTurnAnime': 'Ativar animação de virada',
       'enableDoubleTapToScaleUp': 'Ativar toque duplo para aumentar a escala',
       'enableTapDragToScaleUp': 'Enable Tap Drag to Scale up',
       'disableGestureWhenScrolling': 'Disable Gesture When Scrolling',
-      'disablePageTurningOnTap': 'Disable Page Turning On Tap',
       'enableBottomMenu': 'Enable Bottom Menu',
-      'reverseTurnPageDirection': 'Reverse Page Turning Direction',
+      'enableAutoSwitchGallery': 'Read Downloaded Galleries Continuously',
+      'enableAutoSwitchGalleryHint': 'Keep turning page at the first or last page to open the previous or next gallery in download list. Works for downloads, archives and local galleries',
+      'alreadyFirstPage': 'First page',
+      'alreadyLastPage': 'Last page',
+      'turnPageAgainToReadPrevGallery': 'turn page again to read the previous gallery',
+      'turnPageAgainToReadNextGallery': 'turn page again to read the next gallery',
+      'noPrevGallery': 'no previous gallery',
+      'noNextGallery': 'no next gallery',
+      'switchGalleryFailed': 'Failed to open the gallery',
       'turnPageMode': 'Modo de virar página',
       'turnPageModeHint': 'Para a próxima tela ou próxima imagem',
       'enableImageMaxKilobytes': 'Enable Image Compression',
       'imageMaxKilobytes': 'Image Max Size',
-      'imageMaxKilobytesHint':
-          'Images larger than this size will be compressed',
+      'imageMaxKilobytesHint': 'Images larger than this size will be compressed',
       'image': 'Imagem',
       'screen': 'Tela',
       'preloadDistanceInOnlineMode': 'Preload Distance(Online)',
@@ -562,15 +586,30 @@ class pt_BR {
       'doubleColumn': 'Duas Colunas',
       'displayFirstPageAlone': 'Display First Page Alone',
       'displayFirstPageAloneGlobally': 'Display First Page Alone(Globally)',
+      'portraitDisplayFirstPageAlone': 'Portrait Display First Page Alone',
+      'landscapeDisplayFirstPageAlone': 'Landscape Display First Page Alone',
       'toggleFullScreen': 'Toggle Full Screen',
-      'enableAutoScaleUp':
-          'Ativar dimensionamento automático de imagens grandes',
-      'enableAutoScaleUpHints':
-          'Tornar a largura da imagem igual à largura da tela',
+      'keyboardShortcuts': 'Atalhos de Teclado',
+      'keyboardShortcutsHint': 'Personalizar atalhos de teclado da página de leitura',
+      'pressAnyKey': 'Pressione qualquer tecla...',
+      'unboundKey': 'Sem vínculo',
+      'clearKey': 'Limpar',
+      'resetAll': 'Redefinir tudo',
+      'resetSuccess': 'Redefinido para padrão',
+      'keyConflict': 'Conflito de tecla',
+      'fixedKeyHint': 'Tecla fixa, não personalizável',
+      'pressAnyKeyOrMouseSideButton': 'Pressione qualquer tecla ou botão lateral do mouse...',
+      'mouseButton4Name': 'Mouse Avançar',
+      'mouseButton5Name': 'Mouse Voltar',
+      'toLeft': 'Virar à esquerda',
+      'toRight': 'Virar à direita',
+      'enableAutoScaleUp': 'Ativar dimensionamento automático de imagens grandes',
+      'enableAutoScaleUpHints': 'Tornar a largura da imagem igual à largura da tela',
 
       /// preference setting page
       'showR18GImageDirectly': 'Show R18G Image Directly',
       'defaultTab': 'Default Tab',
+      'defaultDownloadTab': 'Default Download Tab',
       'showUtcTime': 'Show UTC Time for Gallery',
       'showDawnInfo': 'Show new dawn event',
       'showEncounterMonster': 'Show hentaiVerse monster encounter event',
@@ -606,14 +645,10 @@ class pt_BR {
       'completed': 'Completo',
       'needReUnlock': 'Precisa de novo desbloqueio',
       'reUnlock': 'Desbloquear novamente',
-      'reUnlockHint':
-          'Atenção! precisa comprar este arquivo novamente para desbloque-lo novamente.',
-      'downloadHelpInfo':
-          'Se você não conseguir fazer o download e encontrar erros como a tabela não existe nos logs, desinstale o aplicativo atual e reinstale.',
-      'localGalleryHelpInfo':
-          'Load gallerys which is not downloaded by JHenTai. Add config in Download Setting -> Extra Gallery Scan Path and then refresh.',
-      'localGalleryHelpInfo4iOSAndMacOS':
-          'Load gallerys which is not downloaded by JHenTai. Put your gallerys in default download path and then refresh',
+      'reUnlockHint': 'Atenção! precisa comprar este arquivo novamente para desbloque-lo novamente.',
+      'downloadHelpInfo': 'Se você não conseguir fazer o download e encontrar erros como a tabela não existe nos logs, desinstale o aplicativo atual e reinstale.',
+      'localGalleryHelpInfo': 'Load galleries which is not downloaded by JHenTai. Add config in Download Setting -> Extra Gallery Scan Path and then refresh.',
+      'localGalleryHelpInfo4iOSAndMacOS': 'Load galleries which is not downloaded by JHenTai. Put your galleries in default download path and then refresh',
       'deleteLocalGalleryHint': 'Delete your local files',
       'priority': 'Prioridade',
       'highest': 'Alta',
@@ -637,19 +672,14 @@ class pt_BR {
       'operationHasCompleted': 'The operation has completed',
       'operationInProgress': 'The operation is in progress',
       'startProcess': 'Start Process',
-      'multiReDownloadHint': 'You will re-download all selected gallerys.',
-      'multiChangeGroupHint': 'You will change group of all selected gallerys.',
-      'multiDeleteHint': 'You will delete all selected gallerys.',
-      'blankImageHint':
-          'Downloading the image returned an empty result, trying to re-parse.',
-      'peakHoursHint':
-          'Downloading original files during peak hours requires GP, and you do not have enough, downloading is paused.',
-      'oldGalleryHint':
-          'Downloading original files of this gallery requires GP, and you do not have enough.',
-      'exceedLimitHint':
-          'You have reached the image limit, and do not have sufficient GP to buy a download quota.',
-      'deleteUpdatingDependentHint':
-          'Another gallery\'s update relies on current gallery, you\'d better delete after update has completed.',
+      'multiReDownloadHint': 'You will re-download all selected galleries.',
+      'multiChangeGroupHint': 'You will change group of all selected galleries.',
+      'multiDeleteHint': 'You will delete all selected galleries.',
+      'blankImageHint': 'Downloading the image returned an empty result, trying to re-parse.',
+      'peakHoursHint': 'Downloading original files during peak hours requires GP, and you do not have enough, downloading is paused.',
+      'oldGalleryHint': 'Downloading original files of this gallery requires GP, and you do not have enough.',
+      'exceedLimitHint': 'You have reached the image limit, and do not have sufficient GP to buy a download quota.',
+      'deleteUpdatingDependentHint': 'Another gallery\'s update relies on current gallery, you\'d better delete after update has completed.',
       'migrateToDownload': 'Migrate To 「Download」',
       'refresh': 'Refresh',
 
@@ -690,8 +720,7 @@ class pt_BR {
       'pageAtLeast': 'Página no mínimo',
       'pageAtMost': 'Página no máximo',
       'pagesBetween': 'Páginas entre',
-      'pageRangeSelectHint':
-          'min <= 1000, max >= 10\nmin/max <= 0.8, max-min >= 20',
+      'pageRangeSelectHint': 'min <= 1000, max >= 10\nmin/max <= 0.8, max-min >= 20',
       'to': 'para',
       'minimumRating': 'Classificação mínima',
       'disableFilterForLanguage': 'Desativar filtro para idioma',
@@ -711,11 +740,10 @@ class pt_BR {
 
       /// ranklist page
       'getRanklistFailed': 'Falha ao obter lista de classificação',
-      'getSomeOfGallerysFailed': 'Falha ao obter algumas das galerias',
+      'getSomeOfGalleriesFailed': 'Falha ao obter algumas das galerias',
 
       /// history page
-      'getHistoryGallerysFailed':
-          'Falha ao obter alguns dos histórico galerias',
+      'getHistoryGalleriesFailed': 'Falha ao obter alguns dos histórico galerias',
 
       /// search page
       'search': 'Pesquisar',
@@ -740,21 +768,20 @@ class pt_BR {
       'resetDownloadPath': 'Redefinir caminho de download',
       'singleImageSavePath': 'Single Image Save Path',
       'extraGalleryScanPath': 'Extra Gallery Scan Path',
-      'extraGalleryScanPathHint': 'To scan and load local gallerys',
+      'extraGalleryScanPathHint': 'To scan and load local galleries',
       'downloadOriginalImage': 'Imagem original',
       'downloadOriginalImageByDefault': 'Escolher imagem original por padrão',
       'originalImage': 'Original',
       'resampleImage': 'Redimensionada',
       'defaultGalleryGroup': 'Default Gallery Group',
+      'prioritizeRecentGalleryGroups': 'Priorizar grupos de galeria usados recentemente',
       'defaultArchiveGroup': 'Default Archive Group',
       'never': 'Nunca',
       'manual': 'Manual',
       'always': 'Sempre',
       'longPress2Reset': 'Pressione e segure para redefinir',
-      'needPermissionToChangeDownloadPath':
-          'Precisa de permissão para alterar o caminho de download',
-      'invalidPath':
-          'Caminho inválido. Evite usar o caminho do sistema, caminho raiz ou caminho do cartão SD.',
+      'needPermissionToChangeDownloadPath': 'Precisa de permissão para alterar o caminho de download',
+      'invalidPath': 'Caminho inválido. Evite usar o caminho do sistema, caminho raiz ou caminho do cartão SD.',
       'downloadTaskConcurrency': 'Download simultâneo',
       'needRestart': 'Precisa reiniciar',
       'speedLimit': 'Limite de velocidade',
@@ -762,37 +789,26 @@ class pt_BR {
       'per': 'por',
       'images': 'imagens',
       'downloadTimeout': 'Tempo limite de download',
-      'downloadAllGallerysOfSamePriority':
-          'Download All Gallerys of Same Priority',
-      'downloadAllGallerysOfSamePriorityHint':
-          'Download only 1 gallery simultaneously in 1 group with highest priority by default',
+      'downloadAllGalleriesOfSamePriority': 'Download All Galleries of Same Priority',
+      'downloadAllGalleriesOfSamePriorityHint': 'Download only 1 gallery simultaneously in 1 group with highest priority by default',
       'alwaysUseDefaultGroup': 'Sempre usar o grupo padrão',
-      'enableStoreMetadataForRestore':
-          'Ativar metadados da loja para restauração',
-      'enableStoreMetadataForRestoreHint':
-          'Se desabilitar isso, você não poderá restaurar as tarefas de download',
+      'enableStoreMetadataForRestore': 'Ativar metadados da loja para restauração',
+      'enableStoreMetadataForRestoreHint': 'Se desabilitar isso, você não poderá restaurar as tarefas de download',
       'archiveDownloadIsolateCount': 'Archive Download Thread Count',
-      'archiveDownloadIsolateCountHint':
-          'Sum of threads for all tasks needs to be less than 10, otherwise the download will fail',
+      'archiveDownloadIsolateCountHint': 'Sum of threads for all tasks needs to be less than 10, otherwise the download will fail',
       'manageArchiveDownloadConcurrency': 'Manage Archive Download Concurrency',
-      'manageArchiveDownloadConcurrencyHint':
-          'Archive will wait until there are enough threads to download',
-      'deleteArchiveFileAfterDownload':
-          'Delete Archive .zip File After Download',
+      'manageArchiveDownloadConcurrencyHint': 'Archive will wait until there are enough threads to download',
+      'deleteArchiveFileAfterDownload': 'Delete Archive .zip File After Download',
       'restoreDownloadTasks': 'Restaurar tarefas de download',
       'restoreDownloadTasksHint': 'Restaurar tarefas de download por metadados',
-      'restoreDownloadTasksSuccess':
-          'Tarefas de download restauradas com sucesso',
+      'restoreDownloadTasksSuccess': 'Tarefas de download restauradas com sucesso',
       'restoredCount': 'Contagem de tarefas restaurada',
       'restoredGalleryCount': 'Contagem de galerias restaurada',
       'restoredArchiveCount': 'Contagem de arquivos restaurada',
       'restoreTasksAutomatically': 'Restore Tasks Automatically',
-      'restoreTasksAutomaticallyHint':
-          'Restore tasks automatically when app launched',
-      'brokenDownloadPathHint':
-          'Parece que seu caminho de download está quebrado, a função de download pode ser ineficaz',
-      'brokenExtraScanPathHint':
-          'Seems your default local gallery path is broken, local gallery may be not recognized',
+      'restoreTasksAutomaticallyHint': 'Restore tasks automatically when app launched',
+      'brokenDownloadPathHint': 'Parece que seu caminho de download está quebrado, a função de download pode ser ineficaz',
+      'brokenExtraScanPathHint': 'Seems your default local gallery path is broken, local gallery may be not recognized',
       'useJH2UpdateGallery': 'Use JH server to accelerate gallery updates',
 
       /// archive bot settings
@@ -809,8 +825,10 @@ class pt_BR {
       'checkInFailed': 'Check-in failed',
       'checkInSuccess': 'Check-in success',
       'checkInSuccessHint': 'Got GP: %s, current total GP: %s.',
-      'pauseDownloadByInvalidArchiveBotKey':
-          'Archive bot settings is invalid, download paused',
+      'pauseDownloadByInvalidArchiveBotKey': 'Archive bot settings is invalid, download paused',
+      'archiveBotNotConfigured': 'O bot de arquivo não está configurado, ir para as configurações?',
+      'getBotCostFailed': 'Falha ao obter o custo do bot',
+      'archiveBotShort': 'Bot',
       'chooseArchiveParseSource': 'Change Parse Source',
       'official': 'Official',
       'archiveBot': 'Archive Bot',
@@ -839,12 +857,12 @@ class pt_BR {
       'upload2cloud': 'Upload to Cloud',
       'upload2cloudHint': 'Upload your current local configuration',
       'tap2upload': 'Tap to upload',
-      'copyIdentificationCodeSuccess':
-          'Upload successfully. Identification code has been copied',
+      'copyIdentificationCodeSuccess': 'Upload successfully. Identification code has been copied',
       'copyShareCode': 'Copy Share Code',
       'import': 'Import',
       'save2Local': 'Save to Local',
       'readIndexRecord': 'Read Progress',
+      'quickSearch': 'Quick Search Config',
       'blockRules': 'Block Rules',
       'searchHistory': 'Search History',
       'galleryHistory': 'Gallery History',
@@ -855,11 +873,9 @@ class pt_BR {
       'inputNumberHint': 'Please input a correct number',
       'inputRegexHint': 'Please input a correct regex',
       'useBuiltInBlockedUsers': 'Enable Built-in User Blocklist',
-      'useBuiltInBlockedUsersHint':
-          'Filter out gallery comments from users on the blocklist',
+      'useBuiltInBlockedUsersHint': 'Filter out gallery comments from users on the blocklist',
       'blockingRules': 'Block Rules',
-      'blockingRulesHint':
-          'Additional blocking rules for gallerys and comments',
+      'blockingRulesHint': 'Additional blocking rules for galleries and comments',
       'blockingTarget': 'Blocking Target',
       'blockingAttribute': 'Blocking Attribute',
       'blockingPattern': 'Blocking Pattern',
@@ -873,8 +889,7 @@ class pt_BR {
       'content': 'Content',
       'incompleteInformation': 'Incomplete information',
       'noBlockingRuleHint': 'Add at least 1 rule',
-      'notSameBlockingRuleTargetHint':
-          'All sub-rules should have the same blocking target',
+      'notSameBlockingRuleTargetHint': 'All sub-rules should have the same blocking target',
       'blockingRuleHelp': '''
 Blocking Target: Filter galleries on the list page or filter comments on the details page. All sub-rules under the same rule must have the same blocking target.
 Blocking Attribute: Specify the attribute of the target based on which the rule is written to block.
@@ -906,6 +921,19 @@ Example 2: Block comments with a score not exceeding 10————Comment Score
       /// tagSet dialog
       'chooseTagSet': 'Choose Tag Set',
 
+      /// tag dialog actions
+      'tagActionAccurate': 'Accurate',
+      'tagActionInaccurate': 'Inaccurate',
+      'tagActionFollow': 'Follow Tag',
+      'tagActionHide': 'Hide Tag',
+      'tagActionTagSets': 'Manage Tag Sets',
+      'tagActionVoteUpTooltip': 'Vote that this tag is correct for this gallery',
+      'tagActionVoteDownTooltip': 'Vote that this tag is wrong for this gallery',
+      'tagActionFollowHint': 'Add this tag to a watched tag set',
+      'tagActionHideHint': 'Add this tag to a hidden tag set',
+      'tagActionTagSetsHint': 'Open tag set management',
+      'currentTagSet': 'Current',
+
       /// tag namespace
       'language': 'Idioma',
       'artist': 'Artista',
@@ -919,6 +947,9 @@ Example 2: Block comments with a score not exceeding 10————Comment Score
       'cosplayer': 'Cosplayer',
       'reclass': 'Reclassificar',
       'temp': 'Temporário',
+      'permissionPermanentlyDenied': 'Permissão permanentemente negada',
+      'permissionPermanentlyDeniedHint': 'Salvar no álbum requer permissão. Vá às configurações do sistema e conceda acesso total ao aplicativo',
+      'goToSetting': 'Ir para configurações',
       'other': 'Outro',
     };
   }

@@ -22,8 +22,7 @@ class EHGalleryStatDialog extends StatefulWidget {
   final int gid;
   final String token;
 
-  const EHGalleryStatDialog({Key? key, required this.gid, required this.token})
-    : super(key: key);
+  const EHGalleryStatDialog({Key? key, required this.gid, required this.token}) : super(key: key);
 
   @override
   State<EHGalleryStatDialog> createState() => _EHGalleryStatDialogState();
@@ -51,26 +50,10 @@ class _EHGalleryStatDialogState extends State<EHGalleryStatDialog> {
           successWidgetBuilder: () => Column(
             children: [
               _buildSegmentedControl().marginOnly(bottom: 24),
-              if (graphType == GraphType.allTime)
-                FadeIn(
-                  key: const Key('1'),
-                  child: _AllTimeTable(galleryStats: galleryStats),
-                ),
-              if (graphType == GraphType.year)
-                FadeIn(
-                  key: const Key('2'),
-                  child: _LineGraph(datasource: galleryStats.yearlyStats),
-                ),
-              if (graphType == GraphType.month)
-                FadeIn(
-                  key: const Key('3'),
-                  child: _LineGraph(datasource: galleryStats.monthlyStats),
-                ),
-              if (graphType == GraphType.day)
-                FadeIn(
-                  key: const Key('4'),
-                  child: _LineGraph(datasource: galleryStats.dailyStats),
-                ),
+              if (graphType == GraphType.allTime) FadeIn(key: const Key('1'), child: _AllTimeTable(galleryStats: galleryStats)),
+              if (graphType == GraphType.year) FadeIn(key: const Key('2'), child: _LineGraph(datasource: galleryStats.yearlyStats)),
+              if (graphType == GraphType.month) FadeIn(key: const Key('3'), child: _LineGraph(datasource: galleryStats.monthlyStats)),
+              if (graphType == GraphType.day) FadeIn(key: const Key('4'), child: _LineGraph(datasource: galleryStats.dailyStats)),
             ],
           ),
           errorTapCallback: _getGalleryStats,
@@ -145,123 +128,47 @@ class _AllTimeTable extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(
-          '${'totalVisits'.tr}: ${galleryStats.totalVisits}',
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
+        Text('${'totalVisits'.tr}: ${galleryStats.totalVisits}', style: const TextStyle(fontWeight: FontWeight.bold)),
         DataTable(
           columnSpacing: UIConfig.statisticsDialogColumnSpacing,
           columns: <DataColumn>[
             DataColumn(
-              label: SizedBox(
-                width: UIConfig.statisticsDialogColumnWidth,
-                child: Center(child: Text('period'.tr)),
-              ),
+              label: SizedBox(width: UIConfig.statisticsDialogColumnWidth, child: Center(child: Text('period'.tr))),
             ),
             DataColumn(
-              label: SizedBox(
-                width: UIConfig.statisticsDialogColumnWidth,
-                child: Center(child: Text('ranking'.tr)),
-              ),
+              label: SizedBox(width: UIConfig.statisticsDialogColumnWidth, child: Center(child: Text('ranking'.tr))),
             ),
             DataColumn(
-              label: SizedBox(
-                width: UIConfig.statisticsDialogColumnWidth,
-                child: Center(child: Text('score'.tr)),
-              ),
+              label: SizedBox(width: UIConfig.statisticsDialogColumnWidth, child: Center(child: Text('score'.tr))),
             ),
           ],
           rows: <DataRow>[
             DataRow(
               cells: <DataCell>[
                 DataCell(Center(child: Text('allTime'.tr))),
-                DataCell(
-                  Center(
-                    child: Text(
-                      galleryStats.allTimeRanking == null
-                          ? '-'
-                          : '#${galleryStats.allTimeRanking}',
-                    ),
-                  ),
-                ),
-                DataCell(
-                  Center(
-                    child: Text(
-                      galleryStats.allTimeScore == null
-                          ? '-'
-                          : galleryStats.allTimeScore.toString(),
-                    ),
-                  ),
-                ),
+                DataCell(Center(child: Text(galleryStats.allTimeRanking == null ? '-' : '#${galleryStats.allTimeRanking}'))),
+                DataCell(Center(child: Text(galleryStats.allTimeScore == null ? '-' : galleryStats.allTimeScore.toString()))),
               ],
             ),
             DataRow(
               cells: <DataCell>[
                 DataCell(Center(child: Text('year'.tr))),
-                DataCell(
-                  Center(
-                    child: Text(
-                      galleryStats.yearRanking == null
-                          ? '-'
-                          : '#${galleryStats.yearRanking}',
-                    ),
-                  ),
-                ),
-                DataCell(
-                  Center(
-                    child: Text(
-                      galleryStats.yearScore == null
-                          ? '-'
-                          : galleryStats.yearScore.toString(),
-                    ),
-                  ),
-                ),
+                DataCell(Center(child: Text(galleryStats.yearRanking == null ? '-' : '#${galleryStats.yearRanking}'))),
+                DataCell(Center(child: Text(galleryStats.yearScore == null ? '-' : galleryStats.yearScore.toString()))),
               ],
             ),
             DataRow(
               cells: <DataCell>[
                 DataCell(Center(child: Text('month'.tr))),
-                DataCell(
-                  Center(
-                    child: Text(
-                      galleryStats.monthRanking == null
-                          ? '-'
-                          : '#${galleryStats.monthRanking}',
-                    ),
-                  ),
-                ),
-                DataCell(
-                  Center(
-                    child: Text(
-                      galleryStats.monthScore == null
-                          ? '-'
-                          : galleryStats.monthScore.toString(),
-                    ),
-                  ),
-                ),
+                DataCell(Center(child: Text(galleryStats.monthRanking == null ? '-' : '#${galleryStats.monthRanking}'))),
+                DataCell(Center(child: Text(galleryStats.monthScore == null ? '-' : galleryStats.monthScore.toString()))),
               ],
             ),
             DataRow(
               cells: <DataCell>[
                 DataCell(Center(child: Text('day'.tr))),
-                DataCell(
-                  Center(
-                    child: Text(
-                      galleryStats.dayRanking == null
-                          ? '-'
-                          : '#${galleryStats.dayRanking}',
-                    ),
-                  ),
-                ),
-                DataCell(
-                  Center(
-                    child: Text(
-                      galleryStats.dayScore == null
-                          ? '-'
-                          : galleryStats.dayScore.toString(),
-                    ),
-                  ),
-                ),
+                DataCell(Center(child: Text(galleryStats.dayRanking == null ? '-' : '#${galleryStats.dayRanking}'))),
+                DataCell(Center(child: Text(galleryStats.dayScore == null ? '-' : galleryStats.dayScore.toString()))),
               ],
             ),
           ],
@@ -286,26 +193,20 @@ class _LineGraph extends StatelessWidget {
           trackballBehavior: TrackballBehavior(
             enable: true,
             activationMode: ActivationMode.singleTap,
-            tooltipSettings: const InteractiveTooltip(
-              format: 'point.x: point.y',
-            ),
+            tooltipSettings: const InteractiveTooltip(format: 'point.x: point.y'),
             hideDelay: 1500,
           ),
-          primaryXAxis: const CategoryAxis(
+          primaryXAxis: CategoryAxis(
             tickPosition: TickPosition.inside,
-            majorGridLines: MajorGridLines(width: 0),
-            majorTickLines: MajorTickLines(width: 1, size: 3),
+            majorGridLines: const MajorGridLines(width: 0),
+            majorTickLines: const MajorTickLines(width: 1, size: 3),
             edgeLabelPlacement: EdgeLabelPlacement.shift,
-            labelStyle: TextStyle(fontSize: 10),
+            labelStyle: const TextStyle(fontSize: 10),
           ),
           primaryYAxis: NumericAxis(
             title: AxisTitle(
               text: 'visits'.tr,
-              textStyle: const TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: Color.fromRGBO(75, 135, 185, 1),
-              ),
+              textStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color.fromRGBO(75, 135, 185, 1)),
             ),
             tickPosition: TickPosition.inside,
             labelStyle: const TextStyle(fontSize: 10),
@@ -317,20 +218,13 @@ class _LineGraph extends StatelessWidget {
               opposedPosition: true,
               title: AxisTitle(
                 text: 'imageAccesses'.tr,
-                textStyle: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromRGBO(192, 108, 132, 1),
-                ),
+                textStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color.fromRGBO(192, 108, 132, 1)),
               ),
               labelStyle: const TextStyle(fontSize: 10),
               majorTickLines: const MajorTickLines(width: 1, size: 3),
             ),
           ],
-          legend: const Legend(
-            isVisible: true,
-            position: LegendPosition.bottom,
-          ),
+          legend: Legend(isVisible: true, position: LegendPosition.bottom),
           series: <CartesianSeries<VisitStat, String>>[
             LineSeries<VisitStat, String>(
               name: 'visits'.tr,

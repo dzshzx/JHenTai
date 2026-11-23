@@ -47,7 +47,7 @@ class _ArchiveBotSettingsPageState extends State<ArchiveBotSettingsPage> {
         children: [
           _buildApiKeySetting(),
           if (archiveBotSetting.isReady) _buildBalance(),
-          if (archiveBotSetting.isReady) _buildCheckin(),
+          if (archiveBotSetting.isReady && archiveBotSetting.botType.value.supportsCheckIn) _buildCheckin(),
         ],
       ).withListTileTheme(context),
     );
@@ -56,11 +56,7 @@ class _ArchiveBotSettingsPageState extends State<ArchiveBotSettingsPage> {
   Widget _buildApiKeySetting() {
     return ListTile(
       title: Text('apiSetting'.tr),
-      subtitle: Text(
-        archiveBotSetting.apiKey.value == null
-            ? 'apiKeyHint'.tr
-            : archiveBotSetting.apiKey.value.toString(),
-      ),
+      subtitle: Text(archiveBotSetting.apiKey.value == null ? 'apiKeyHint'.tr : archiveBotSetting.apiKey.value.toString()),
       trailing: const Icon(Icons.keyboard_arrow_right),
       onTap: _showApiKeyDialog,
     );
@@ -75,8 +71,7 @@ class _ArchiveBotSettingsPageState extends State<ArchiveBotSettingsPage> {
           LoadingStateIndicator(
             loadingState: _balanceState,
             useCupertinoIndicator: true,
-            successWidgetBuilder: () =>
-                Text(_balance.value == null ? '' : '${_balance.value} GP'),
+            successWidgetBuilder: () => Text(_balance.value == null ? '' : '${_balance.value} GP'),
             errorWidgetBuilder: () => const Icon(Icons.error_outline),
           ),
         ],
@@ -116,7 +111,9 @@ class _ArchiveBotSettingsPageState extends State<ArchiveBotSettingsPage> {
     );
 
     if (result == true) {
-      setStateSafely(_checkBalance);
+      setStateSafely(() {
+        _checkBalance();
+      });
     }
   }
 
@@ -141,9 +138,7 @@ class _ArchiveBotSettingsPageState extends State<ArchiveBotSettingsPage> {
       if (response.isSuccess) {
         setStateSafely(() {
           _balanceState = LoadingState.success;
-          _balance.value = archiveBotSetting.botType.value
-              .parseBalance(response.data)
-              .gp;
+          _balance.value = archiveBotSetting.botType.value.parseBalance(response.data).gp;
         });
       } else {
         snack('checkBalanceFailed'.tr, response.errorMessage);
@@ -167,6 +162,9 @@ class _ArchiveBotSettingsPageState extends State<ArchiveBotSettingsPage> {
     if (!archiveBotSetting.isReady) {
       return;
     }
+    if (!archiveBotSetting.botType.value.supportsCheckIn) {
+      return;
+    }
 
     setStateSafely(() => _checkinState = LoadingState.loading);
 
@@ -178,20 +176,12 @@ class _ArchiveBotSettingsPageState extends State<ArchiveBotSettingsPage> {
       );
       log.info('Checkin response: $response');
       if (response.isSuccess) {
-        final checkInVO = archiveBotSetting.botType.value.parseCheckIn(
-          response.data,
-        );
+        final checkInVO = archiveBotSetting.botType.value.parseCheckIn(response.data);
         setStateSafely(() {
           _checkinState = LoadingState.success;
           _balance.value = checkInVO.currentGP;
         });
-        snack(
-          'checkInSuccess'.tr,
-          'checkInSuccessHint'.trArgs([
-            checkInVO.getGP.toString(),
-            checkInVO.currentGP.toString(),
-          ]),
-        );
+        snack('checkInSuccess'.tr, 'checkInSuccessHint'.trArgs([checkInVO.getGP.toString(), checkInVO.currentGP.toString()]));
       } else {
         snack('checkInFailed'.tr, response.errorMessage);
         setStateSafely(() => _checkinState = LoadingState.error);

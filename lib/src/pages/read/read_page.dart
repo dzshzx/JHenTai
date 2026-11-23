@@ -1,50 +1,108 @@
-import 'dart:math';
+﻿import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:jhentai/src/extension/widget_extension.dart';
-import 'package:jhentai/src/mixin/window_widget_mixin.dart';
 import 'package:jhentai/src/mixin/scroll_status_listener.dart';
 import 'package:jhentai/src/mixin/scroll_status_listener_state.dart';
+import 'package:jhentai/src/mixin/window_widget_mixin.dart';
 import 'package:jhentai/src/model/read_page_info.dart';
+import 'package:jhentai/src/model/tap_zone_config.dart';
 import 'package:jhentai/src/pages/read/layout/horizontal_list/horizontal_list_layout.dart';
 import 'package:jhentai/src/pages/read/layout/horizontal_page/horizontal_page_layout.dart';
 import 'package:jhentai/src/pages/read/read_page_logic.dart';
 import 'package:jhentai/src/pages/read/read_page_state.dart';
 import 'package:jhentai/src/service/super_resolution_service.dart';
 import 'package:jhentai/src/widget/eh_mouse_button_listener.dart';
+import 'package:jhentai/src/widget/tap_zone_guide_overlay.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../config/ui_config.dart';
-import '../../routes/routes.dart';
-import '../../service/gallery_download_service.dart';
+import '../../service/gallery_download/gallery_download_service.dart';
+import '../../setting/keyboard_shortcut_setting.dart';
 import '../../setting/read_setting.dart';
 import '../../utils/route_util.dart';
 import '../../utils/screen_size_util.dart';
-import '../../utils/toast_util.dart';
 import '../../widget/eh_image.dart';
 import '../../widget/eh_keyboard_listener.dart';
 import '../../widget/eh_read_page_stack.dart';
 import '../../widget/eh_thumbnail.dart';
 import '../../widget/eh_wheel_speed_controller_for_read_page.dart';
 import '../../widget/loading_state_indicator.dart';
-import '../home_page.dart';
 import 'layout/horizontal_double_column/horizontal_double_column_layout.dart';
 import 'layout/vertical_list/vertical_list_layout.dart';
 
+/// Hosts the read page of one gallery, and replaces it with the one of another gallery when user switches to the previous or next
+/// gallery, so that the route is kept and there is no page transition.
 class ReadPage extends StatefulWidget {
   const ReadPage({super.key});
 
   @override
-  State<ReadPage> createState() => _ReadPageState();
+  State<ReadPage> createState() => _ReadPageHostState();
 }
 
-class _ReadPageState extends State<ReadPage> with ScrollStatusListener, WindowListener, WindowWidgetMixin {
-  final ReadPageLogic logic = Get.put<ReadPageLogic>(ReadPageLogic());
-  final ReadPageState state = Get.find<ReadPageLogic>().state;
+class _ReadPageHostState extends State<ReadPage> {
+  /// Null while switching gallery
+  ReadPageInfo? readPageInfo = Get.arguments;
+
+  /// [ReadPageLogic] and layout logics are singletons, so dispose those of the old gallery in one frame, and create new ones in the
+  /// next frame.
+  void switchGallery(ReadPageInfo newReadPageInfo) {
+    setState(() => readPageInfo = null);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() => readPageInfo = newReadPageInfo);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (readPageInfo == null) {
+      return const ColoredBox(color: Colors.black, child: SizedBox.expand());
+    }
+
+    return _ReadPageBody(key: ObjectKey(readPageInfo), readPageInfo: readPageInfo!, onSwitchGallery: switchGallery);
+  }
+}
+
+class _ReadPageBody extends StatefulWidget {
+  final ReadPageInfo readPageInfo;
+  final ValueChanged<ReadPageInfo> onSwitchGallery;
+
+  const _ReadPageBody({super.key, required this.readPageInfo, required this.onSwitchGallery});
+
+  @override
+  State<_ReadPageBody> createState() => _ReadPageBodyState();
+}
+
+class _ReadPageBodyState extends State<_ReadPageBody> with ScrollStatusListener, WindowListener, WindowWidgetMixin {
+  late final ReadPageLogic logic;
+  late final ReadPageState state;
+
+  @override
+  void initState() {
+    logic = Get.put<ReadPageLogic>(ReadPageLogic(readPageInfo: widget.readPageInfo));
+    logic.switchGalleryHandler = widget.onSwitchGallery;
+    state = logic.state;
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    /// Normally [ReadPageLogic] is deleted by GetX when the route is disposed. But the route is kept when switching gallery, delete
+    /// it now to make room for the one of the new gallery.
+    if (logic.isSwitchingGallery) {
+      Get.delete<ReadPageLogic>(force: true);
+    }
+
+    super.dispose();
+  }
 
   @override
   ScrollStatusListerState get scrollStatusListerState => state;
@@ -64,48 +122,67 @@ class _ReadPageState extends State<ReadPage> with ScrollStatusListener, WindowLi
       value: const SystemUiOverlayStyle(
         systemNavigationBarColor: Colors.transparent,
         systemNavigationBarDividerColor: Colors.transparent,
+        systemNavigationBarContrastEnforced: false,
         statusBarColor: Colors.transparent,
         systemNavigationBarIconBrightness: Brightness.light,
         statusBarIconBrightness: Brightness.light,
         statusBarBrightness: Brightness.dark,
       ),
-      child: EHMouseButtonListener(
-        onFifthButtonTapDown: (_) => backRoute(),
-        child: EHKeyboardListener(
-          focusNode: state.focusNode,
-          handleEsc: backRoute,
-          handleSpace: logic.toggleMenu,
-          handlePageDown: logic.toNext,
-          handlePageUp: logic.toPrev,
-          handleArrowDown: logic.toNext,
-          handleArrowUp: logic.toPrev,
-          handleArrowRight: logic.toRight,
-          handleArrowLeft: logic.toLeft,
-          handleA: logic.toLeft,
-          handleD: logic.toRight,
-          handleM: logic.handleM,
-          handleEnd: backRoute,
-          handleF11: toggleFullScreen,
-          child: DefaultTextStyle(
-            style: DefaultTextStyle.of(context).style.copyWith(
-                  color: UIConfig.readPageForeGroundColor,
-                  fontSize: 12,
-                  decoration: TextDecoration.none,
-                ),
-            child: Container(
-              color: Colors.black,
-              child: Stack(
-                children: [
-                  EHReadPageStack(
-                    children: [
-                      buildGestureRegion(),
-                      buildLayout(),
-                    ],
+      child: Obx(
+        () => EHMouseButtonListener(
+          mouseHandlers: keyboardShortcutSetting.buildMouseHandlerMap(
+            onToNext: logic.toNext,
+            onToPrev: logic.toPrev,
+            onToLeft: logic.toLeft,
+            onToRight: logic.toRight,
+            onBack: backRoute,
+            onToggleMenu: logic.toggleMenu,
+            onToggleFirstPageAlone: logic.handleM,
+            onToggleFullScreen: toggleFullScreen,
+          ),
+          child: EHKeyboardListener(
+            focusNode: state.focusNode,
+            keyHandlers: {
+              LogicalKeyboardKey.escape: backRoute,
+              ...keyboardShortcutSetting.buildHandlerMap(
+                onToNext: logic.toNext,
+                onToPrev: logic.toPrev,
+                onToLeft: logic.toLeft,
+                onToRight: logic.toRight,
+                onBack: backRoute,
+                onToggleMenu: logic.toggleMenu,
+                onToggleFirstPageAlone: logic.handleM,
+                onToggleFullScreen: toggleFullScreen,
+              ),
+            },
+            child: DefaultTextStyle(
+              style: DefaultTextStyle.of(context).style.copyWith(
+                    color: UIConfig.readPageForeGroundColor,
+                    fontSize: 12,
+                    decoration: TextDecoration.none,
                   ),
-                  buildRightBottomInfo(context),
-                  buildTopMenu(context),
-                  buildBottomMenu(context),
-                ],
+              child: Container(
+                color: Colors.black,
+                child: Stack(
+                  children: [
+                    EHReadPageStack(
+                      children: [
+                        buildGestureRegion(),
+                        buildLayout(),
+                        GetBuilder<ReadPageLogic>(
+                          id: logic.guideOverlayId,
+                          builder: (_) => state.showTapZoneGuide
+                              ? TapZoneGuideOverlay(onDismiss: logic.dismissTapZoneGuide)
+                              : const SizedBox.shrink(),
+                        ),
+                      ],
+                    ),
+                    buildRightBottomInfo(context),
+                    buildSwitchGalleryHint(context),
+                    buildTopMenu(context),
+                    buildBottomMenu(context),
+                  ],
+                ),
               ),
             ),
           ),
@@ -140,18 +217,18 @@ class _ReadPageState extends State<ReadPage> with ScrollStatusListener, WindowLi
     Widget child = GetBuilder<ReadPageLogic>(
       id: logic.layoutId,
       builder: (_) {
-        return  LayoutBuilder(
+        return LayoutBuilder(
           builder: (context, constraints) {
             logic.clearImageContainerSized();
             state.displayRegionSize = Size(constraints.maxWidth, constraints.maxHeight);
 
-            if (readSetting.readDirection.value == ReadDirection.top2bottomList) {
+            if (logic.effectiveReadDirection == ReadDirection.top2bottomList) {
               return VerticalListLayout();
             }
-            if (readSetting.isInListReadDirection) {
+            if (logic.isInListReadDirection) {
               return HorizontalListLayout();
             }
-            if (readSetting.isInDoubleColumnReadDirection) {
+            if (logic.isInDoubleColumnReadDirection) {
               return HorizontalDoubleColumnLayout();
             }
             return HorizontalPageLayout();
@@ -160,7 +237,83 @@ class _ReadPageState extends State<ReadPage> with ScrollStatusListener, WindowLi
       },
     );
 
-    return wrapScrollListener(child);
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        logic.handleScrollNotification(notification);
+        return false;
+      },
+      child: wrapScrollListener(child),
+    );
+  }
+
+  /// Tell user which gallery will be opened when turning page beyond the first or last page
+  Widget buildSwitchGalleryHint(BuildContext context) {
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: max(MediaQuery.of(context).viewPadding.bottom, UIConfig.readPageBottomSpacingHeight) + 56,
+      child: IgnorePointer(
+        child: GetBuilder<ReadPageLogic>(
+          id: logic.switchGalleryHintId,
+          builder: (_) {
+            SwitchGalleryHint? hint = state.switchGalleryHint;
+
+            return AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: hint == null ? const SizedBox.shrink() : _buildSwitchGalleryHintCard(hint),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSwitchGalleryHintCard(SwitchGalleryHint hint) {
+    String boundaryText = hint.next ? 'alreadyLastPage'.tr : 'alreadyFirstPage'.tr;
+    String actionText = hint.gallery == null
+        ? (hint.next ? 'noNextGallery'.tr : 'noPrevGallery'.tr)
+        : (hint.next ? 'turnPageAgainToReadNextGallery'.tr : 'turnPageAgainToReadPrevGallery'.tr);
+
+    return Center(
+      key: ValueKey('${hint.next}::${hint.gallery?.title}'),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 420),
+        margin: const EdgeInsets.symmetric(horizontal: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.85),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white24),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              hint.gallery == null ? Icons.block : (hint.next ? Icons.skip_next : Icons.skip_previous),
+              color: UIConfig.readPageForeGroundColor,
+              size: 28,
+            ),
+            const SizedBox(width: 12),
+            Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('$boundaryText · $actionText', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  if (hint.gallery != null)
+                    Text(
+                      hint.gallery!.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 12, height: 1.4),
+                    ).marginOnly(top: 4),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   /// right-bottom info
@@ -187,7 +340,15 @@ class _ReadPageState extends State<ReadPage> with ScrollStatusListener, WindowLi
                 borderRadius: const BorderRadius.only(topLeft: Radius.circular(8)),
               ),
               alignment: Alignment.center,
-              padding: const EdgeInsets.only(right: 32, bottom: 1, top: 3, left: 6),
+
+              /// keep the text out of the right system inset, e.g. the vertical status bar of iPhone Duo's inner screen,
+              /// except in immersive mode, where the status bar is hidden
+              padding: EdgeInsets.only(
+                right: readSetting.enableImmersiveMode.isTrue ? 32 : max(32, MediaQuery.paddingOf(context).right + 8),
+                bottom: 1,
+                top: 3,
+                left: 6,
+              ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -232,25 +393,42 @@ class _ReadPageState extends State<ReadPage> with ScrollStatusListener, WindowLi
 
   /// gesture for turn page and pop menu
   Widget buildGestureRegion() {
-    return Row(
-      children: [
-        /// left region
-        Expanded(
-          flex: (100 - readSetting.gestureRegionWidthRatio.value) ~/ 2,
-          child: GestureDetector(onTap: logic.tapLeftRegion, behavior: HitTestBehavior.opaque),
-        ),
+    return GetBuilder<ReadPageLogic>(
+      id: logic.tapZoneId,
+      builder: (_) {
+        TapZoneConfig config = readSetting.tapZoneConfig;
+        List<int> columnFlex = [
+          config.leftColumnWidthRatio,
+          config.middleColumnWidthRatio,
+          config.rightColumnWidthRatio,
+        ];
+        List<int> rowFlex = [
+          config.topRowHeightRatio,
+          config.middleRowHeightRatio,
+          config.bottomRowHeightRatio,
+        ];
+        Widget buildCell(int index) => Expanded(
+              flex: columnFlex[index % 3],
+              child: GestureDetector(
+                onTap: () => logic.handleTapZone(index),
+                behavior: HitTestBehavior.opaque,
+              ),
+            );
 
-        /// center region
-        Expanded(
-          flex: readSetting.gestureRegionWidthRatio.value,
-          child: GestureDetector(onTap: logic.tapCenterRegion, behavior: HitTestBehavior.opaque),
-        ),
-
-        /// right region: toRight
-        Expanded(
-            flex: (100 - readSetting.gestureRegionWidthRatio.value) ~/ 2,
-            child: GestureDetector(onTap: logic.tapRightRegion, behavior: HitTestBehavior.opaque)),
-      ],
+        return Column(
+          children: [
+            for (int row = 0; row < 3; row++)
+              Expanded(
+                flex: rowFlex[row],
+                child: Row(
+                  children: [
+                    for (int col = 0; col < 3; col++) buildCell(row * 3 + col),
+                  ],
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 
@@ -258,119 +436,97 @@ class _ReadPageState extends State<ReadPage> with ScrollStatusListener, WindowLi
   Widget buildTopMenu(BuildContext context) {
     return GetBuilder<ReadPageLogic>(
       id: logic.topMenuId,
-      builder: (_) => AnimatedPositioned(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.ease,
-        height: state.isMenuOpen ? UIConfig.appBarHeight + context.mediaQuery.padding.top : 0,
-        width: fullScreenWidth,
-        child: AppBar(
-          backgroundColor: UIConfig.readPageMenuColor,
-          title: Text(state.readPageInfo.galleryTitle, style: const TextStyle(color: UIConfig.readPageButtonColor)),
-          leading: const BackButton(color: UIConfig.readPageButtonColor),
-          actions: [
-            if (GetPlatform.isDesktop)
-              ElevatedButton(
-                child: const Icon(Icons.help, color: UIConfig.readPageButtonColor),
-                onPressed: () => toast(
-                  'PageDown、→、↓ 、D :  ${'toNext'.tr}'
-                  '\n'
-                  'PageUp、←、↑、A  :  ${'toPrev'.tr}'
-                  '\n'
-                  'Esc、End  :  ${'back'.tr}'
-                  '\n'
-                  'Space  :  ${'toggleMenu'.tr}'
-                  '\n'
-                  'M  :  ${'displayFirstPageAlone'.tr}'
-                  '\n'
-                  'F11  :  ${'toggleFullScreen'.tr}',
-                  isShort: false,
-                ),
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  padding: const EdgeInsets.all(0),
-                  surfaceTintColor: Colors.transparent,
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  minimumSize: const Size(56, 56),
-                ),
-              ),
-            if (GetPlatform.isDesktop &&
-                state.readPageInfo.gid != null &&
-                (state.readPageInfo.mode == ReadMode.downloaded || state.readPageInfo.mode == ReadMode.archive) &&
-                state.readPageInfo.useSuperResolution)
-              TextButton(
-                child: GetBuilder<SuperResolutionService>(
-                  id: '${SuperResolutionService.superResolutionId}::${state.readPageInfo.gid}',
-                  builder: (_) => Text(
-                    'AI' + logic.getSuperResolutionProgress(),
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: state.useSuperResolution ? UIConfig.readPageActiveButtonColor(context) : UIConfig.readPageButtonColor,
+      builder: (_) {
+        // Slide the whole app bar (leading/title/actions together) in from the
+        // top instead of animating its height. Growing the height only animates
+        // the middle/trailing slots; the leading is laid out at full toolbar
+        // height and pops in place.
+        final double menuHeight = UIConfig.appBarHeight + context.mediaQuery.padding.top;
+        return AnimatedPositioned(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.ease,
+          top: state.isMenuOpen ? 0 : -menuHeight,
+          height: menuHeight,
+          width: fullScreenWidth,
+          child: AppBar(
+            backgroundColor: UIConfig.readPageMenuColor,
+            title: Text(state.readPageInfo.galleryTitle, style: const TextStyle(color: UIConfig.readPageButtonColor)),
+            leading: const BackButton(color: UIConfig.readPageButtonColor),
+            actions: [
+              if (GetPlatform.isDesktop &&
+                  state.readPageInfo.gid != null &&
+                  (state.readPageInfo.mode == ReadMode.downloaded || state.readPageInfo.mode == ReadMode.archive) &&
+                  state.readPageInfo.useSuperResolution)
+                TextButton(
+                  child: GetBuilder<SuperResolutionService>(
+                    id: '${SuperResolutionService.superResolutionId}::${state.readPageInfo.gid}',
+                    builder: (_) => Text(
+                      'AI' + logic.getSuperResolutionProgress(),
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: state.useSuperResolution ? UIConfig.readPageActiveButtonColor(context) : UIConfig.readPageButtonColor,
+                      ),
                     ),
                   ),
+                  onPressed: logic.handleTapSuperResolutionButton,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(56, 56),
+                  ),
                 ),
-                onPressed: logic.handleTapSuperResolutionButton,
-                style: TextButton.styleFrom(
-                  minimumSize: const Size(56, 56),
-                ),
-              ),
-            Obx(() {
-              if (!readSetting.isInDoubleColumnReadDirection) {
-                return const SizedBox();
-              }
-              return ElevatedButton(
-                child: Icon(
-                  Icons.looks_one,
-                  color: state.displayFirstPageAlone ? UIConfig.readPageActiveButtonColor(context) : UIConfig.readPageButtonColor,
-                ),
-                onPressed: logic.toggleDisplayFirstPageAlone,
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  padding: const EdgeInsets.all(0),
-                  surfaceTintColor: Colors.transparent,
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  minimumSize: const Size(56, 56),
-                ),
-              );
-            }),
-            GetBuilder<ReadPageLogic>(
-              id: logic.autoModeId,
-              builder: (_) => ElevatedButton(
-                child: Icon(Icons.schedule, color: state.autoMode ? UIConfig.readPageActiveButtonColor(context) : UIConfig.readPageButtonColor),
-                onPressed: logic.toggleAutoMode,
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  padding: const EdgeInsets.all(0),
-                  surfaceTintColor: Colors.transparent,
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  minimumSize: const Size(56, 56),
-                ),
-              ),
-            ),
-            if (readSetting.enableBottomMenu.isFalse)
-              ElevatedButton(
-                child: const Icon(Icons.settings, color: UIConfig.readPageButtonColor),
-                onPressed: () {
-                  logic.restoreImmersiveMode();
-                  toRoute(Routes.settingRead, id: fullScreen)?.then((_) {
-                    logic.applyCurrentImmersiveMode();
-                    state.focusNode.requestFocus();
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  padding: const EdgeInsets.all(0),
-                  surfaceTintColor: Colors.transparent,
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  minimumSize: const Size(56, 56),
+              Obx(() {
+                if (!logic.isInDoubleColumnReadDirection) {
+                  return const SizedBox();
+                }
+                return ElevatedButton(
+                  child: Icon(
+                    Icons.looks_one,
+                    // ElevatedButton M3 default iconSize (18) shrinks a bare child Icon; pin size explicitly
+                    size: 24,
+                    color: state.displayFirstPageAlone ? UIConfig.readPageActiveButtonColor(context) : UIConfig.readPageButtonColor,
+                  ),
+                  onPressed: logic.toggleDisplayFirstPageAlone,
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    padding: const EdgeInsets.all(0),
+                    surfaceTintColor: Colors.transparent,
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    minimumSize: const Size(56, 56),
+                  ),
+                );
+              }),
+              GetBuilder<ReadPageLogic>(
+                id: logic.autoModeId,
+                builder: (_) => ElevatedButton(
+                  child: Icon(Icons.schedule, size: 24, color: state.autoMode ? UIConfig.readPageActiveButtonColor(context) : UIConfig.readPageButtonColor),
+                  onPressed: logic.toggleAutoMode,
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    padding: const EdgeInsets.all(0),
+                    surfaceTintColor: Colors.transparent,
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    minimumSize: const Size(56, 56),
+                  ),
                 ),
               ),
-          ],
-        ),
-      ),
+              if (readSetting.enableBottomMenu.isFalse)
+                ElevatedButton(
+                  child: const Icon(Icons.settings, size: 24, color: UIConfig.readPageButtonColor),
+                  onPressed: () => logic.openReadSetting(context),
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    padding: const EdgeInsets.all(0),
+                    surfaceTintColor: Colors.transparent,
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    minimumSize: const Size(56, 56),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -388,16 +544,27 @@ class _ReadPageState extends State<ReadPage> with ScrollStatusListener, WindowLi
                   UIConfig.readPageBottomSliderHeight -
                   (readSetting.enableBottomMenu.isTrue ? UIConfig.readPageBottomActionHeight : 0) -
                   max(MediaQuery.of(context).viewPadding.bottom, UIConfig.readPageBottomSpacingHeight),
+          left: 0,
+          right: 0,
           child: ColoredBox(
             color: UIConfig.readPageMenuColor,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (readSetting.showThumbnails.isTrue) _buildThumbnails(context),
-                _buildSlider(),
-                if (readSetting.enableBottomMenu.isTrue) _buildBottomAction(),
-                SizedBox(height: max(MediaQuery.of(context).viewPadding.bottom, UIConfig.readPageBottomSpacingHeight)),
-              ],
+
+            /// menu background stays edge-to-edge, while its content avoids the left and right system insets,
+            /// except in immersive mode, where the status bar is hidden and the menu takes the full width
+            child: SafeArea(
+              top: false,
+              bottom: false,
+              left: readSetting.enableImmersiveMode.isFalse,
+              right: readSetting.enableImmersiveMode.isFalse,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (readSetting.showThumbnails.isTrue) Offstage(offstage: !state.isMenuOpen, child: _buildThumbnails(context)),
+                  _buildSlider(),
+                  if (readSetting.enableBottomMenu.isTrue) _buildBottomAction(),
+                  SizedBox(height: max(MediaQuery.of(context).viewPadding.bottom, UIConfig.readPageBottomSpacingHeight)),
+                ],
+              ),
             ),
           ),
         ),
@@ -407,14 +574,15 @@ class _ReadPageState extends State<ReadPage> with ScrollStatusListener, WindowLi
 
   Widget _buildThumbnails(BuildContext context) {
     return SizedBox(
-      width: fullScreenWidth,
+      width: double.infinity,
       height: UIConfig.readPageBottomThumbnailsRegionHeight,
       child: Obx(
         () => EHWheelSpeedControllerForReadPage(
           scrollOffsetController: state.thumbnailsScrollOffsetController,
+          stopScrollWhenCtrlPressed: false,
           child: ScrollablePositionedList.separated(
             scrollDirection: Axis.horizontal,
-            reverse: readSetting.isInRight2LeftDirection,
+            reverse: logic.isInRight2LeftDirection,
             physics: const ClampingScrollPhysics(),
             minCacheExtent: 1 * fullScreenWidth,
             initialScrollIndex: state.readPageInfo.initialIndex,
@@ -509,6 +677,7 @@ class _ReadPageState extends State<ReadPage> with ScrollStatusListener, WindowLi
             containerWidth: constraints.maxWidth,
             borderRadius: BorderRadius.circular(8),
             maxBytes: 1024 * 50,
+            disableAnimation: true,
           ),
         );
       },
@@ -520,11 +689,11 @@ class _ReadPageState extends State<ReadPage> with ScrollStatusListener, WindowLi
       id: logic.sliderId,
       builder: (_) => SizedBox(
         height: UIConfig.readPageBottomSliderHeight,
-        width: fullScreenWidth,
+        width: double.infinity,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(readSetting.isInRight2LeftDirection ? state.readPageInfo.pageCount.toString() : (state.readPageInfo.currentImageIndex + 1).toString())
+            Text(logic.isInRight2LeftDirection ? state.readPageInfo.pageCount.toString() : (state.readPageInfo.currentImageIndex + 1).toString())
                 .marginOnly(left: 36, right: 4),
             Expanded(
               child: Column(
@@ -534,7 +703,7 @@ class _ReadPageState extends State<ReadPage> with ScrollStatusListener, WindowLi
                     child: Material(
                       color: Colors.transparent,
                       child: RotatedBox(
-                        quarterTurns: readSetting.isInRight2LeftDirection ? 2 : 0,
+                        quarterTurns: logic.isInRight2LeftDirection ? 2 : 0,
                         child: Slider(
                           min: 1,
                           max: state.readPageInfo.pageCount.toDouble(),
@@ -549,7 +718,7 @@ class _ReadPageState extends State<ReadPage> with ScrollStatusListener, WindowLi
                 ],
               ),
             ),
-            Text(readSetting.isInRight2LeftDirection ? (state.readPageInfo.currentImageIndex + 1).toString() : state.readPageInfo.pageCount.toString())
+            Text(logic.isInRight2LeftDirection ? (state.readPageInfo.currentImageIndex + 1).toString() : state.readPageInfo.pageCount.toString())
                 .marginOnly(right: 36, left: 4),
           ],
         ),
@@ -558,23 +727,25 @@ class _ReadPageState extends State<ReadPage> with ScrollStatusListener, WindowLi
   }
 
   Widget _buildBottomAction() {
+    final ReadDirection effectiveDirection = logic.effectiveReadDirection;
+
     return SizedBox(
       height: UIConfig.readPageBottomActionHeight,
-      width: fullScreenWidth,
+      width: double.infinity,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Material(
             color: Colors.transparent,
             child: PopupMenuButton<ReadDirection>(
-              initialValue: readSetting.readDirection.value,
+              initialValue: effectiveDirection,
               icon: const Icon(Icons.height, color: UIConfig.readPageButtonColor),
               itemBuilder: (_) => ReadDirection.values
                   .map(
                     (e) => PopupMenuItem<ReadDirection>(child: Text(e.name.tr), value: e),
                   )
                   .toList(),
-              onSelected: (ReadDirection value) => readSetting.saveReadDirection(value),
+              onSelected: (ReadDirection value) => logic.saveReadDirection(value),
             ),
           ),
           Material(
@@ -587,7 +758,10 @@ class _ReadPageState extends State<ReadPage> with ScrollStatusListener, WindowLi
                     (e) => PopupMenuItem<DeviceDirection>(child: Text(e.name.tr), value: e),
                   )
                   .toList(),
-              onSelected: (DeviceDirection value) => readSetting.saveDeviceDirection(value),
+              onSelected: (DeviceDirection value) {
+                readSetting.saveDeviceDirection(value);
+                logic.onEffectiveSettingChanged();
+              },
             ),
           ),
           GestureDetector(
@@ -600,13 +774,7 @@ class _ReadPageState extends State<ReadPage> with ScrollStatusListener, WindowLi
                 ),
               ),
             ),
-            onTap: () {
-              logic.restoreImmersiveMode();
-              toRoute(Routes.settingRead, id: fullScreen)?.then((_) {
-                logic.applyCurrentImmersiveMode();
-                state.focusNode.requestFocus();
-              });
-            },
+            onTap: () => logic.openReadSetting(context),
           ),
         ],
       ),

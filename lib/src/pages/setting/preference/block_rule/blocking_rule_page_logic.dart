@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:jhentai/src/enum/config_enum.dart';
 import 'package:jhentai/src/extension/get_logic_extension.dart';
 import 'package:jhentai/src/service/local_config_service.dart';
+import 'package:jhentai/src/service/storage_service.dart';
 import 'package:jhentai/src/utils/snack_util.dart';
 
 import '../../../../service/local_block_rule_service.dart';
@@ -19,9 +20,7 @@ class BlockingRulePageLogic extends GetxController {
   Future<void> onInit() async {
     super.onInit();
 
-    String? showGroupString = await localConfigService.read(
-      configKey: ConfigEnum.displayBlockingRulesGroup,
-    );
+    String? showGroupString = await localConfigService.read(configKey: ConfigEnum.displayBlockingRulesGroup);
     if (showGroupString != null) {
       state.showGroup = showGroupString == 'true';
     }
@@ -36,14 +35,11 @@ class BlockingRulePageLogic extends GetxController {
 
   Future<void> toggleShowGroup() async {
     await state.showGroupCompleter.future;
-
+    
     state.showGroup = !state.showGroup;
     updateSafely([bodyId]);
 
-    await localConfigService.write(
-      configKey: ConfigEnum.displayBlockingRulesGroup,
-      value: state.showGroup.toString(),
-    );
+    await localConfigService.write(configKey: ConfigEnum.displayBlockingRulesGroup, value: state.showGroup.toString());
   }
 
   void toggleDisplayGroups(String groupName) {
@@ -68,9 +64,7 @@ class BlockingRulePageLogic extends GetxController {
     state.groupedRules = rules.groupListsBy((rule) => rule.groupId!);
     List<String> keys = state.groupedRules.keys.toList();
     keys.sort((a, b) {
-      int code =
-          state.groupedRules[a]!.first.target.code -
-          state.groupedRules[b]!.first.target.code;
+      int code = state.groupedRules[a]!.first.target.code - state.groupedRules[b]!.first.target.code;
       if (code != 0) {
         return code;
       }
@@ -86,8 +80,7 @@ class BlockingRulePageLogic extends GetxController {
   }
 
   Future<void> removeLocalBlockRulesByGroupId(String groupId) async {
-    ({bool success, String? msg}) result = await localBlockRuleService
-        .removeLocalBlockRulesByGroupId(groupId);
+    ({bool success, String? msg}) result = await localBlockRuleService.removeLocalBlockRulesByGroupId(groupId);
     if (!result.success) {
       snack('removeBlockRuleFailed'.tr, result.msg ?? '');
     }

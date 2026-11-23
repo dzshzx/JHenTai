@@ -15,9 +15,7 @@ import '../utils/eh_spider_parser.dart';
 
 FavoriteSetting favoriteSetting = FavoriteSetting();
 
-class FavoriteSetting
-    with JHLifeCircleBeanWithConfigStorage
-    implements JHLifeCircleBean {
+class FavoriteSetting with JHLifeCircleBeanWithConfigStorage implements JHLifeCircleBean {
   RxList<String> favoriteTagNames = [
     'Favorite 0',
     'Favorite 1',
@@ -33,12 +31,10 @@ class FavoriteSetting
 
   List<int> favoriteCounts = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
 
-  bool get inited =>
-      favoriteTagNames[0] != 'Favorite 0' || favoriteCounts[0] != -1;
+  bool get inited => favoriteTagNames[0] != 'Favorite 0' || favoriteCounts[0] != -1;
 
   @override
-  List<JHLifeCircleBean> get initDependencies =>
-      super.initDependencies..add(userSetting);
+  List<JHLifeCircleBean> get initDependencies => super.initDependencies..add(userSetting);
 
   @override
   ConfigEnum get configEnum => ConfigEnum.favoriteSetting;
@@ -47,15 +43,14 @@ class FavoriteSetting
   void applyBeanConfig(String configString) {
     Map map = jsonDecode(configString);
 
-    favoriteTagNames.value = (jsonDecode(map['favoriteTagNames']) as List)
-        .cast<String>();
+    favoriteTagNames.value = (jsonDecode(map['favoriteTagNames']) as List).cast<String>();
     favoriteCounts = (jsonDecode(map['favoriteCounts']) as List).cast<int>();
   }
 
   @override
   String toConfigString() {
     return jsonEncode({
-      'favoriteTagNames': jsonEncode(favoriteTagNames.toList()),
+      'favoriteTagNames': jsonEncode(favoriteTagNames.value),
       'favoriteCounts': jsonEncode(favoriteCounts),
     });
   }
@@ -100,9 +95,7 @@ class FavoriteSetting
     try {
       await retry(
         () async {
-          Map<String, List> map = await ehRequest.requestFavoritePage(
-            EHSpiderParser.favoritePage2FavoriteTagsAndCounts,
-          );
+          Map<String, List> map = await ehRequest.requestFavoritePage(EHSpiderParser.favoritePage2FavoriteTagsAndCounts);
           favoriteTagNames.value = map['favoriteTagNames'] as List<String>;
           favoriteCounts = map['favoriteCounts'] as List<int>;
         },

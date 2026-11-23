@@ -2,6 +2,7 @@ import 'package:jhentai/src/enum/config_enum.dart';
 import 'package:jhentai/src/service/local_config_service.dart';
 import 'package:jhentai/src/service/path_service.dart';
 
+import '../main.dart';
 import 'log.dart';
 
 abstract interface class JHLifeCircleBean {
@@ -39,11 +40,7 @@ mixin JHLifeCircleBeanErrorCatch {
 }
 
 mixin JHLifeCircleBeanWithConfigStorage {
-  List<JHLifeCircleBean> get initDependencies => [
-    pathService,
-    log,
-    localConfigService,
-  ];
+  List<JHLifeCircleBean> get initDependencies => [pathService, log, localConfigService];
 
   ConfigEnum get configEnum;
 
@@ -51,18 +48,12 @@ mixin JHLifeCircleBeanWithConfigStorage {
     try {
       await doInitBean();
 
-      String? configString = await localConfigService.read(
-        configKey: configEnum,
-      );
+      String? configString = await localConfigService.read(configKey: configEnum);
       if (configString != null) {
         applyBeanConfig(configString);
       }
 
-      log.debug(
-        configString == null
-            ? 'Init $runtimeType config success with default'
-            : 'Init $runtimeType config success',
-      );
+      log.debug(configString == null ? 'Init $runtimeType config success with default' : 'Init $runtimeType config success');
     } catch (e, stack) {
       log.error('Init $runtimeType config failed', e, stack);
     }
@@ -79,9 +70,7 @@ mixin JHLifeCircleBeanWithConfigStorage {
 
   Future<void> refreshBean() async {
     try {
-      String? configString = await localConfigService.read(
-        configKey: configEnum,
-      );
+      String? configString = await localConfigService.read(configKey: configEnum);
       if (configString == null) {
         log.debug('Refresh $runtimeType config success with default');
       } else {
@@ -94,10 +83,7 @@ mixin JHLifeCircleBeanWithConfigStorage {
   }
 
   Future<int> saveBeanConfig() {
-    return localConfigService.write(
-      configKey: configEnum,
-      value: toConfigString(),
-    );
+    return localConfigService.write(configKey: configEnum, value: toConfigString());
   }
 
   Future<bool> clearBeanConfig() {

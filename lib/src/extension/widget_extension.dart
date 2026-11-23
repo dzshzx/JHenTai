@@ -1,5 +1,7 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:jhentai/src/config/ui_config.dart';
 import 'package:jhentai/src/widget/eh_keyboard_listener.dart';
 import 'package:jhentai/src/widget/eh_mouse_button_listener.dart';
@@ -23,14 +25,9 @@ extension WidgetExtension on Widget {
     return Theme(
       data: Theme.of(context).copyWith(
         textTheme: Theme.of(context).textTheme.copyWith(
-          bodyMedium: TextStyle(
-            fontSize: UIConfig.settingPageListTileSubTitleTextSize,
-            color: UIConfig.onBackGroundColor(context),
-          ),
-          bodySmall: TextStyle(
-            color: UIConfig.settingPageListTileSubTitleColor(context),
-          ),
-        ),
+              bodyMedium: TextStyle(fontSize: UIConfig.settingPageListTileSubTitleTextSize, color: UIConfig.onBackGroundColor(context)),
+              bodySmall: TextStyle(color: UIConfig.settingPageListTileSubTitleColor(context)),
+            ),
       ),
       child: this,
     );
@@ -38,9 +35,9 @@ extension WidgetExtension on Widget {
 
   Widget withEscOrFifthButton2BackRightRoute() {
     return EHKeyboardListener(
-      handleEsc: popRightRoute,
+      keyHandlers: {LogicalKeyboardKey.escape: popRightRoute},
       child: EHMouseButtonListener(
-        onFifthButtonTapDown: (_) => popRightRoute(),
+        mouseHandlers: {kBackMouseButton: popRightRoute},
         child: this,
       ),
     );
@@ -48,9 +45,7 @@ extension WidgetExtension on Widget {
 
   Widget enableMouseDrag({bool withScrollBar = true}) {
     return ScrollConfiguration(
-      behavior: withScrollBar
-          ? UIConfig.scrollBehaviourWithScrollBarWithMouse
-          : UIConfig.scrollBehaviourWithoutScrollBarWithMouse,
+      behavior: withScrollBar ? UIConfig.scrollBehaviourWithScrollBarWithMouse : UIConfig.scrollBehaviourWithoutScrollBarWithMouse,
       child: this,
     );
   }
@@ -59,8 +54,7 @@ extension WidgetExtension on Widget {
 extension StateExtension on State {
   void setStateSafely(VoidCallback fn) {
     if (mounted) {
-      fn();
-      (context as Element).markNeedsBuild();
+      setState(fn);
     }
   }
 }

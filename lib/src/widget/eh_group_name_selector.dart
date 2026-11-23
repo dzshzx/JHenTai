@@ -14,12 +14,7 @@ class EHGroupNameSelector extends StatefulWidget {
   final List<String> candidates;
   final ValueChanged<String>? listener;
 
-  const EHGroupNameSelector({
-    Key? key,
-    this.currentGroup,
-    required this.candidates,
-    this.listener,
-  }) : super(key: key);
+  const EHGroupNameSelector({Key? key, this.currentGroup, required this.candidates, this.listener}) : super(key: key);
 
   @override
   State<EHGroupNameSelector> createState() => _EHGroupNameSelectorState();
@@ -81,9 +76,7 @@ class _EHGroupNameSelectorState extends State<EHGroupNameSelector> {
       padding: const EdgeInsets.only(left: 4),
       child: Text(
         'existingGroup'.tr,
-        style: const TextStyle(
-          fontSize: UIConfig.groupSelectorChipsHintTextSize,
-        ),
+        style: TextStyle(fontSize: UIConfig.groupSelectorChipsHintTextSize),
       ),
     );
   }
@@ -100,8 +93,7 @@ class _EHGroupNameSelectorState extends State<EHGroupNameSelector> {
             scrollDirection: Axis.horizontal,
             padding: EdgeInsets.zero,
             itemCount: widget.candidates.length,
-            itemBuilder: (context, index) =>
-                _chipBuilder(context, index).marginOnly(right: 4),
+            itemBuilder: (context, index) => _chipBuilder(context, index).marginOnly(right: 4),
           ).enableMouseDrag(withScrollBar: false),
         ),
       ),
@@ -128,13 +120,9 @@ class _EHGroupNameSelectorState extends State<EHGroupNameSelector> {
           isDense: true,
           alignLabelWithHint: true,
           labelText: 'groupName'.tr,
-          labelStyle: const TextStyle(
-            fontSize: UIConfig.groupSelectorTextFieldLabelTextSize,
-          ),
+          labelStyle: const TextStyle(fontSize: UIConfig.groupSelectorTextFieldLabelTextSize),
         ),
-        style: const TextStyle(
-          fontSize: UIConfig.groupSelectorTextFieldTextSize,
-        ),
+        style: const TextStyle(fontSize: UIConfig.groupSelectorTextFieldTextSize),
         controller: textEditingController,
         onChanged: (value) {
           bool hasSelectedCandidateBefore = hasSelectedCandidate;
@@ -149,9 +137,7 @@ class _EHGroupNameSelectorState extends State<EHGroupNameSelector> {
   }
 
   void _updateSelectedCandidate() {
-    hasSelectedCandidate = widget.candidates.contains(
-      textEditingController.text,
-    );
+    hasSelectedCandidate = widget.candidates.contains(textEditingController.text);
   }
 }
 
@@ -160,12 +146,7 @@ class GroupChip extends StatefulWidget {
   final bool selected;
   final VoidCallback? onTap;
 
-  const GroupChip({
-    Key? key,
-    required this.text,
-    required this.selected,
-    this.onTap,
-  }) : super(key: key);
+  const GroupChip({Key? key, required this.text, required this.selected, this.onTap}) : super(key: key);
 
   @override
   State<GroupChip> createState() => _GroupChipState();
@@ -174,10 +155,7 @@ class GroupChip extends StatefulWidget {
 class _GroupChipState extends State<GroupChip> with AnimationMixin {
   bool _selected = false;
 
-  late Animation<double> animation = CurvedAnimation(
-    parent: controller,
-    curve: Curves.easeInOut,
-  );
+  late Animation<double> animation = CurvedAnimation(parent: controller, curve: Curves.easeInOut);
 
   @override
   void initState() {
@@ -211,9 +189,7 @@ class _GroupChipState extends State<GroupChip> with AnimationMixin {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
           height: 26,
           decoration: BoxDecoration(
-            color: _selected
-                ? UIConfig.groupSelectorSelectedChipColor(context)
-                : UIConfig.groupSelectorChipColor(context),
+            color: _selected ? UIConfig.groupSelectorSelectedChipColor(context) : UIConfig.groupSelectorChipColor(context),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Row(
@@ -222,22 +198,11 @@ class _GroupChipState extends State<GroupChip> with AnimationMixin {
               Align(
                 heightFactor: animation.value,
                 widthFactor: animation.value,
-                child: Transform.scale(
-                  scale: animation.value,
-                  child: Icon(
-                    Icons.check,
-                    size: 12,
-                    color: UIConfig.groupSelectorTextColor(context),
-                  ),
-                ),
+                child: Transform.scale(scale: animation.value, child: Icon(Icons.check, size: 12, color: UIConfig.groupSelectorTextColor(context))),
               ).marginOnly(right: animation.value),
               Text(
                 widget.text,
-                style: TextStyle(
-                  fontSize: UIConfig.groupSelectorChipTextSize,
-                  height: 1,
-                  color: UIConfig.groupSelectorTextColor(context),
-                ),
+                style: TextStyle(fontSize: UIConfig.groupSelectorChipTextSize, height: 1, color: UIConfig.groupSelectorTextColor(context)),
               ),
             ],
           ),
