@@ -27,6 +27,7 @@ import 'package:retry/retry.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../database/database.dart';
+import '../consts/fork_consts.dart';
 import '../enum/config_enum.dart';
 import '../model/archive_bot_response/archive_bot_response.dart';
 import '../model/gallery_metadata.dart';
@@ -66,7 +67,7 @@ class ScheduleService with JHLifeCircleBeanErrorCatch implements JHLifeCircleBea
       return;
     }
 
-    String url = 'https://api.github.com/repos/jiangtian616/JHenTai/releases';
+    String url = ForkConsts.releasesApi;
     String latestVersion;
 
     try {
@@ -74,8 +75,7 @@ class ScheduleService with JHLifeCircleBeanErrorCatch implements JHLifeCircleBea
         () => ehRequest.get(url: url, parser: EHSpiderParser.githubReleasePage2LatestVersion),
         maxAttempts: 3,
       ))
-          .trim()
-          .split('+')[0];
+          .trim();
     } on Exception catch (_) {
       log.info('check update failed');
       return;
@@ -87,10 +87,10 @@ class ScheduleService with JHLifeCircleBeanErrorCatch implements JHLifeCircleBea
     }
 
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    String currentVersion = 'v${packageInfo.version}'.trim();
-    log.info('Latest version:[$latestVersion], current version: [$currentVersion], current build: [${packageInfo.buildNumber}]');
+    String currentVersion = 'v${packageInfo.version}+${packageInfo.buildNumber}'.trim();
+    log.info('Latest version:[$latestVersion], current version: [$currentVersion]');
 
-    if (compareVersion(currentVersion, latestVersion) >= 0) {
+    if (!isNewerForkBuild(latestVersion, packageInfo.buildNumber)) {
       return;
     }
 

@@ -1,0 +1,198 @@
+# fork 自用的构建：Android arm64 APK（用 fork 密钥签名）和不签名的 iOS IPA（自行侧载）。
+# Android 签名密钥来自仓库 secrets ENCODED_KEYSTORE、KEY_PROPERTIES，
+# 原件和密码存在用户 Bitwarden 的「JHenTai 签名密钥」条目里。
+# 构建号取所构建分支的提交数（只增不减）。只在两种情况下发 Release：
+#   - sync-upstream.yml 发现原作者有了新的正式发版（标题注明「跟随上游 <tag>」）；
+#   - 手动在 master 上运行本工作流并勾选 release（中途版本）。
+# Release 的 tag 为 v<版本名>+<构建号>，应用内更新检查读的就是这些 Release。
+name: Build (fork)
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 发一个中途版本（只对 master 生效）
+        type: boolean
+        default: false
+  push:
+    branches:
+      - 'master'
+      - 'upstream-sync/**'
+  workflow_call:
+    inputs:
+      ref:
+        description: 要构建的分支
+        type: string
+        required: true
+      upstream_release:
+        description: 跟随的上游正式版 tag，非空时发 Release
+        type: string
+        default: ''
+
+concurrency:
+  group: fork-build-${{ inputs.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  meta:
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.v.outputs.sha }}
+      flutter: ${{ steps.v.outputs.flutter }}
+      name: ${{ steps.v.outputs.name }}
+      build: ${{ steps.v.outputs.build }}
+      release: ${{ steps.v.outputs.release }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 0
+      - id: v
+        env:
+          WANT_RELEASE: ${{ (inputs.upstream_release || inputs.release) && 'true' || 'false' }}
+        run: |
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "flutter=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+          echo "name=$(grep -m1 '^version:' pubspec.yaml | cut -d' ' -f2 | cut -d+ -f1)" >> "$GITHUB_OUTPUT"
+          echo "build=$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
+          branch=$(git rev-parse --abbrev-ref HEAD)
+          if [ "$branch" = master ] && [ "$WANT_RELEASE" = true ]; then
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  android:
+    needs: meta
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.meta.outputs.sha }}
+
+      - name: Runner hardware
+        run: echo "cpu=$(nproc) mem=$(free -h | awk '/^Mem:/{print $2}')"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ needs.meta.outputs.flutter }}
+          channel: 'master'
+          cache: true
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: gradle
+
+      - name: Signing key
+        env:
+          ENCODED_KEYSTORE: ${{ secrets.ENCODED_KEYSTORE }}
+          KEY_PROPERTIES: ${{ secrets.KEY_PROPERTIES }}
+        run: |
+          if [ -z "$ENCODED_KEYSTORE" ] || [ -z "$KEY_PROPERTIES" ]; then
+            echo "::error::缺少签名 secrets ENCODED_KEYSTORE / KEY_PROPERTIES"
+            exit 1
+          fi
+          echo "$ENCODED_KEYSTORE" | base64 -d > android/app/upload-keystore.jks
+          echo "$KEY_PROPERTIES" > android/key.properties
+
+      - name: Test
+        run: |
+          flutter pub get
+          flutter test
+
+      - name: Build APK
+        run: |
+          flutter build apk -t lib/src/main.dart --release --split-per-abi --target-platform android-arm64 \
+            --build-number ${{ needs.meta.outputs.build }}
+          mkdir -p out
+          mv build/app/outputs/apk/release/app-arm64-v8a-release.apk \
+            "out/JHenTai-${{ needs.meta.outputs.name }}+${{ needs.meta.outputs.build }}-arm64-v8a.apk"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: android-arm64
+          path: out/*.apk
+          retention-days: 14
+
+  ios:
+    needs: meta
+    # 原作者用 iOS 27 SDK 构建，否则在 iPhone Duo 上会有黑边；这里选机器上最新的稳定版 Xcode。
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.meta.outputs.sha }}
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Runner hardware
+        run: |
+          echo "cpu=$(sysctl -n hw.ncpu) mem=$(( $(sysctl -n hw.memsize) / 1073741824 ))G"
+          xcodebuild -version
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ needs.meta.outputs.flutter }}
+          channel: 'master'
+          cache: true
+
+      - uses: actions/cache@v5
+        with:
+          path: ios/Pods
+          key: ios-pods-${{ hashFiles('ios/Podfile.lock') }}
+
+      - name: Build IPA
+        run: |
+          flutter pub get
+          flutter precache --ios
+          (cd ios && pod install)
+          flutter build ios -t lib/src/main.dart --release --no-codesign \
+            --build-number ${{ needs.meta.outputs.build }}
+          sh thin-payload.sh build/ios/iphoneos/*.app
+          mkdir -p build/Payload out
+          mv build/ios/iphoneos/*.app build/Payload
+          (cd build && zip -9 -r "../out/JHenTai-${{ needs.meta.outputs.name }}+${{ needs.meta.outputs.build }}-unsigned.ipa" Payload)
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ios-unsigned
+          path: out/*.ipa
+          retention-days: 14
+
+  release:
+    needs: [meta, android, ios]
+    if: needs.meta.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      TAG: v${{ needs.meta.outputs.name }}+${{ needs.meta.outputs.build }}
+      SHA: ${{ needs.meta.outputs.sha }}
+      UPSTREAM_RELEASE: ${{ inputs.upstream_release }}
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: out
+          merge-multiple: true
+
+      - name: Release
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "$TAG 已存在，跳过"
+            exit 0
+          fi
+          if [ -n "$UPSTREAM_RELEASE" ]; then
+            kind="跟随上游 $UPSTREAM_RELEASE"
+          else
+            kind="中途版本"
+          fi
+          gh release create "$TAG" out/* \
+            --target "$SHA" \
+            --title "$TAG（$kind）" \
+            --notes "fork 构建，$kind，提交 ${SHA::7}。Android 包用 fork 密钥签名；iOS 包未签名，需自行侧载。"

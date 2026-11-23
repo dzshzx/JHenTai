@@ -1,0 +1,137 @@
+# 每天跟一次原作者：
+#   - 代码跟原作者的 master：有新提交就合并进本仓 master（保留 fork 自己的改动），跑单元测试后推送；
+#   - 发版跟原作者的正式发版：原作者最新 release 的 tag 已在 master 里、而本仓还没有「跟随上游 <tag>」
+#     的 Release 时，调用 fork-build.yml 编译并发版。
+# 两者都没有变化时什么也不做；只合并、不发版时也编译一次，确认能编过。
+# 合并冲突、测试失败或推送被拒时不硬来，开一个 issue 交给人处理。推送被拒的常见原因：
+# 上游改了 .github/workflows 下的文件，GITHUB_TOKEN 无权推送这类改动，需要在本地手动合并推送。
+name: Sync upstream
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # 北京时间 10:00
+  workflow_dispatch:
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+
+env:
+  UPSTREAM: jiangtian616/JHenTai
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    outputs:
+      merged: ${{ steps.merge.outputs.merged }}
+      upstream_release: ${{ steps.release.outputs.tag }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Merge upstream master
+        id: merge
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch --no-tags "https://github.com/$UPSTREAM.git" master:refs/remotes/upstream/master
+          if git merge-base --is-ancestor upstream/master HEAD; then
+            echo "原作者 master 已在本仓 master 里"
+            echo "merged=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          upstream_short=$(git rev-parse --short upstream/master)
+          upstream_version=$(git show upstream/master:pubspec.yaml | grep -m1 '^version:' | cut -d' ' -f2)
+          if ! git merge --no-ff --no-edit -m "Merge upstream master $upstream_version ($upstream_short)" upstream/master; then
+            git diff --name-only --diff-filter=U > /tmp/conflicts.txt
+            git merge --abort
+            exit 1
+          fi
+          # 本地开发和 CI 都按 .fvmrc 选 Flutter 版本，跟原作者 CI 用的版本对齐。
+          flutter=$(grep -m1 'FLUTTER_VERSION:' .github/workflows/build_publish.yml | awk '{print $2}')
+          if [ -n "$flutter" ] && [ "$(jq -r .flutter .fvmrc)" != "$flutter" ]; then
+            jq --arg v "$flutter" '.flutter=$v' .fvmrc > .fvmrc.new && mv .fvmrc.new .fvmrc
+            git commit --amend --no-edit .fvmrc
+          fi
+          echo "merged=true" >> "$GITHUB_OUTPUT"
+
+      - name: Read Flutter version
+        id: fvm
+        if: steps.merge.outputs.merged == 'true'
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+
+      - uses: subosito/flutter-action@v2
+        if: steps.merge.outputs.merged == 'true'
+        with:
+          flutter-version: ${{ steps.fvm.outputs.version }}
+          channel: 'master'
+          cache: true
+
+      - name: Test
+        if: steps.merge.outputs.merged == 'true'
+        run: |
+          flutter pub get
+          flutter test
+
+      - name: Push master
+        if: steps.merge.outputs.merged == 'true'
+        run: git push origin HEAD:master
+
+      - name: Decide release
+        id: release
+        run: |
+          tag=$(gh api "repos/$UPSTREAM/releases/latest" -q .tag_name)
+          [ -n "$tag" ] || { echo "::error::读不到原作者最新的正式发版"; exit 1; }
+          git fetch --no-tags "https://github.com/$UPSTREAM.git" "refs/tags/$tag:refs/tags/upstream/$tag"
+          if ! git merge-base --is-ancestor "upstream/$tag" HEAD; then
+            echo "原作者 $tag 还没合进本仓 master，这次不发版"
+            exit 0
+          fi
+          if gh release list --limit 100 --json name -q '.[].name' | grep -qF "跟随上游 $tag）"; then
+            echo "已经发过跟随上游 $tag 的版本"
+            exit 0
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Open issue on failure
+        if: failure()
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="同步原作者 master 失败"
+          if [ -n "$(gh issue list --state open --search "in:title \"$title\"" --json number -q '.[].number')" ]; then
+            echo "已有未关闭的 issue：$title"
+            exit 0
+          fi
+          {
+            echo "自动同步原作者的 master 没有完成，本仓 master 没有改动。"
+            echo
+            if [ -s /tmp/conflicts.txt ]; then
+              echo "合并冲突的文件："
+              sed 's/^/- `/; s/$/`/' /tmp/conflicts.txt
+            else
+              echo "失败在测试、推送或读取发版信息这一步，详情见运行日志。原作者改了 \`.github/workflows\` 时，GITHUB_TOKEN 推不上去，需要在本地合并推送。"
+            fi
+            echo
+            echo "运行日志：$RUN_URL"
+            echo
+            echo "本地处理：新建 \`upstream-sync/<版本>\` 分支，合并原作者的 master，解决后推送，验证通过再快进合并到 master。"
+          } > /tmp/issue.md
+          gh issue create --title "$title" --body-file /tmp/issue.md
+
+  build:
+    needs: sync
+    if: needs.sync.outputs.merged == 'true' || needs.sync.outputs.upstream_release != ''
+    uses: ./.github/workflows/fork-build.yml
+    with:
+      ref: master
+      upstream_release: ${{ needs.sync.outputs.upstream_release }}
+    secrets: inherit

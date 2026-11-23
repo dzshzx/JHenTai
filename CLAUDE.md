@@ -30,7 +30,7 @@ flutter test
 
 `test/` holds unit tests; run them with `flutter test`.
 
-Fork Android builds run in GitHub Actions (`.github/workflows/android-fork.yml`, on pushes to `master` and `upstream-sync/**`) and are signed with the fork's key from the repo secrets `ENCODED_KEYSTORE` and `KEY_PROPERTIES`; the original keystore and its password are in the owner's Bitwarden item 「JHenTai 签名密钥」. The upstream `build_publish.yml` needs upstream's API secret and release setup and is disabled in this fork.
+Fork builds run in GitHub Actions (`.github/workflows/fork-build.yml`, on pushes to `master` and `upstream-sync/**`): an Android arm64 APK signed with the fork's key from the repo secrets `ENCODED_KEYSTORE` and `KEY_PROPERTIES` (the original keystore and its password are in the owner's Bitwarden item 「JHenTai 签名密钥」), and an unsigned iOS IPA for sideloading. The build number is the commit count of the built branch. Releases are tagged `v<version>+<build>` and are published only when following a new upstream release or when the workflow is run manually on `master` with `release` checked (an interim release); the in-app update check (`ForkConsts`, `isNewerForkBuild`) reads these releases instead of upstream's. `.github/workflows/sync-upstream.yml` merges upstream `master` daily (see `docs/adr/0002-automated-upstream-sync.md`). The upstream `build_publish.yml` needs upstream's API secret and release setup and is disabled in this fork.
 
 ## Architecture
 

@@ -5,6 +5,8 @@ import 'package:jhentai/src/service/local_config_service.dart';
 import 'package:jhentai/src/utils/route_util.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
+import '../consts/fork_consts.dart';
+
 class UpdateDialog extends StatelessWidget {
   final String currentVersion;
   final String latestVersion;
@@ -45,7 +47,7 @@ class UpdateDialog extends StatelessWidget {
           child: Text('check'.tr + ' ->'),
           onPressed: () {
             backRoute();
-            launchUrlString('https://github.com/jiangtian616/JHenTai/releases', mode: LaunchMode.externalApplication);
+            launchUrlString(ForkConsts.releasesPage, mode: LaunchMode.externalApplication);
           },
         )
       ],
