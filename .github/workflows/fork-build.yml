@@ -118,8 +118,9 @@ jobs:
 
   ios:
     needs: meta
-    # 原作者用 iOS 27 SDK 构建，否则在 iPhone Duo 上会有黑边；这里选机器上最新的稳定版 Xcode。
-    runs-on: macos-26
+    # 用 iOS 27 SDK 构建，否则在 iPhone Duo 上会有黑边（同原作者）。xcode-27 镜像目前是 GitHub 的
+    # 预览版；它转正或 macos-latest 自带 Xcode 27 后，可以换回 macos-latest。
+    runs-on: xcode-27
     steps:
       - uses: actions/checkout@v6
         with:
