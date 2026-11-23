@@ -2,6 +2,27 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Fork rules
+
+This repository is `dzshzx/JHenTai`, a public fork of `jiangtian616/JHenTai`. Most of the code belongs to upstream; these rules keep it that way.
+
+- Never act on upstream (`jiangtian616/JHenTai`): no issues, PRs, comments, reviews, or stars unless the owner explicitly asks for that specific action.
+- Keep fork-owned changes small and listed in the customization inventory below. Change upstream code only for a fork feature or fix the owner asked for; no reformatting, lint sweeps, renames, or dependency bumps of upstream code, because every such hunk becomes a merge conflict when syncing upstream `master`.
+- When a fix also exists upstream, take upstream's version instead of keeping a fork variant.
+- Commits, releases, and issues here are public: no local paths, hostnames, credentials, or personal data.
+- Upstream sync and releases follow `docs/adr/0002-automated-upstream-sync.md`; resolve conflicts on an `upstream-sync/<baseline>` branch (ADR 0001) and fast-forward `master` after the build passes.
+
+### Customization inventory
+
+Fork-owned changes on top of upstream; update this list in the same commit that adds or removes one.
+
+- In-app update check and update dialog read this fork's releases (`lib/src/consts/fork_consts.dart`, `isNewerForkBuild` in `lib/src/utils/version_util.dart`).
+- Mobile layout uses `CupertinoScrollbar` (`lib/src/config/ui_config.dart`).
+- Archive bot JHenTai proxy switch (`useProxyServer`, `resolvedApiAddress`) and readiness that only needs an API key (`lib/src/setting/archive_bot_setting.dart`, `lib/src/widget/eh_archive_bot_setting_dialog.dart`).
+- Android Gradle repositories: domestic mirrors locally, official repositories when `CI=true` (`android/build.gradle`, `android/settings.gradle`).
+- Workflows `fork-build.yml` and `sync-upstream.yml`; upstream's `build_publish.yml` is disabled in GitHub, not edited beyond action version bumps.
+- Agent workflow overlay (`.trellis/`, `.agents/`, `.codex/`, `docs/`, `CONTEXT.md`, this file) and `test/` additions.
+
 ## Project overview
 
 JHenTai is a Flutter app for browsing E-Hentai / EXHentai, targeting Android, iOS, Windows, macOS, and Linux. The version is in `pubspec.yaml`.
